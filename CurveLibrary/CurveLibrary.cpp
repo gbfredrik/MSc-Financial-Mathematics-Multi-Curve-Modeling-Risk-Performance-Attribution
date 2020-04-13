@@ -20,3 +20,8 @@ CCurveLibrary::CCurveLibrary()
 {
     return;
 }
+
+int CCurveLibrary::testSquare(int x)
+{
+	return x * x;
+}
