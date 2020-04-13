@@ -1,0 +1,2 @@
+#define CURVELIBRARY_API __declspec(dllexport)
+#define CURVELIBRARY_API __declspec(dllimport)

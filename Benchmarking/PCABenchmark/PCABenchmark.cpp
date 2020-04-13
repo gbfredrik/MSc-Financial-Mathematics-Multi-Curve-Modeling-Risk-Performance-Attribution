@@ -1,23 +1,13 @@
 // PCABenchmark.cpp : This file contains the 'main' function. Program execution begins and ends there.
 //
 
-#include <boost/regex.hpp>
 #include <boost/numeric/ublas/matrix.hpp>
 #include <iostream>
 #include <string>
 
 int main()
 {
-	std::string line;
-	boost::regex pat("^Subject: (Re: |Aw: )*(.*)");
-
-	while (std::cin)
-	{
-		std::getline(std::cin, line);
-		boost::smatch matches;
-		if (boost::regex_match(line, matches, pat))
-			std::cout << matches[2] << std::endl;
-	}
+	
 }
 
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu
