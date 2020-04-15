@@ -15,9 +15,11 @@ class CURVELIBRARY_API CCurveLibrary {
 public:
 	CCurveLibrary(void);
 	// TODO: add your methods here.
-	int testSquare(int x);
+	// ...
 };
 
 extern CURVELIBRARY_API int nCurveLibrary;
 
 CURVELIBRARY_API int fnCurveLibrary(void);
+CURVELIBRARY_API int __stdcall testSquare(int x);
+

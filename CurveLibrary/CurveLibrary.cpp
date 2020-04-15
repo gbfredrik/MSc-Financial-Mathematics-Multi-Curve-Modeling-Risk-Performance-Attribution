@@ -21,7 +21,7 @@ CCurveLibrary::CCurveLibrary()
     return;
 }
 
-int CCurveLibrary::testSquare(int x)
+CURVELIBRARY_API int __stdcall testSquare(int x)
 {
 	return x * x;
 }
