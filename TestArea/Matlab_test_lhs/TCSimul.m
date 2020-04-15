@@ -1,12 +1,14 @@
-function u = TCSimul(Corr, v, n, s)
+    function u = TCSimul(Corr, v, cases, s)
     rng(s)
-    z = randn(size(Corr,1), n); % Independent Gaussian random variables
-    A = chol(Corr); % Cholesky factorization
-    y = (A'*z); % Correlated Gaussian random variables
     
-    s = chi2rnd(v,[1 n]); % Random number from the chi-square distribution
+    n = size(Corr,1);
     
-    x = (sqrt(v./s)'*ones(1,size(Corr,1)))'.*y; % Multivariate student-t distribution simulation
+    X = randn(cases, n); % Independent Gaussian random variables
+    U = chol(Corr); % Cholesky factorization
+    Z = X * U; % Correlated Gaussian random variables
+
+    x = sqrt(gamrnd(v./2, 2, cases, 1) ./ v);
+    Z = Z ./ x(:,ones(n,1));
     
-    u = tcdf(x,v); % Student´s t copula simulation
-    
+    mean(Z, 1)
+    u = tcdf(Z, v); % Return uniform dist

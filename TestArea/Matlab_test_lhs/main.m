@@ -1,27 +1,29 @@
 % Definitions
 dim = 3;
-n = 1000;
-rho = 0;
+n = 10000;
+rho = 0.7;
 
 R1 = ones(dim)*rho;
 R2 = ones(dim)*1;
 R = R1 - diag(diag(R1)) + diag(diag(R2));
 %% Gaussian Copula
-u = GCSimul(R,n,s);
+u = GCSimul(R,n,"default");
 
 subplot(1,2,1)
-scatter3(u(1,:),u(2,:),u(3,:));
+scatter3(u(:,1),u(:,2),u(:,3));
 title('Gaussian copula')
 
 subplot(1,2,2)
-scatter3(norminv(V(1,:)),norminv(V(2,:)),norminv(V(3,:)));
+scatter3(norminv(u(:,1)),norminv(u(:,2)),norminv(u(:,3)));
 title('Gaussian copula and marginals')
 
-%% Student´s t Copula
-v = 3;
-u = TCSimul(R,v,n,s);
 
-scatter(u(1,:),u(2,:));
+
+%% Student´s t Copula
+v = 10;
+u = TCSimul(R,v,n,112234127);
+
+scatter3(u(:,1),u(:,2),u(:,3));
 
 %% Test lim => inf (student´s t), should converge
 n = 10;

@@ -1,4 +1,5 @@
-test = [5 2 3 1 2 3; 10 5 4 4 5 6; 15 10 5 3 2 1; 20 3 1 4 5 6; 25 2 3 222 1 3; 30 1 2 444 5 123];
+%test = [5 2 3 1 2 3; 10 5 4 4 5 6; 15 10 5 3 2 1; 20 3 1 4 5 6; 25 2 3 222 1 3; 30 1 2 444 5 123];
+test = [4 4 2; 5 6 5; 3 2 3];
 corrm = corr(test)
 
 n = size(test,2);
@@ -14,6 +15,9 @@ for i = 1:n
 end
 
 corrm_test
+
+U = chol(corrm)
+L = U'
 
 function rho = corr_egen(X,Y)
     X_hat = mean(X);

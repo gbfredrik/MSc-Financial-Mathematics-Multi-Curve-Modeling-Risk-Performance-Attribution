@@ -1,7 +1,8 @@
-function u = GCSimul(Corr, n, s)
+function u = GCSimul(Corr, cases, s)
     rng(s);
-    y = randn(size(Corr,1), n); % Independent Gaussian random variables
-    A = chol(Corr); % Cholesky Factorization
-    x = (A'*y); % Correlated Gaussian random variables
-    u = normcdf(x); % Gaussian copula
+    n = size(Corr,1);
+    X = randn(cases, n); % Independent Gaussian random variables
+    U = chol(Corr);; % Cholesky Factorization
+    Z = X * U; % Correlated Gaussian random variables
+    u = normcdf(Z); % Gaussian copula
     
