@@ -17,6 +17,7 @@
 using namespace boost::numeric::ublas;
 using namespace boost::math;
 
+void GC_sim();
 vector<double> gen_normal(double m, double s, int n);
 matrix<double> gen_test(int rows, int cols);
 double pearson_rho(vector<double> X, vector<double> Y);
@@ -24,42 +25,36 @@ matrix<double> corrm(matrix<double> input);
 matrix<double> chol(matrix<double> input);
 
 int main() {
-    
-	int N = 5;
+	GC_sim();
+}
+
+// Controller method
+void GC_sim() {
+
+	int N = 2000;
+	int m = 11000;
+	int n = 6;
 	// Generate a test matrix
-	matrix<double> test(3, 3);
-	//test = gen_test(3, 3);
-	test(0, 0) = 4; test(0, 1) = 4; test(0, 2) = 2;
-	test(1, 0) = 5; test(1, 1) = 6; test(1, 2) = 5;
-	test(2, 0) = 3; test(2, 1) = 2; test(2, 2) = 3;
-	size_t n = test.size2();
-	std::cout << test << std::endl;
-	
+	matrix<double> test(m, n);
+	test = gen_test(m, n);
+
 	// Calculate the correlation matrix
 	matrix<double> corr(n, n);
-	//corr = corrm(test);
-	//std::cout << corr << std::endl;
-	corr(0, 0) = 1; corr(0, 1) = 0.7; corr(0, 2) = 0.7;
-	corr(1, 0) = 0.7; corr(1, 1) = 1; corr(1, 2) = 0.7;
-	corr(2, 0) = 0.7; corr(2, 1) = 0.7; corr(2, 2) = 1;
+	corr = corrm(test);
 
 	// Perform Cholesky decomposition
 	matrix<double> L(n, n);
 	L = chol(corr);
-	std::cout << L << std::endl;
 
 	// Generate i.i.d. standard normal random variables
-	size_t m = test.size1();
 	matrix<double> X(n, N);
 	for (int i = 0; i < n; i++) {
-		row(X,i) = gen_normal(0.0, 1.0, N);
+		row(X, i) = gen_normal(0.0, 1.0, N);
 	}
-	std::cout << X << std::endl;
 
 	// Generate Correlated Gaussian samples
 	matrix<double> Z(n, N);
 	Z = prod(L, X);
-	std::cout << Z << std::endl;
 
 	// Return correlated uniformy distributed random variables
 	matrix<double> U(n, N);
@@ -73,7 +68,7 @@ int main() {
 }
 
 // Cholesky decomposition
-matrix<double> chol(matrix<double> input){
+matrix<double> chol(matrix<double> input) {
 	size_t n = input.size1();
 	matrix<double> L(n, n, 0);
 	// Decomposing a matrix into lower triangular 
@@ -90,7 +85,7 @@ matrix<double> chol(matrix<double> input){
 }
 
 // Calculate the Pearson correlation matrix, TODO: reduce the amount of calls to pearson_rho()
-matrix<double> corrm(matrix<double> input){
+matrix<double> corrm(matrix<double> input) {
 	size_t m = input.size1();
 	size_t n = input.size2();
 	matrix<double> corr(n, n);
@@ -103,7 +98,7 @@ matrix<double> corrm(matrix<double> input){
 				corr(i, j) = 1;
 			}
 			else {
-				corr(i, j) = pearson_rho(column(input,i) , column(input, j));
+				corr(i, j) = pearson_rho(column(input, i), column(input, j));
 			}
 		}
 	}
@@ -129,20 +124,19 @@ double pearson_rho(vector<double> X, vector<double> Y) {
 		denomenator_b = denomenator_b + pow(Y(i) - Y_hat, 2);
 	}
 
-	return numerator / (sqrt(denomenator_a) * sqrt(denomenator_b));;
+	return numerator / (sqrt(denomenator_a) * sqrt(denomenator_b));
 }
 
 matrix<double> gen_test(int rows, int cols) {
 	std::random_device rd;
 	std::mt19937 mt(rd());
 	std::uniform_real_distribution<double> dist(1.0, 10.0);
-	matrix<double> test(3, 10);
+	matrix<double> test(rows, cols);
 	for (int i = 0; i < test.size1(); i++) {
 		for (int j = 0; j < test.size2(); j++) {
 			test(i, j) = dist(mt);
 		}
 	}
-
 	return test;
 }
 
@@ -157,6 +151,5 @@ vector<double> gen_normal(double m, double s, int n) {
 		rand[i] = number;
 		//std::cout << rand[i] << std::endl;
 	}
-
 	return rand;
 }
