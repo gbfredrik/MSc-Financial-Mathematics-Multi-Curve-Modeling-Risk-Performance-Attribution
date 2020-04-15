@@ -47,24 +47,24 @@ void GC_sim() {
 	L = chol(corr);
 
 	// Generate i.i.d. standard normal random variables
-	matrix<double> X(n, N);
+	matrix<double> X(N, n);
 	for (int i = 0; i < n; i++) {
-		row(X, i) = gen_normal(0.0, 1.0, N);
+		column(X, i) = gen_normal(0.0, 1.0, N);
 	}
 
 	// Generate Correlated Gaussian samples
-	matrix<double> Z(n, N);
-	Z = prod(L, X);
+	matrix<double> Z(N, n);
+	Z = prod(X, trans(L));
 
 	// Return correlated uniformy distributed random variables
-	matrix<double> U(n, N);
+	matrix<double> U(N, n);
 	normal s;
-	for (int i = 0; i < n; i++) {
-		for (int j = 0; j < N; j++) {
+	for (int i = 0; i < N; i++) {
+		for (int j = 0; j < n; j++) {
 			U(i, j) = cdf(s, Z(i, j));
 		}
 	}
-	std::cout << U << std::endl;
+	//std::cout << U << std::endl;
 }
 
 // Cholesky decomposition
@@ -141,15 +141,15 @@ matrix<double> gen_test(int rows, int cols) {
 }
 
 // Generate n normal variables with mean m and standard deviation s
-vector<double> gen_normal(double m, double s, int n) {
-	std::default_random_engine generator;
+vector<double> gen_normal(double m, double s, int N) {
+	std::random_device rd;
+	std::default_random_engine generator(rd());
 	std::normal_distribution<double> distribution(m, s);
-	vector<double> rand(n);
+	vector<double> rand(N);
 
-	for (int i = 0; i < n; ++i) {
+	for (int i = 0; i < N; ++i) {
 		double number = distribution(generator);
 		rand[i] = number;
-		//std::cout << rand[i] << std::endl;
 	}
 	return rand;
 }
