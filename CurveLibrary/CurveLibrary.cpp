@@ -20,3 +20,8 @@ CCurveLibrary::CCurveLibrary()
 {
     return;
 }
+
+CURVELIBRARY_API int __stdcall testSquare(int x)
+{
+	return x * x;
+}
