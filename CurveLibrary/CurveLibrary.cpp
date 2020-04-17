@@ -6,12 +6,8 @@
 #include "CurveLibrary.h"
 
 
-
-int WINAPI testFN()
-{
-#pragma EXPORT
-	return 10;
+int __stdcall squareXL(int x, int &y) {
+	#pragma EXPORT
+	y += 100;
+	return x * x;
 }
-
-// ?
-// https://stackoverflow.com/questions/538134/exporting-functions-from-a-dll-with-dllexport?rq=1
