@@ -16,6 +16,9 @@
     <Filter Include="Header Files\Helpers">
       <UniqueIdentifier>{2c9843ed-0ea6-41c6-b689-27837cd43322}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Helpers">
+      <UniqueIdentifier>{9c1fe3a1-5416-4433-87a1-781fa4f71c21}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />
@@ -43,6 +46,9 @@
     </ClCompile>
     <ClCompile Include="pch.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sample_handler.cpp">
+      <Filter>Source Files\Helpers</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
