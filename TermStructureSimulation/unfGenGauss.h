@@ -1,11 +1,11 @@
-#ifndef ALGO4
-#define ALGO4
+#ifndef UNFGENGAUSS
+#define UNFGENGAUSS
 
 #include <boost/numeric/ublas/matrix.hpp>
 
 using namespace boost::numeric::ublas;
 
-class algo4 {
+class unfGenGauss {
 private:
 
 public:

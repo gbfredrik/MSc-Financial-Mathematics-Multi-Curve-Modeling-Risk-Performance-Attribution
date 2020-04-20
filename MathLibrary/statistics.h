@@ -5,7 +5,7 @@
 #include <boost/numeric/ublas/matrix.hpp>
 
 
-class statistics{
+class statistics {
 private:
 
 public:

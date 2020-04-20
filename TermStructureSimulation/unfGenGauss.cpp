@@ -1,7 +1,8 @@
-#include "algo4.h"
-#include "../MathFunctions/matrixOperations.h"
-#include "../MathFunctions/rvSim.h"
-#include "../MathFunctions/statistics.h"
+#include "pch.h"
+#include "unfGenGauss.h"
+#include "../MathLibrary/matrixOperations.h"
+#include "../MathLibrary/rvSim.h"
+#include "../MathLibrary/statistics.h"
 
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/matrix_proxy.hpp>
@@ -13,11 +14,11 @@ using namespace boost::numeric::ublas;
 using namespace boost::math;
 
 
-matrix<double> algo4::GC_sim(matrix<double> const& E, int N) {
+matrix<double> unfGenGauss::GC_sim(matrix<double> const& E, int N) {
 
 	int m = E.size1();
 	int n = E.size2();
-	
+
 	// Calculate the correlation matrix
 	matrix<double> corr(n, n);
 	corr = statistics::corrm(E);
@@ -44,7 +45,6 @@ matrix<double> algo4::GC_sim(matrix<double> const& E, int N) {
 			U(i, j) = cdf(s, Z(i, j));
 		}
 	}
-	//std::cout << U << std::endl;
 	return U;
 }
 

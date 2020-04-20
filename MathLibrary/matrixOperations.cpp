@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "matrixOperations.h"
 
 #include <boost/numeric/ublas/matrix.hpp>

@@ -1,11 +1,11 @@
-#ifndef ALGO5
-#define ALGO5
+#ifndef UNFGENT
+#define UNFGENT
 
 #include <boost/numeric/ublas/matrix.hpp>
 
 using namespace boost::numeric::ublas;
 
-class algo5 {
+class unfGenT {
 private:
 
 public:
@@ -13,3 +13,4 @@ public:
 };
 
 #endif
+

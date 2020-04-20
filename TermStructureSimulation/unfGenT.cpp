@@ -1,8 +1,8 @@
-
-#include "algo5.h"
-#include "../MathFunctions/matrixOperations.h"
-#include "../MathFunctions/rvSim.h"
-#include "../MathFunctions/statistics.h"
+#include "pch.h"
+#include "unfGenT.h"
+#include "../MathLibrary/matrixOperations.h"
+#include "../MathLibrary/rvSim.h"
+#include "../MathLibrary/statistics.h"
 
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/matrix_proxy.hpp>
@@ -15,7 +15,7 @@ using namespace boost::numeric::ublas;
 using namespace boost::math;
 
 
-matrix<double> algo5::TC_sim(matrix<double> const& E, int N){
+matrix<double> unfGenT::TC_sim(matrix<double> const& E, int N) {
 
 	int m = E.size1();
 	int n = E.size2();
@@ -50,7 +50,7 @@ matrix<double> algo5::TC_sim(matrix<double> const& E, int N){
 			Z(i, j) = Z(i, j) / Xi(i);
 		}
 	}
-	
+
 	// Return uniformly distributed r.v.s
 	matrix<double> U(N, n);
 	students_t dist(df);
@@ -61,7 +61,7 @@ matrix<double> algo5::TC_sim(matrix<double> const& E, int N){
 	}
 
 	return U;
-	
+
 }
 
 

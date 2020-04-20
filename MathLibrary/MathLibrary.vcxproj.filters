@@ -15,13 +15,16 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="matrixOperations.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="statistics.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="rvSim.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\CurveLibrary\pch.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="matrixOperations.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -29,10 +32,16 @@
     <ClInclude Include="statistics.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="rvSim.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="matrixOperations.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="rvSim.h">
+    <ClInclude Include="..\CurveLibrary\pch.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\CurveLibrary\framework.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
