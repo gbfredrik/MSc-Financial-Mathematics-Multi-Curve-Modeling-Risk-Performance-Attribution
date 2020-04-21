@@ -3,11 +3,73 @@
 
 #include "pch.h"
 #include "framework.h"
-#include "CurveLibrary.h"
+#include "CurveLibrary.h" // Must be this order, otherwise functions are not exported!
+
+#include "sample_handler.h"
+
+#include <boost/numeric/ublas/matrix.hpp>
 
 
-int __stdcall squareXL(int x, int &y) {
-	#pragma EXPORT
+LONG __stdcall squareXL(int x, int &y) {
+#pragma EXPORT
 	y += 100;
 	return x * x;
+}
+
+BOOL __stdcall ir_measurement_multiXL(BOOL const save_curves) {
+#pragma EXPORT
+	BOOL status{ TRUE };
+
+	try
+	{
+		boost::numeric::ublas::matrix<double> m_forward_curves_rf{ read_txt_matrix("25x10950.txt") };
+		boost::numeric::ublas::matrix<double> m_forward_curves_tenor{ read_txt_matrix("25x10950.txt") };
+
+		if (save_curves) {
+			write_txt_matrix(m_forward_curves_rf, "forward_curves_rf.txt");
+			write_txt_matrix(m_forward_curves_tenor, "forward_curves_tenor.txt");
+		}
+	}
+	catch (const std::exception&)
+	{
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
+
+
+BOOL __stdcall run_all_multiXL(BOOL const compute_curves/*, ...*/) {
+#pragma EXPORT
+
+	try
+	{
+		boost::numeric::ublas::matrix<double> m_forward_curves_rf{};
+		boost::numeric::ublas::matrix<double> m_forward_curves_tenor{};
+		if (compute_curves) { // Compute
+			m_forward_curves_rf = read_txt_matrix("25x10950.txt");
+			m_forward_curves_tenor = read_txt_matrix("25x10950.txt");
+			// TODO: Replace above to compute curve(s)
+
+			write_txt_matrix(m_forward_curves_rf, "forward_curves_rf.txt");
+			write_txt_matrix(m_forward_curves_tenor, "forward_curves_tenor.txt");
+		} else { // Read
+			m_forward_curves_rf = read_txt_matrix("25x10950.txt");
+			m_forward_curves_tenor = read_txt_matrix("25x10950.txt");
+			// TODO: Add tenor curve nicely?
+		}
+
+
+
+
+
+	}
+	catch (const std::exception&)
+	{
+		return FALSE;
+	}
+
+	return TRUE;
+
 }

@@ -1,5 +1,7 @@
 #include "sample_handler.h"
 
+#include "pch.h"
+
 #include <boost/numeric/ublas/io.hpp>
 #include <boost/numeric/ublas/matrix.hpp>
 
@@ -12,7 +14,7 @@
 
 boost::numeric::ublas::matrix<double> read_txt_matrix(std::string const& file_name) {
 	boost::numeric::ublas::matrix<double> m;
-	std::ifstream inf("../../ExampleData/" + file_name);
+	std::ifstream inf("../ExampleData/" + file_name);
 	if (!inf) {
 		std::cout << "Failed to open file" << std::endl;
 	}
@@ -30,7 +32,7 @@ bool write_txt_matrix(boost::numeric::ublas::matrix<double> const& m, std::strin
 	std::ofstream outf;
 	outf.open("m_" + file_name); // Appending "m_" to prevent accidental overwriting of important files
 
-	if (!(outf << m)) {
+	if (!(outf << m)) { // If failed write
 		outf.close();
 		return false;
 	}
