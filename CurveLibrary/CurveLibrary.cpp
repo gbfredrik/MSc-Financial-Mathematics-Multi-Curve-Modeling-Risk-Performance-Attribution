@@ -18,38 +18,37 @@ LONG __stdcall squareXL(int x, int &y) {
 
 BOOL __stdcall ir_measurement_multiXL(BOOL const save_curves) {
 #pragma EXPORT
+
 	BOOL status{ TRUE };
 
-	try
-	{
-		boost::numeric::ublas::matrix<double> m_forward_curves_rf{ read_txt_matrix("25x10950.txt") };
-		boost::numeric::ublas::matrix<double> m_forward_curves_tenor{ read_txt_matrix("25x10950.txt") };
+	try	{
+		boost::numeric::ublas::matrix<double> m_forward_curves_rf;
+		boost::numeric::ublas::matrix<double> m_forward_curves_tenor;
+		
+		status = placeholder_ir_measurement_multi(m_forward_curves_rf, m_forward_curves_rf);
 
-		if (save_curves) {
+		if (status && save_curves) { // If computation is successful and saving is toggled
 			write_txt_matrix(m_forward_curves_rf, "forward_curves_rf.txt");
 			write_txt_matrix(m_forward_curves_tenor, "forward_curves_tenor.txt");
 		}
-	}
-	catch (const std::exception&)
-	{
+	} catch (const std::exception&) {
 		return FALSE;
 	}
 
-	return TRUE;
+	return status;
 }
 
 
 
 BOOL __stdcall run_all_multiXL(BOOL const compute_curves/*, ...*/) {
 #pragma EXPORT
+	BOOL status{ FALSE };
 
-	try
-	{
+	try	{
 		boost::numeric::ublas::matrix<double> m_forward_curves_rf{};
 		boost::numeric::ublas::matrix<double> m_forward_curves_tenor{};
 		if (compute_curves) { // Compute
-			m_forward_curves_rf = read_txt_matrix("25x10950.txt");
-			m_forward_curves_tenor = read_txt_matrix("25x10950.txt");
+			status = placeholder_ir_measurement_multi(m_forward_curves_rf, m_forward_curves_rf);
 			// TODO: Replace above to compute curve(s)
 
 			write_txt_matrix(m_forward_curves_rf, "forward_curves_rf.txt");
@@ -64,12 +63,9 @@ BOOL __stdcall run_all_multiXL(BOOL const compute_curves/*, ...*/) {
 
 
 
-	}
-	catch (const std::exception&)
-	{
+	} catch (const std::exception&) {
 		return FALSE;
 	}
 
-	return TRUE;
-
+	return status;
 }

@@ -40,3 +40,12 @@ bool write_txt_matrix(boost::numeric::ublas::matrix<double> const& m, std::strin
 	outf.close();
 	return true;
 }
+
+bool placeholder_ir_measurement_multi(boost::numeric::ublas::matrix<double>& m_rf, 
+									  boost::numeric::ublas::matrix<double>& m_tenor) {
+	m_rf =  read_txt_matrix("25x10950.txt");
+	m_tenor = read_txt_matrix("25x10950.txt");
+
+	bool status{ m_rf.size1() > 0 && m_tenor.size1() > 0 };
+	return status;
+}
