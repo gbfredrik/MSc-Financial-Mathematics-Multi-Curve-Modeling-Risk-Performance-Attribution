@@ -6,22 +6,8 @@
 #include "CurveLibrary.h"
 
 
-// This is an example of an exported variable
-CURVELIBRARY_API int nCurveLibrary=0;
-
-// This is an example of an exported function.
-CURVELIBRARY_API int fnCurveLibrary(void)
-{
-    return 0;
-}
-
-// This is the constructor of a class that has been exported.
-CCurveLibrary::CCurveLibrary()
-{
-    return;
-}
-
-CURVELIBRARY_API int __stdcall testSquare(int x)
-{
+int __stdcall squareXL(int x, int &y) {
+	#pragma EXPORT
+	y += 100;
 	return x * x;
 }
