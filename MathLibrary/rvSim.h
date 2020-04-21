@@ -10,9 +10,9 @@ private:
 public:
 	static boost::numeric::ublas::matrix<double> gen_test(int rows, int cols);
 	static boost::numeric::ublas::vector<double> gen_normal(double m, double s, int N);
-	static float gen_gamma(float a);
-	static float gen_normal(double m, double s);
-	static float gen_uniform(float l, float u);
+	static double gen_gamma(double a);
+	static double gen_normal(double m, double s);
+	static double gen_uniform(double l, double u);
 };
 
 

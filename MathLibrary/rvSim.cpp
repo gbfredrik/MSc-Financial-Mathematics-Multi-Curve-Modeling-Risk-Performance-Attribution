@@ -36,8 +36,8 @@ vector<double> rvSim::gen_normal(double m, double s, int N) {
 }
 
 // R.v.s from the gamma distribution using the same method as Matlab (Marsaglia, G. and Tsang, W.W. (2000))
-float rvSim::gen_gamma(float a) {
-	float d, c, x, v, u;
+double rvSim::gen_gamma(double a) {
+	double d, c, x, v, u;
 	d = a - 1. / 3.;
 	c = 1. / sqrt(9. * d);
 
@@ -58,14 +58,14 @@ float rvSim::gen_gamma(float a) {
 	}
 }
 
-float rvSim::gen_normal(double m, double s) {
+double rvSim::gen_normal(double m, double s) {
 	std::random_device rd;
 	std::default_random_engine generator(rd());
 	std::normal_distribution<double> distribution(m, s);
 	return distribution(generator);
 }
 
-float rvSim::gen_uniform(float l, float u) {
+double rvSim::gen_uniform(double l, double u) {
 	std::random_device rd;
 	std::default_random_engine generator(rd());
 	std::uniform_real_distribution<double> distribution(l, u);

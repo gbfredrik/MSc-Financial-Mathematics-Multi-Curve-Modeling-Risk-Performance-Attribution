@@ -25,7 +25,7 @@ int main() {
 
 
 void test_algo4_5() {
-	int N = 100;
+	int N = 2000;
 	int m = 11000;
 	int n = 6;
 
@@ -46,13 +46,12 @@ void test_algo4_5() {
 	V = lhsd::lhsd_gen(U_T);
 
 
-	int f;
+	size_t f;
 	f = column(V, 1).size();
-	float average = 0.0f;
+	double average = 0.0f;
 	if (f != 0) {
 		average = accumulate(column(V, 1).begin(), column(V, 1).end(), 0.0) / f;
 	}
-
 	
 }
 

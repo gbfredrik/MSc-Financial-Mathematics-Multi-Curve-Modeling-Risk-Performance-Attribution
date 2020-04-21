@@ -10,8 +10,8 @@ using namespace boost::numeric::ublas;
 
 
 matrix<double> lhsd::lhsd_gen(matrix<double> const& U) {
-	int N = U.size1(); // Number of simulations
-	int n = U.size2(); // Number of risk factors
+	size_t N = U.size1(); // Number of simulations
+	size_t n = U.size2(); // Number of risk factors
 
 	matrix<double> r(N, n);
     matrix<double> V(N, n);
@@ -30,8 +30,9 @@ matrix<double> lhsd::lhsd_gen(matrix<double> const& U) {
 	return V;
 }
 
+// Sort columns after rank
 vector<double> lhsd::rank(vector<double> const& U) {
-	int N = U.size();
+	size_t N = U.size();
 	vector<double> r(N);
 	vector<double> rowid(N);
 	
@@ -45,6 +46,7 @@ vector<double> lhsd::rank(vector<double> const& U) {
 
 }
 
+// Generate indices used for the rank statistics
 vector<double> lhsd::sort(vector<double> const& U) {
 
     vector<size_t> indices(U.size());

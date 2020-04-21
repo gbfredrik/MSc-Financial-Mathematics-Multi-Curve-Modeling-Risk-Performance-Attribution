@@ -16,8 +16,8 @@ using namespace boost::math;
 
 matrix<double> unfGenGauss::GC_sim(matrix<double> const& E, int N) {
 
-	int m = E.size1();
-	int n = E.size2();
+	size_t m = E.size1();
+	size_t n = E.size2();
 
 	// Calculate the correlation matrix
 	matrix<double> corr(n, n);

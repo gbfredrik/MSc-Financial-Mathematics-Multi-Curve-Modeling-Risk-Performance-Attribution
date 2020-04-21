@@ -17,8 +17,8 @@ using namespace boost::math;
 
 matrix<double> unfGenT::TC_sim(matrix<double> const& E, int N) {
 
-	int m = E.size1();
-	int n = E.size2();
+	size_t m = E.size1();
+	size_t n = E.size2();
 
 	// Calculate the correlation matrix
 	matrix<double> corr(n, n);
@@ -41,8 +41,8 @@ matrix<double> unfGenT::TC_sim(matrix<double> const& E, int N) {
 	// Generate random variables from the gamma distribution
 	// Generate sqrt(normalized chi-square r.v.s)
 	int df = 3; // Degrees of freedom
-	vector<float> g(N);
-	vector<float> Xi(N);
+	vector<double> g(N);
+	vector<double> Xi(N);
 	for (int i = 0; i < N; i++) {
 		g(i) = rvSim::gen_gamma(df);
 		Xi(i) = sqrt(g(i) / df);
