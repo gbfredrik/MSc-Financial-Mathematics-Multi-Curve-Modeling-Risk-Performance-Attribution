@@ -56,3 +56,32 @@ MatrixXd matrixOperations::ublasToMatrixXd(matrix<double> const& uMatrix) {
 
 	return xdMatrix;
 }
+
+vector<double> matrixOperations::vectorXdToUblas(VectorXd const& xdVector) {
+
+	size_t length = xdVector.innerSize();
+
+	vector<double> uVector(length);
+
+
+	for (int i = 0; i < length; i++) {
+		uVector(i) = xdVector(i);
+	}
+
+	return uVector;
+
+}
+
+VectorXd matrixOperations::ublasToVectorXd(vector<double> const& uVector) {
+
+	size_t length = uVector.size();
+
+	VectorXd xdVector(length);
+
+	for (int i = 0; i < length; i++) {
+		xdVector(i) = uVector(i);
+	}
+
+	return xdVector;
+}
+
