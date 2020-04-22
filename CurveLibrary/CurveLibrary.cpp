@@ -6,12 +6,13 @@
 #include "CurveLibrary.h" // Must be this order, otherwise functions are not exported!
 
 #include "sample_handler.h"
+#include "../MathLibrary/matrixOperations.h"
 
 #include <boost/numeric/ublas/matrix.hpp>
 
-
 LONG __stdcall squareXL(int x, int &y) {
 #pragma EXPORT
+
 	y += 100;
 	return x * x;
 }
@@ -19,20 +20,20 @@ LONG __stdcall squareXL(int x, int &y) {
 BOOL __stdcall ir_measurement_multiXL(BOOL const save_curves) {
 #pragma EXPORT
 
-	BOOL status{ TRUE };
+	bool status{ 0 };
 
 	try	{
 		boost::numeric::ublas::matrix<double> m_forward_curves_rf;
 		boost::numeric::ublas::matrix<double> m_forward_curves_tenor;
 		
-		status = placeholder_ir_measurement_multi(m_forward_curves_rf, m_forward_curves_rf);
+		status = placeholder_ir_measurement_multi(m_forward_curves_rf, m_forward_curves_tenor);
 
-		if (status && save_curves) { // If computation is successful and saving is toggled
-			write_txt_matrix(m_forward_curves_rf, "forward_curves_rf.txt");
-			write_txt_matrix(m_forward_curves_tenor, "forward_curves_tenor.txt");
+		if (status == 1 && save_curves) { // If computation is successful and saving is toggled
+			status = write_txt_matrix(m_forward_curves_rf, "forward_curves_rf.txt");
+			status = status && write_txt_matrix(m_forward_curves_tenor, "forward_curves_tenor.txt");
 		}
 	} catch (const std::exception&) {
-		return FALSE;
+		return 0;
 	}
 
 	return status;
@@ -42,29 +43,33 @@ BOOL __stdcall ir_measurement_multiXL(BOOL const save_curves) {
 
 BOOL __stdcall run_all_multiXL(BOOL const compute_curves/*, ...*/) {
 #pragma EXPORT
-	BOOL status{ FALSE };
+
+	bool status{ 0 };
 
 	try	{
 		boost::numeric::ublas::matrix<double> m_forward_curves_rf{};
 		boost::numeric::ublas::matrix<double> m_forward_curves_tenor{};
 		if (compute_curves) { // Compute
-			status = placeholder_ir_measurement_multi(m_forward_curves_rf, m_forward_curves_rf);
+			status = placeholder_ir_measurement_multi(m_forward_curves_rf, m_forward_curves_tenor);
 			// TODO: Replace above to compute curve(s)
 
-			write_txt_matrix(m_forward_curves_rf, "forward_curves_rf.txt");
-			write_txt_matrix(m_forward_curves_tenor, "forward_curves_tenor.txt");
+			if (status == 1) { // If computation is successful and saving is toggled
+				status = write_txt_matrix(m_forward_curves_rf, "forward_curves_rf.txt");
+				status = status && write_txt_matrix(m_forward_curves_tenor, "forward_curves_tenor.txt");
+			}
 		} else { // Read
 			m_forward_curves_rf = read_txt_matrix("25x10950.txt");
 			m_forward_curves_tenor = read_txt_matrix("25x10950.txt");
-			// TODO: Add tenor curve nicely?
 		}
 
-
-
+		// ...
+		// ...
+		boost::numeric::ublas::matrix<double> m_diff{matrixOperations::diff_matrix(m_forward_curves_rf)};
+		status = status && write_txt_matrix(m_diff, "rf_diff.txt");
 
 
 	} catch (const std::exception&) {
-		return FALSE;
+		return 0;
 	}
 
 	return status;

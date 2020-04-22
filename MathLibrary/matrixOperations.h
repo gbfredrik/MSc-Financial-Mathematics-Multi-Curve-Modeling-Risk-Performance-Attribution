@@ -8,6 +8,7 @@ class matrixOperations {
 
 public:
 	static boost::numeric::ublas::matrix<double> chol(boost::numeric::ublas::matrix<double> const& input);
+	static boost::numeric::ublas::matrix<double> diff_matrix(boost::numeric::ublas::matrix<double> const& m_curves);
 };
 
 

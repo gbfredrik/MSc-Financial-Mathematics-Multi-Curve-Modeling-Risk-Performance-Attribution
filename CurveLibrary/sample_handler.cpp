@@ -14,7 +14,8 @@
 
 boost::numeric::ublas::matrix<double> read_txt_matrix(std::string const& file_name) {
 	boost::numeric::ublas::matrix<double> m;
-	std::ifstream inf("../ExampleData/" + file_name);
+	std::ifstream inf("./MSc Git/MScCurveModeling/Data/" + file_name);
+
 	if (!inf) {
 		std::cout << "Failed to open file" << std::endl;
 	}
@@ -30,15 +31,15 @@ boost::numeric::ublas::matrix<double> read_txt_matrix(std::string const& file_na
 
 bool write_txt_matrix(boost::numeric::ublas::matrix<double> const& m, std::string const& file_name) {
 	std::ofstream outf;
-	outf.open("m_" + file_name); // Appending "m_" to prevent accidental overwriting of important files
+	outf.open("./MSc Git/MScCurveModeling/Data/m_" + file_name); // Appending "m_" to prevent accidental overwriting of important files
 
 	if (!(outf << m)) { // If failed write
 		outf.close();
-		return false;
+		return 0;
 	}
 
 	outf.close();
-	return true;
+	return 1;
 }
 
 bool placeholder_ir_measurement_multi(boost::numeric::ublas::matrix<double>& m_rf, 
@@ -46,6 +47,5 @@ bool placeholder_ir_measurement_multi(boost::numeric::ublas::matrix<double>& m_r
 	m_rf =  read_txt_matrix("25x10950.txt");
 	m_tenor = read_txt_matrix("25x10950.txt");
 
-	bool status{ m_rf.size1() > 0 && m_tenor.size1() > 0 };
-	return status;
+	return (m_rf.size1() > 0) && (m_tenor.size2() > 0);
 }
