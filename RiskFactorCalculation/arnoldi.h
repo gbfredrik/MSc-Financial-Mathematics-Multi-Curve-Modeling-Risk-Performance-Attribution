@@ -9,8 +9,9 @@ class arnoldi {
 private:
 
 public:
-	static boost::numeric::ublas::matrix<double> matrixXdToUblas(Eigen::MatrixXd xdMatrix);
-	static Eigen::MatrixXd ublasToMatrixXd(boost::numeric::ublas::matrix<double> uMatrix);
+	static std::tuple<boost::numeric::ublas::matrix<double>, boost::numeric::ublas::vector<double>> iram(boost::numeric::ublas::matrix<double> const& input, int k);
+	
+
 };
 
 #endif
