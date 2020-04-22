@@ -4,22 +4,9 @@
 // that uses this DLL. This way any other project whose source files include this file see
 // CURVELIBRARY_API functions as being imported from a DLL, whereas this DLL sees symbols
 // defined with this macro as being exported.
-#ifdef CURVELIBRARY_EXPORTS
-#define CURVELIBRARY_API __declspec(dllexport)
-#else
-#define CURVELIBRARY_API __declspec(dllimport)
-#endif
 
-// This class is exported from the dll
-class CURVELIBRARY_API CCurveLibrary {
-public:
-	CCurveLibrary(void);
-	// TODO: add your methods here.
-	// ...
-};
+#define EXPORT comment(linker, "/EXPORT:" __FUNCTION__ "=" __FUNCDNAME__)
 
-extern CURVELIBRARY_API int nCurveLibrary;
 
-CURVELIBRARY_API int fnCurveLibrary(void);
-CURVELIBRARY_API int __stdcall testSquare(int x);
+int __stdcall squareXL(int, int &);
 
