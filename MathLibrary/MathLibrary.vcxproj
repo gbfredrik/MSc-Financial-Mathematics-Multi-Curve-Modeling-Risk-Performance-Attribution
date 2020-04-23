@@ -19,20 +19,17 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\CurveLibrary\pch.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
-    </ClCompile>
     <ClCompile Include="matrixOperations.cpp" />
+    <ClCompile Include="pch.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="rvSim.cpp" />
     <ClCompile Include="statistics.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\CurveLibrary\framework.h" />
-    <ClInclude Include="..\CurveLibrary\pch.h" />
+    <ClInclude Include="framework.h" />
     <ClInclude Include="matrixOperations.h" />
+    <ClInclude Include="pch.h" />
     <ClInclude Include="rvSim.h" />
     <ClInclude Include="statistics.h" />
   </ItemGroup>

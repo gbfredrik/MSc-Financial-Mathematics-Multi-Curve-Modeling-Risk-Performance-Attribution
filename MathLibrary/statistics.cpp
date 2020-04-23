@@ -14,11 +14,9 @@ matrix<double> statistics::corrm(matrix<double> const& input) {
 	size_t m = input.size1();
 	size_t n = input.size2();
 	matrix<double> corr(n, n);
-	vector<double> X(m);
-	vector<double> Y(m);
 
-	for (int i = 0; i < n; i++) {
-		for (int j = 0; j < n; j++) {
+	for (size_t i = 0; i < n; i++) {
+		for (size_t j = 0; j < n; j++) {
 			if (i == j) {
 				corr(i, j) = 1;
 			}
@@ -43,7 +41,7 @@ double statistics::pearson_rho(vector<double> const& X, vector<double> const& Y)
 	sum = std::accumulate(Y.begin(), Y.end(), 0.0);
 	double Y_hat = sum / Y.size();
 
-	for (int i = 0; i < m; i++) {
+	for (size_t i = 0; i < m; i++) {
 		numerator = numerator + (X(i) - X_hat) * (Y(i) - Y_hat);
 		denomenator_a = denomenator_a + pow(X(i) - X_hat, 2);
 		denomenator_b = denomenator_b + pow(Y(i) - Y_hat, 2);

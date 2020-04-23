@@ -65,7 +65,10 @@ BOOL __stdcall run_all_multiXL(BOOL const compute_curves/*, ...*/) {
 		// ...
 		// ...
 		boost::numeric::ublas::matrix<double> m_diff{matrixOperations::diff_matrix(m_forward_curves_rf)};
-		status = status && write_txt_matrix(m_diff, "rf_diff.txt");
+		//status = status && write_txt_matrix(m_diff, "rf_diff.txt");
+
+		int k = 6;
+		//boost::numeric::ublas::matrix<double> m_E{ matrixOperations::diff_matrix(m_forward_curves_rf) };
 
 
 	} catch (const std::exception&) {
