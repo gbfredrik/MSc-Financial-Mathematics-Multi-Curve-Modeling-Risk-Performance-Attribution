@@ -13,8 +13,8 @@ matrix<double> rvSim::gen_test(int rows, int cols) {
 	std::mt19937 mt(rd());
 	std::uniform_real_distribution<double> dist(1.0, 10.0);
 	matrix<double> test(rows, cols);
-	for (int i = 0; i < test.size1(); i++) {
-		for (int j = 0; j < test.size2(); j++) {
+	for (unsigned int i = 0; i < test.size1(); i++) {
+		for (unsigned int j = 0; j < test.size2(); j++) {
 			test(i, j) = dist(mt);
 		}
 	}
