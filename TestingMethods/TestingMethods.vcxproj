@@ -90,7 +90,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\local\boost_1_71_0\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\local\boost_1_71_0\; E:\eigen-eigen-323c052e1731; E:\spectra-0.8.1\include\Spectra;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -140,7 +140,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\local\boost_1_71_0\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\local\boost_1_71_0\; E:\eigen-eigen-323c052e1731; E:\spectra-0.8.1\include\Spectra;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -156,6 +156,9 @@
   <ItemGroup>
     <ProjectReference Include="..\MathLibrary\MathLibrary.vcxproj">
       <Project>{a18252bf-632c-435a-9887-422029fc1503}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\RiskFactorCalculation\RiskFactorCalculation.vcxproj">
+      <Project>{0b29d493-394b-4028-abdf-f76d5a63c1d4}</Project>
     </ProjectReference>
     <ProjectReference Include="..\TermStructureSimulation\TermStructureSimulationNew.vcxproj">
       <Project>{9c77745f-86f1-450e-ae01-acfcbf298666}</Project>

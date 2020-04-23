@@ -1,10 +1,12 @@
 #include "pch.h"
 #include "matrixOperations.h"
-
+#include <Eigen/Core>
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/matrix_proxy.hpp>
 
 using namespace boost::numeric::ublas;
+using namespace Eigen;
+
 
 matrix<double> matrixOperations::chol(matrix<double> const& input) {
 	size_t n = input.size1();
@@ -20,6 +22,68 @@ matrix<double> matrixOperations::chol(matrix<double> const& input) {
 		}
 	}
 	return L;
+}
+
+matrix<double> matrixOperations::matrixXdToUblas(MatrixXd const& xdMatrix) {
+
+	size_t m = xdMatrix.innerSize();
+	size_t n = xdMatrix.outerSize();
+
+	matrix<double> uMatrix(m, n);
+
+
+	for (int i = 0; i < m; i++) {
+		for (int j = 0; j < n; j++) {
+			uMatrix(i, j) = xdMatrix(i, j);
+		}
+	}
+
+	return uMatrix;
+
+}
+
+MatrixXd matrixOperations::ublasToMatrixXd(matrix<double> const& uMatrix) {
+
+	size_t m = uMatrix.size1();
+	size_t n = uMatrix.size2();
+
+	MatrixXd xdMatrix(m, n);
+
+	for (int i = 0; i < m; i++) {
+		for (int j = 0; j < n; j++) {
+			xdMatrix(i, j) = uMatrix(i, j);
+		}
+	}
+
+	return xdMatrix;
+}
+
+vector<double> matrixOperations::vectorXdToUblas(VectorXd const& xdVector) {
+
+	size_t length = xdVector.innerSize();
+
+	vector<double> uVector(length);
+
+
+	for (int i = 0; i < length; i++) {
+		uVector(i) = xdVector(i);
+	}
+
+	return uVector;
+
+}
+
+VectorXd matrixOperations::ublasToVectorXd(vector<double> const& uVector) {
+
+	size_t length = uVector.size();
+
+	VectorXd xdVector(length);
+
+	for (int i = 0; i < length; i++) {
+		xdVector(i) = uVector(i);
+	}
+
+	return xdVector;
 }
 
 matrix<double> matrixOperations::diff_matrix(matrix<double>& m_curves) { // Can this be "streamlined"? E.g. by directly returning a subset - a subset?
