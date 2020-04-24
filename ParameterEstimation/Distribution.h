@@ -19,11 +19,11 @@ using namespace boost::numeric::ublas;
 class Distribution {
 public:
 	Distribution(vector<double> time_series);
-	
-	vector<double> calcGradients(vector<double> x);
-	double function_value(vector<double> x);
-	~Distribution(void);
 	vector<double> time_series;
+	virtual vector<double> calcGradients(vector<double> x);
+	virtual double function_value(vector<double> x);
+	~Distribution(void);
+	
 
 private:
 	
