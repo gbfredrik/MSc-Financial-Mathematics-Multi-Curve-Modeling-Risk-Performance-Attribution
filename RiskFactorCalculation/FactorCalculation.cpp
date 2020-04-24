@@ -1,4 +1,4 @@
-#include "arnoldi.h"
+#include "FactorCalculation.h"
 #include <Eigen/Core>
 #include <boost/numeric/ublas/matrix.hpp>
 #include "../MathLibrary/matrixOperations.h"
@@ -12,7 +12,7 @@ using namespace boost::numeric::ublas;
 using namespace Spectra;
 using namespace Eigen;
 
-std::tuple<matrix<double>, vector<double>> arnoldi::iram(matrix<double> const& input, int k) {
+bool FactorCalculation::iram(matrix<double> const& input, int k, boost::numeric::ublas::matrix<double>& m_E, boost::numeric::ublas::vector<double>& v_Lambda) {
 	
 	// Create return vector and matrix
 	Eigen::VectorXd lambda;
@@ -29,7 +29,7 @@ std::tuple<matrix<double>, vector<double>> arnoldi::iram(matrix<double> const& i
 	DenseCholesky<double> Bop(C);
 
 	// Construct eigen solver object, requesting the largest k eigenvalues in magnitude
-	SymGEigsSolver<double, SMALLEST_MAGN, DenseSymMatProd<double>, DenseCholesky<double>, GEIGS_CHOLESKY> geigs(&op, &Bop, k, 2.0 * k + 1.0);
+	SymGEigsSolver<double, LARGEST_MAGN, DenseSymMatProd<double>, DenseCholesky<double>, GEIGS_CHOLESKY> geigs(&op, &Bop, k, 2.0 * k + 1.0);
 
 	// Initialize and compute
 	geigs.init();
@@ -39,11 +39,13 @@ std::tuple<matrix<double>, vector<double>> arnoldi::iram(matrix<double> const& i
 	if (geigs.info() == SUCCESSFUL){
 		lambda = geigs.eigenvalues();
 		E = geigs.eigenvectors();
+		// Return k eigenpairs as a tuple
+		m_E = matrixOperations::matrixXdToUblas(E);
+		v_Lambda = matrixOperations::vectorXdToUblas(lambda);
+		return true;
 	}
 	
-	// Return k eigenpairs as a tuple
-	return std::make_tuple(matrixOperations::matrixXdToUblas(E), matrixOperations::vectorXdToUblas(lambda));
-	
+	return false;
 }
 
 

@@ -42,6 +42,21 @@ bool write_txt_matrix(boost::numeric::ublas::matrix<double> const& m, std::strin
 	return 1;
 }
 
+bool write_txt_vector(boost::numeric::ublas::vector<double> const& m, std::string const& file_name) {
+	std::ofstream outf;
+	outf.open("./MSc Git/MScCurveModeling/Data/v_" + file_name); // Appending "m_" to prevent accidental overwriting of important files
+
+	if (!(outf << m)) { // If failed write
+		outf.close();
+		return 0;
+	}
+
+	outf.close();
+	return 1;
+}
+
+
+
 bool placeholder_ir_measurement_multi(boost::numeric::ublas::matrix<double>& m_rf, 
 									  boost::numeric::ublas::matrix<double>& m_tenor) {
 	m_rf =  read_txt_matrix("25x10950.txt");

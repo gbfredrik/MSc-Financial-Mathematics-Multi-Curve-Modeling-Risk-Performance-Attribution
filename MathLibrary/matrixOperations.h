@@ -1,5 +1,4 @@
-#ifndef MATRIXOPERATIONS_H
-#define MATRIXOPERATIONS_H
+#pragma once
 
 #include <boost/numeric/ublas/matrix.hpp>
 #include <Eigen/Core>
@@ -16,6 +15,3 @@ public:
     
     static boost::numeric::ublas::matrix<double> diff_matrix(boost::numeric::ublas::matrix<double>& m_curves);
 };
-
-
-#endif

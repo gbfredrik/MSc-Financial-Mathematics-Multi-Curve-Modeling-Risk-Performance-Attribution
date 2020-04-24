@@ -1,5 +1,4 @@
-#ifndef RVSIM_H
-#define RVSIM_H
+#pragma once
 
 #include <boost/numeric/ublas/matrix.hpp>
 
@@ -14,6 +13,3 @@ public:
 	static double gen_normal(double m, double s);
 	static double gen_uniform(double l, double u);
 };
-
-
-#endif
