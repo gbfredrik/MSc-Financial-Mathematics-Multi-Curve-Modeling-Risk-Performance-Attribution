@@ -30,6 +30,9 @@
     <ClInclude Include="unfGenT.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="MultipleYieldSim.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -42,6 +45,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="lhsd.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MultipleYieldSim.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

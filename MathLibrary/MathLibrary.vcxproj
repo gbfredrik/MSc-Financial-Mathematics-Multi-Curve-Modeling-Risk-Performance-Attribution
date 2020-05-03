@@ -108,14 +108,14 @@
       <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>C:\local\boost_1_71_0\; E:\eigen-eigen-323c052e1731\; E:\spectra-0.8.1\include\Spectra;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>X:\boost_1_72_0\; X:\exjobb\eigen-eigen-323c052e1731\; X:\exjobb\spectra-0.8.1\include\Spectra;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalLibraryDirectories>C:\local\boost_1_71_0\lib64-msvc-14.2\</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>X:\boost_1_72_0\lib32-msvc-14.2\</AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
