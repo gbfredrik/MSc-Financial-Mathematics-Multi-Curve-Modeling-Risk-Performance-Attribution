@@ -65,7 +65,7 @@ BOOL __stdcall run_all_multiXL(BOOL const compute_curves/*, ...*/) {
 
 		// ...
 		// ...
-		boost::numeric::ublas::matrix<double> m_diff{matrixOperations::diff_matrix(m_forward_curves_rf)};
+		boost::numeric::ublas::matrix<double> m_diff{ matrixOperations::diff_matrix(m_forward_curves_rf) };
 		//status = status && write_txt_matrix(m_diff, "rf_diff.txt");
 
 		int k = 1;
@@ -73,9 +73,12 @@ BOOL __stdcall run_all_multiXL(BOOL const compute_curves/*, ...*/) {
 		boost::numeric::ublas::vector<double> m_Lambda(k);
 
 		//std::tuple<boost::numeric::ublas::matrix<double>, boost::numeric::ublas::vector<double>> EVD{};
-		status = status && FactorCalculation::iram(m_diff, k, m_E, m_Lambda);
-		//status = status && write_txt_matrix(m_E, "rf_vec.txt");
-		//status = status && write_txt_vector(m_Lambda, "rf_val.txt");
+		
+		//status = status && FactorCalculation::iram(m_diff, k, m_E, m_Lambda);
+		status = status && FactorCalculation::eigen_bdcsvd(m_diff, m_E, m_Lambda);
+		
+		status = status && write_txt_matrix(m_E, "rf_vec.txt");
+		status = status && write_txt_vector(m_Lambda, "rf_val.txt");
 
 
 

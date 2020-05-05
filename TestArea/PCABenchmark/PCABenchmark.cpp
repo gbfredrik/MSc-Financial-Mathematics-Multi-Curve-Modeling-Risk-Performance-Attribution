@@ -1,5 +1,5 @@
 #include <iostream>
-#include "BenchTimer.h"
+#include "bench/BenchTimer.h"
 #include <Eigen/Dense>
 #include <map>
 #include <vector>
@@ -40,7 +40,7 @@ void bench(int id, int rows, int size = Size)
 
   int svd_opt = ComputeThinU|ComputeThinV;
   
-  int tries = 5;
+  int tries = 3;
   int rep = 1000/size;
   if(rep==0) rep = 1;
 //   rep = rep*rep;
@@ -101,14 +101,14 @@ int main()
     results[labels[i]].fill(-1);
 
   const int small = 8;
-  sizes.push_back(Array2i(small,small));
-  sizes.push_back(Array2i(100,100));
-  sizes.push_back(Array2i(1000,1000));
-  sizes.push_back(Array2i(4000,4000));
-  sizes.push_back(Array2i(10000,small));
-  sizes.push_back(Array2i(10000,100));
-  sizes.push_back(Array2i(10000,1000));
-  sizes.push_back(Array2i(10000,4000));
+  //sizes.push_back(Array2i(small,small));
+  //sizes.push_back(Array2i(100,100));
+  sizes.push_back(Array2i(1500,1500));
+  //sizes.push_back(Array2i(4000,4000));
+  //sizes.push_back(Array2i(10000,small));
+  //sizes.push_back(Array2i(10000,100));
+  sizes.push_back(Array2i(10950,1500));
+  //sizes.push_back(Array2i(10000,4000));
 
   using namespace std;
 
@@ -145,7 +145,7 @@ int main()
   }
 
   // HTML output
-  cout << "<table class=\"manual\">" << endl;
+  /*cout << "<table class=\"manual\">" << endl;
   cout << "<tr><th>solver/size</th>" << endl;
   for(int k=0; k<sizes.size(); ++k)
     cout << "  <th>" << sizes[k](0) << "x" << sizes[k](1) << "</th>";
@@ -171,16 +171,16 @@ int main()
     }
     cout << "</tr>" << endl;
   }
-  cout << "</table>" << endl;
+  cout << "</table>" << endl;*/
 
-//   cout << "LLT                             (ms)  " << (results["LLT"]*1000.).format(fmt) << "\n";
-//   cout << "LDLT                             (%)  " << (results["LDLT"]/results["LLT"]).format(fmt) << "\n";
-//   cout << "PartialPivLU                     (%)  " << (results["PartialPivLU"]/results["LLT"]).format(fmt) << "\n";
-//   cout << "FullPivLU                        (%)  " << (results["FullPivLU"]/results["LLT"]).format(fmt) << "\n";
-//   cout << "HouseholderQR                    (%)  " << (results["HouseholderQR"]/results["LLT"]).format(fmt) << "\n";
-//   cout << "ColPivHouseholderQR              (%)  " << (results["ColPivHouseholderQR"]/results["LLT"]).format(fmt) << "\n";
-//   cout << "CompleteOrthogonalDecomposition  (%)  " << (results["CompleteOrthogonalDecomposition"]/results["LLT"]).format(fmt) << "\n";
-//   cout << "FullPivHouseholderQR             (%)  " << (results["FullPivHouseholderQR"]/results["LLT"]).format(fmt) << "\n";
-//   cout << "JacobiSVD                        (%)  " << (results["JacobiSVD"]/results["LLT"]).format(fmt) << "\n";
-//   cout << "BDCSVD                           (%)  " << (results["BDCSVD"]/results["LLT"]).format(fmt) << "\n";
+   //cout << "llt                             (ms)  " << (results["llt"]*1000.).format(fmt) << "\n";
+   //cout << "ldlt                             (%)  " << (results["ldlt"]/results["llt"]).format(fmt) << "\n";
+   //cout << "partialpivlu                     (%)  " << (results["partialpivlu"]/results["llt"]).format(fmt) << "\n";
+   //cout << "fullpivlu                        (%)  " << (results["fullpivlu"]/results["llt"]).format(fmt) << "\n";
+   //cout << "householderqr                    (%)  " << (results["householderqr"]/results["llt"]).format(fmt) << "\n";
+   //cout << "colpivhouseholderqr              (%)  " << (results["colpivhouseholderqr"]/results["llt"]).format(fmt) << "\n";
+   //cout << "completeorthogonaldecomposition  (%)  " << (results["completeorthogonaldecomposition"]/results["llt"]).format(fmt) << "\n";
+   //cout << "fullpivhouseholderqr             (%)  " << (results["fullpivhouseholderqr"]/results["llt"]).format(fmt) << "\n";
+   //cout << "jacobisvd                        (%)  " << (results["jacobisvd"]/results["llt"]).format(fmt) << "\n";
+   //cout << "bdcsvd                           (%)  " << (results["bdcsvd"]/results["llt"]).format(fmt) << "\n";
 }
