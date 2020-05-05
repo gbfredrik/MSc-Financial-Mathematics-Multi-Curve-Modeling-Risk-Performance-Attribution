@@ -10,6 +10,7 @@ public:
 	static boost::numeric::ublas::matrix<double> chol(boost::numeric::ublas::matrix<double> const& input);
 	static boost::numeric::ublas::matrix<double> matrixXdToUblas(Eigen::MatrixXd const& xdMatrix);
 	static Eigen::MatrixXd ublasToMatrixXd(boost::numeric::ublas::matrix<double> const& uMatrix);
+	static boost::numeric::ublas::matrix<double> matrixLog(boost::numeric::ublas::matrix<double> const& input);
 };
 
 

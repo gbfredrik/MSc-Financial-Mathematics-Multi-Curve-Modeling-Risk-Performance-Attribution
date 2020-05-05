@@ -11,10 +11,10 @@ matrix<double> matrixOperations::chol(matrix<double> const& input) {
 	size_t n = input.size1();
 	matrix<double> L(n, n, 0);
 	// Decomposing a matrix into lower triangular 
-	for (int i = 0; i < n; i++) {
-		for (int k = 0; k < (i + 1); k++) {
+	for (size_t i = 0; i < n; i++) {
+		for (size_t k = 0; k < (i + 1); k++) {
 			double sum = 0;
-			for (int j = 0; j < k; j++) {
+			for (size_t j = 0; j < k; j++) {
 				sum += L(i, j) * L(k, j);
 			}
 			L(i, k) = (i == k) ? sqrt(input(i, i) - sum) : (1.0 / L(k, k) * (input(i, k) - sum));
@@ -31,8 +31,8 @@ matrix<double> matrixOperations::matrixXdToUblas(MatrixXd const& xdMatrix) {
 	matrix<double> uMatrix(m, n);
 
 
-	for (int i = 0; i < m; i++) {
-		for (int j = 0; j < n; j++) {
+	for (size_t i = 0; i < m; i++) {
+		for (size_t j = 0; j < n; j++) {
 			uMatrix(i, j) = xdMatrix(i, j);
 		}
 	}
@@ -48,11 +48,32 @@ MatrixXd matrixOperations::ublasToMatrixXd(matrix<double> const& uMatrix) {
 
 	MatrixXd xdMatrix(m, n);
 
-	for (int i = 0; i < m; i++) {
-		for (int j = 0; j < n; j++) {
+	for (size_t i = 0; i < m; i++) {
+		for (size_t j = 0; j < n; j++) {
 			xdMatrix(i, j) = uMatrix(i, j);
 		}
 	}
 
 	return xdMatrix;
+}
+
+//Logarithm of a matrix
+matrix<double> matrixOperations::matrixLog(matrix<double> const& input) {
+
+	size_t rows = input.size1();
+	size_t columns = input.size2();
+
+	matrix<double> logMatrix(rows, columns);
+
+	std::cout << "rows: " << rows << std::endl;
+	std::cout << "columns: " << columns << std::endl;
+
+	for (size_t i = 0; i < rows; ++i) {
+		for (size_t j = 0; j < columns; ++j) {
+			logMatrix(i, j) = log(input(i, j));
+			std::cout << "logMatrix loop: " << logMatrix(i,j) << std::endl;
+		}
+	}
+	std::cout << "logMatrix: " << logMatrix(1,1) << std::endl;
+	return logMatrix;
 }

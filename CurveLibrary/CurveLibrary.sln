@@ -23,6 +23,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ParseTester", "..\TestArea\
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RawInterpolTest", "..\TestArea\RawInterpolTest\RawInterpolTest.vcxproj", "{AE913A5C-809F-4960-AC07-C1AA212DAB56}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Backtesting", "..\Backtesting\Backtesting.vcxproj", "{61306C73-EDC9-401B-9F84-0542CDD2E2A4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -103,6 +105,14 @@ Global
 		{AE913A5C-809F-4960-AC07-C1AA212DAB56}.Release|x64.Build.0 = Release|x64
 		{AE913A5C-809F-4960-AC07-C1AA212DAB56}.Release|x86.ActiveCfg = Release|Win32
 		{AE913A5C-809F-4960-AC07-C1AA212DAB56}.Release|x86.Build.0 = Release|Win32
+		{61306C73-EDC9-401B-9F84-0542CDD2E2A4}.Debug|x64.ActiveCfg = Debug|x64
+		{61306C73-EDC9-401B-9F84-0542CDD2E2A4}.Debug|x64.Build.0 = Debug|x64
+		{61306C73-EDC9-401B-9F84-0542CDD2E2A4}.Debug|x86.ActiveCfg = Debug|Win32
+		{61306C73-EDC9-401B-9F84-0542CDD2E2A4}.Debug|x86.Build.0 = Debug|Win32
+		{61306C73-EDC9-401B-9F84-0542CDD2E2A4}.Release|x64.ActiveCfg = Release|x64
+		{61306C73-EDC9-401B-9F84-0542CDD2E2A4}.Release|x64.Build.0 = Release|x64
+		{61306C73-EDC9-401B-9F84-0542CDD2E2A4}.Release|x86.ActiveCfg = Release|Win32
+		{61306C73-EDC9-401B-9F84-0542CDD2E2A4}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
