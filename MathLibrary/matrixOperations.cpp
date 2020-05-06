@@ -83,3 +83,15 @@ matrix<double> matrixOperations::diff_matrix(matrix<double>& m_curves) { // Can 
 	//matrix<double> m_diff(m_2 - m_1);
 	return m_2 - m_1;
 }
+
+double matrixOperations::compute_column_average(vector<double> const& vec) {
+	return sum(vec) / vec.size();
+}
+
+matrix<double> matrixOperations::center_matrix(matrix<double>& diff_matrix) {
+	matrix<double> centered_matrix();
+
+
+
+	centered_matrix;
+}
