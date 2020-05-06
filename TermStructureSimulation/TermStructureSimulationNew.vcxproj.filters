@@ -50,5 +50,8 @@
     <ClCompile Include="MultipleYieldSim.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="simMultipleYield.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

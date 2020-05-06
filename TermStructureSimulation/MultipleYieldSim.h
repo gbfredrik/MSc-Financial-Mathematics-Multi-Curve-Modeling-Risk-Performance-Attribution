@@ -1,15 +1,13 @@
 #ifndef MULTIPLEYIELDSIM
 #define MULTIPLEYIELDSIM
 #include "mex.h"
-#include <tuple>
 #include <boost/numeric/ublas/matrix.hpp>
 
 class MultipleYieldSim {
 private:
-
+	static void simMultipleDaily(boost::numeric::ublas::vector<boost::numeric::ublas::matrix<double>> const& E, boost::numeric::ublas::vector<double> const& fZero, boost::numeric::ublas::matrix<double> const& pi, int M, int N, boost::numeric::ublas::vector<boost::numeric::ublas::matrix<double>>& fRes);
 public:
-	static std::tuple<boost::numeric::ublas::matrix<double>, boost::numeric::ublas::matrix<double>> simMultiple(boost::numeric::ublas::vector<double> eps, boost::numeric::ublas::matrix<double> Ezero, boost::numeric::ublas::matrix<double> Etau, boost::numeric::ublas::vector<double> fZeroCurr, boost::numeric::ublas::vector<double> fTauCurr, int N);
-	static void testSim(double x, double* y, double* z, mwSize n);
+	static void simMultipleFull(boost::numeric::ublas::vector<boost::numeric::ublas::matrix<double>> const& E, boost::numeric::ublas::vector<double> const& fZero, boost::numeric::ublas::matrix<double> const& pi, boost::numeric::ublas::vector<double> const& kappa, boost::numeric::ublas::matrix<double> const& xiHat, int d, boost::numeric::ublas::vector<boost::numeric::ublas::matrix<double>>& fRes);
 };
 
 #endif

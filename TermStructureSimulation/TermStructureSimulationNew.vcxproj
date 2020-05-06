@@ -93,7 +93,7 @@
       <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>X:\boost_1_72_0\; X:\exjobb\eigen-eigen-323c052e1731; X:\exjobb\spectra-0.8.1\include\Spectra;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>X:\boost_1_72_0\; X:\exjobb\eigen-eigen-323c052e1731; X:\exjobb\spectra-0.8.1\include\Spectra;C:\Program Files\Matlab\R2019a\extern\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -114,11 +114,15 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>X:\boost_1_72_0\; X:\exjobb\eigen-eigen-323c052e1731; X:\exjobb\spectra-0.8.1\include\Spectra;C:\Program Files\Matlab\R2019a\extern\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <Lib>
+      <AdditionalLibraryDirectories>X:\boost_1_72_0\lib32-msvc-14.2\</AdditionalLibraryDirectories>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -171,6 +175,7 @@
   <ItemGroup>
     <ClCompile Include="lhsd.cpp" />
     <ClCompile Include="MultipleYieldSim.cpp" />
+    <ClCompile Include="simMultipleYield.cpp" />
     <ClCompile Include="unfGenGauss.cpp" />
     <ClCompile Include="unfGenT.cpp" />
     <ClCompile Include="pch.cpp">
