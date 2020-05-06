@@ -88,10 +88,17 @@ double matrixOperations::compute_column_average(vector<double> const& vec) {
 	return sum(vec) / vec.size();
 }
 
-matrix<double> matrixOperations::center_matrix(matrix<double>& diff_matrix) {
-	matrix<double> centered_matrix();
+matrix<double> matrixOperations::center_matrix(matrix<double> const& diff_matrix) {
+	matrix<double> centered_matrix(diff_matrix.size1(), diff_matrix.size2());
+	vector<double> column_averages(diff_matrix.size2());
 
+	for (size_t i = 0; i < diff_matrix.size2(); ++i) {
+		column_averages(i) = compute_column_average(column(diff_matrix, i));
+	}
 
+	for (size_t i = 0; i < diff_matrix.size1(); ++i) {
+		row(centered_matrix, i) = row(diff_matrix, i) - column_averages;
+	}
 
-	centered_matrix;
+	return centered_matrix;
 }
