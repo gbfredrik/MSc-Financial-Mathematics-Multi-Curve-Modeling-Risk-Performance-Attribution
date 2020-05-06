@@ -11,6 +11,7 @@ using namespace Eigen;
 matrix<double> matrixOperations::chol(matrix<double> const& input) {
 	size_t n = input.size1();
 	matrix<double> L(n, n, 0);
+
 	// Decomposing a matrix into lower triangular 
 	for (size_t i = 0; i < n; i++) {
 		for (size_t k = 0; k < (i + 1); k++) {
@@ -21,36 +22,31 @@ matrix<double> matrixOperations::chol(matrix<double> const& input) {
 			L(i, k) = (i == k) ? sqrt(input(i, i) - sum) : (1.0 / L(k, k) * (input(i, k) - sum));
 		}
 	}
+
 	return L;
 }
 
 matrix<double> matrixOperations::matrixXdToUblas(MatrixXd const& xdMatrix) {
-
 	size_t m = xdMatrix.innerSize();
 	size_t n = xdMatrix.outerSize();
-
 	matrix<double> uMatrix(m, n);
 
-
-	for (int i = 0; i < m; i++) {
-		for (int j = 0; j < n; j++) {
+	for (size_t i = 0; i < m; i++) {
+		for (size_t j = 0; j < n; j++) {
 			uMatrix(i, j) = xdMatrix(i, j);
 		}
 	}
 
 	return uMatrix;
-
 }
 
 MatrixXd matrixOperations::ublasToMatrixXd(matrix<double> const& uMatrix) {
-
 	size_t m = uMatrix.size1();
 	size_t n = uMatrix.size2();
-
 	MatrixXd xdMatrix(m, n);
 
-	for (int i = 0; i < m; i++) {
-		for (int j = 0; j < n; j++) {
+	for (size_t i = 0; i < m; i++) {
+		for (size_t j = 0; j < n; j++) {
 			xdMatrix(i, j) = uMatrix(i, j);
 		}
 	}
@@ -59,27 +55,21 @@ MatrixXd matrixOperations::ublasToMatrixXd(matrix<double> const& uMatrix) {
 }
 
 vector<double> matrixOperations::vectorXdToUblas(VectorXd const& xdVector) {
-
 	size_t length = xdVector.innerSize();
-
 	vector<double> uVector(length);
 
-
-	for (int i = 0; i < length; i++) {
+	for (size_t i = 0; i < length; i++) {
 		uVector(i) = xdVector(i);
 	}
 
 	return uVector;
-
 }
 
 VectorXd matrixOperations::ublasToVectorXd(vector<double> const& uVector) {
-
 	size_t length = uVector.size();
-
 	VectorXd xdVector(length);
 
-	for (int i = 0; i < length; i++) {
+	for (size_t i = 0; i < length; i++) {
 		xdVector(i) = uVector(i);
 	}
 

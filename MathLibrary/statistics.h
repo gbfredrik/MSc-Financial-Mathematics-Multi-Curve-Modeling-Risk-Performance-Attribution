@@ -1,6 +1,4 @@
-#ifndef STATISTICS
-#define STATISTICS
-
+#pragma once
 
 #include <boost/numeric/ublas/matrix.hpp>
 
@@ -13,5 +11,3 @@ public:
 	static double pearson_rho(boost::numeric::ublas::vector<double> const& X, boost::numeric::ublas::vector<double> const& Y);
 
 };
-
-#endif

@@ -7,6 +7,7 @@
 
 #include "sample_handler.h"
 #include "../MathLibrary/matrixOperations.h"
+#include "../RiskFactorCalculation/FactorCalculation.h"
 
 #include <boost/numeric/ublas/matrix.hpp>
 
@@ -64,11 +65,23 @@ BOOL __stdcall run_all_multiXL(BOOL const compute_curves/*, ...*/) {
 
 		// ...
 		// ...
-		boost::numeric::ublas::matrix<double> m_diff{matrixOperations::diff_matrix(m_forward_curves_rf)};
+		boost::numeric::ublas::matrix<double> m_diff{ matrixOperations::diff_matrix(m_forward_curves_rf) };
 		//status = status && write_txt_matrix(m_diff, "rf_diff.txt");
 
-		int k = 6;
-		//boost::numeric::ublas::matrix<double> m_E{ matrixOperations::diff_matrix(m_forward_curves_rf) };
+		int k = 1;
+		boost::numeric::ublas::matrix<double> m_E(m_diff.size2(), k);
+		boost::numeric::ublas::vector<double> m_Lambda(k);
+
+		//std::tuple<boost::numeric::ublas::matrix<double>, boost::numeric::ublas::vector<double>> EVD{};
+		
+		//status = status && FactorCalculation::iram(m_diff, k, m_E, m_Lambda);
+		status = status && FactorCalculation::eigen_bdcsvd(m_diff, m_E, m_Lambda);
+		
+		status = status && write_txt_matrix(m_E, "rf_vec.txt");
+		status = status && write_txt_vector(m_Lambda, "rf_val.txt");
+
+
+
 
 
 	} catch (const std::exception&) {

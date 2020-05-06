@@ -3,7 +3,7 @@
 #include "../TermStructureSimulation/lhsd.h"
 #include "../MathLibrary/rvSim.h"
 #include "../MathLibrary/matrixOperations.h"
-#include "../RiskFactorCalculation/arnoldi.h"
+#include "../RiskFactorCalculation/FactorCalculation.h"
 
 #include <iostream>
 #include <numeric>

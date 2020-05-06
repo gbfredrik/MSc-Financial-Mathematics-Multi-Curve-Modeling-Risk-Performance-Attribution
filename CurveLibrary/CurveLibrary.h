@@ -1,4 +1,5 @@
 // CurveLibrary.h : Declares all DLL functions
+#pragma once
 #define EXPORT comment(linker, "/EXPORT:" __FUNCTION__ "=" __FUNCDNAME__)
 
 LONG __stdcall squareXL(int, int&);
