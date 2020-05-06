@@ -14,6 +14,8 @@
 #include <boost/math/tools/bivariate_statistics.hpp>
 #include <boost/math/distributions/normal.hpp>
 
+#include <boost/math/constants/constants.hpp>
+
 using namespace boost::numeric::ublas;
 
 class Gaussian : public Distribution {
@@ -22,6 +24,7 @@ public:
 	vector<double> create_GARCH_vec(vector<double> x);
 	double function_value(vector<double> x);
 	vector<double> calcGradients(vector<double> x);
+	void getSeries();
 
 private:
 	vector<double> GARCH_vec;

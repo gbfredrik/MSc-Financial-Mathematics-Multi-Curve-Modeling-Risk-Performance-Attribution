@@ -22,6 +22,7 @@ public:
 	vector<double> time_series;
 	virtual vector<double> calcGradients(vector<double> x);
 	virtual double function_value(vector<double> x);
+	virtual void getSeries();
 	~Distribution(void);
 	
 
