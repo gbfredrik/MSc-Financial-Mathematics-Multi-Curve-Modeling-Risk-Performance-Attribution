@@ -1,11 +1,11 @@
-#ifndef STATISTICS
-#define STATISTICS
+#ifndef STATISTICSOPERATIONS
+#define STATISTICSOPERATIONS
 
-
+#include "mex.h"
 #include <boost/numeric/ublas/matrix.hpp>
 
 
-class statistics {
+class statisticsOperations {
 private:
 
 public:

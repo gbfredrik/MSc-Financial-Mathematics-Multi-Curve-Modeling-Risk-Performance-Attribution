@@ -1,6 +1,6 @@
 #include "pch.h"
-#include "statistics.h"
-
+#include "statisticsOperations.h"
+#include "mex.h"
 #include <numeric>
 
 #include <boost/numeric/ublas/matrix.hpp>
@@ -10,7 +10,7 @@ using namespace boost::numeric::ublas;
 
 
 // Calculate the Pearson correlation matrix, TODO: reduce the amount of calls to pearson_rho()
-matrix<double> statistics::corrm(matrix<double> const& input) {
+matrix<double> statisticsOperations::corrm(matrix<double> const& input) {
 	size_t m = input.size1();
 	size_t n = input.size2();
 	matrix<double> corr(n, n);
@@ -30,7 +30,7 @@ matrix<double> statistics::corrm(matrix<double> const& input) {
 	return corr;
 }
 // Calculate the Pearson correlation coefficient
-double statistics::pearson_rho(vector<double> const& X, vector<double> const& Y) {
+double statisticsOperations::pearson_rho(vector<double> const& X, vector<double> const& Y) {
 	double rho = 0.0;
 	size_t m = X.size();
 	double numerator = 0;
@@ -51,3 +51,4 @@ double statistics::pearson_rho(vector<double> const& X, vector<double> const& Y)
 
 	return numerator / (sqrt(denomenator_a) * sqrt(denomenator_b));
 }
+

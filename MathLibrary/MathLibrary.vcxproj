@@ -27,14 +27,14 @@
     </ClCompile>
     <ClCompile Include="matrixOperations.cpp" />
     <ClCompile Include="rvSim.cpp" />
-    <ClCompile Include="statistics.cpp" />
+    <ClCompile Include="statisticsOperations.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\CurveLibrary\framework.h" />
     <ClInclude Include="..\CurveLibrary\pch.h" />
     <ClInclude Include="matrixOperations.h" />
     <ClInclude Include="rvSim.h" />
-    <ClInclude Include="statistics.h" />
+    <ClInclude Include="statisticsOperations.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

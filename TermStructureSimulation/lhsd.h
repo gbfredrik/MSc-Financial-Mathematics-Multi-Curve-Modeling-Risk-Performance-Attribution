@@ -1,6 +1,6 @@
 #ifndef LHSD
 #define LHSD
-
+#include "mex.h"
 #include <boost/numeric/ublas/matrix.hpp>
 
 class lhsd {

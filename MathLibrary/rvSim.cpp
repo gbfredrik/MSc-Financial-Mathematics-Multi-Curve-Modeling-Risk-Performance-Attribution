@@ -1,12 +1,13 @@
 #include "pch.h"
-
+#include "mex.h"
 #include "rvSim.h"
 
 #include <random>
 #include <boost/numeric/ublas/matrix.hpp>
+#include <boost/random/normal_distribution.hpp >
 
 using namespace boost::numeric::ublas;
-
+#include <boost/math/distributions/normal.hpp>
 
 matrix<double> rvSim::gen_test(int rows, int cols) {
 	std::random_device rd;
@@ -22,15 +23,17 @@ matrix<double> rvSim::gen_test(int rows, int cols) {
 }
 
 // Generate n normal variables with mean m and standard deviation s
-vector<double> rvSim::gen_normal(double m, double s, int N) {
-	std::random_device rd;
-	std::default_random_engine generator(rd());
-	std::normal_distribution<double> distribution(m, s);
-	vector<double> rand(N);
+matrix<double> rvSim::gen_normal(double m, double s, int k, int N) {
 
-	for (int i = 0; i < N; ++i) {
-		double number = distribution(generator);
-		rand[i] = number;
+	static std::random_device rd;
+	static std::mt19937 e2(rd());
+	std::normal_distribution<> dist(m, s);
+	matrix<double> rand(k, N);
+
+	for (int i = 0; i < k; i++) {
+		for (int j = 0; j < N; j++) {
+			rand(i, j) = dist(e2);
+		}
 	}
 	return rand;
 }
@@ -72,3 +75,26 @@ double rvSim::gen_uniform(double l, double u) {
 	return distribution(generator);
 }
 
+matrix<double> rvSim::gen_eps(matrix<double> V, double sigma, std::string type) {
+	size_t m = V.size1();
+	size_t n = V.size2();
+
+	matrix<double> eps(m, n);
+	boost::math::normal norm(0.0, 1.0);
+	if (type == "normal") {
+		for (int i = 0; i < m; i++) {
+			for (int j = 0; j < n; j++) {
+				mexPrintf(" ");
+				mexPrintf("%g", V(i, j));
+				eps(i, j) = quantile(norm, V(i, j)) * sigma;
+				
+			}
+		}
+	}
+	/*
+	else if (type == "t") {
+
+	}
+	*/
+	return eps;
+}

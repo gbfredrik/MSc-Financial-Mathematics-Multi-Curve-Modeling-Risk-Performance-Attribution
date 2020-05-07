@@ -6,19 +6,32 @@ load('piHist.mat')
 DZero = fHist(2:end,:) - fHist(1:end-1,:);
 DTau = piHist(2:end,:) - piHist(1:end-1,:);
 
-[Q1, R1] = qr(DZero', 0);
-[U1, D1, V] = svd(R1', 0);
-EZero = Q1 * V(:,1:6);
+CZero = cov(DZero);
+CTau = cov(DTau);
 
-[Q1, R1] = qr(DTau', 0);
-[U1, D1, V] = svd(R1', 0);
-ETau = Q1 * V(:,1:6);
+[V,D] = eigs(CZero, 6);
+[e,ind] = sort(diag(D),1, 'descend');
+EZero = V(:,ind);
+
+[V,D] = eigs(CTau, 6);
+[e,ind] = sort(diag(D),1, 'descend');
+ETau = V(:,ind);
+
+
+plot(EZero(:,1:3))
+
 
 
 %% Estimate simulation parameters
-
-fZero = fHist(end,:);
+T = 1:730;
+fZero = fHist(end-100,:);
 pi = piHist(end,:);
+
+X = randn(6,1000)*0.001;
+deltaF = EZero * X;
+
+fTest = fZero' + deltaF;
+plot(T,fTest, T, fZero');
 
 kappa = zeros(2,1);
 xiHat = zeros(6,2);
@@ -29,16 +42,29 @@ fRes = [];
 
 
 %% Simulate curves
+tic
 
-[fZeroOut, fTauOut] = simMultipleYield(d, EZero, ETau, fZero, pi, kappa, xiHat);
-
+N = 2000;
+[fZeroOut, fTauOut] = simMultipleYield(d, N, EZero, ETau, fZero, pi, kappa, xiHat);
+tid = toc
 %%
-x = fZeroOut - fZero'
+x = fZeroOut - fZero';
 
-y = fTauOut - fZeroOut - pi'
+y = fTauOut - fZeroOut - pi';
+%%
+T = 1:730;
+
+figure;
+plot(T,fTauOut(1:end, 1), T, fZeroOut(1:end, 1), T, fZero)
+figure;
+plot(T,fTauOut', T, fZeroOut')
+
+figure;
+plot(T,fZero)
 
 
 
 
+%mex ../simMultipleYield.cpp ../MultipleYieldSim.cpp ../lhsd.cpp ../unfGenT.cpp ../unfGenGauss.cpp ../../Mathlibrary/statisticsOperations.cpp ../../Mathlibrary/matrixOperations.cpp ../../Mathlibrary/rvSim.cpp -IX:/boost_1_72_0 -IX:\exjobb\eigen-eigen-323c052e1731
 
 
