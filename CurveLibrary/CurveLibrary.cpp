@@ -47,7 +47,7 @@ BOOL __stdcall run_all_multiXL(BOOL const compute_curves/*, ...*/) {
 
 	bool status{ 0 };
 
-	try	{
+	try {
 		boost::numeric::ublas::matrix<double> m_forward_curves_rf{};
 		boost::numeric::ublas::matrix<double> m_forward_curves_tenor{};
 		if (compute_curves) { // Compute
@@ -58,23 +58,22 @@ BOOL __stdcall run_all_multiXL(BOOL const compute_curves/*, ...*/) {
 				status = write_txt_matrix(m_forward_curves_rf, "forward_curves_rf.txt");
 				status = status && write_txt_matrix(m_forward_curves_tenor, "forward_curves_tenor.txt");
 			}
-		} else { // Read
+		}
+		else { // Read
 			m_forward_curves_rf = read_txt_matrix("25x10950.txt");
 			m_forward_curves_tenor = read_txt_matrix("25x10950.txt");
 		}
 
-		// ...
-		// ...
 		boost::numeric::ublas::matrix<double> m_diff{ matrixOperations::diff_matrix(m_forward_curves_rf) };
-		//status = status && write_txt_matrix(m_diff, "rf_diff.txt");
+		boost::numeric::ublas::matrix<double> m_rf_centered{ matrixOperations::center_matrix(m_forward_curves_rf) };
 
 		int k = 6;
-		//boost::numeric::ublas::matrix<double> m_rf_centered(m_diff.size1(), m_diff.size2());
+		status = status && write_txt_matrix(m_rf_centered, "rf_centered.txt");
 		boost::numeric::ublas::matrix<double> m_rf_E(m_diff.size2(), k);
 		boost::numeric::ublas::vector<double> v_rf_Lambda(k);
 
-		//status = status && FactorCalculation::iram(m_diff, k, m_rf_E, v_rf_Lambda);
-		status = status && FactorCalculation::eigen_bdcsvd(m_diff, m_rf_E, v_rf_Lambda);
+		status = status && FactorCalculation::iram(m_rf_centered / std::sqrt(m_rf_centered.size1() - 1), k, m_rf_E, v_rf_Lambda);
+		//status = status && FactorCalculation::eigen_bdcsvd(m_rf_centered, k, m_rf_E, v_rf_Lambda);
 		
 		status = status && write_txt_matrix(m_rf_E, "rf_vec.txt");
 		status = status && write_txt_vector(v_rf_Lambda, "rf_val.txt");

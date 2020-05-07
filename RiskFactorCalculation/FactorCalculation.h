@@ -8,8 +8,8 @@ class FactorCalculation {
 private:
 
 public:
-	static bool iram(boost::numeric::ublas::matrix<double> const& input, int k, boost::numeric::ublas::matrix<double>& m_E, boost::numeric::ublas::vector<double>& v_Lambda);
-	static bool eigen_bdcsvd(boost::numeric::ublas::matrix<double> const& input, boost::numeric::ublas::matrix<double>& m_E, boost::numeric::ublas::vector<double>& v_Lambda);
+	static bool iram(boost::numeric::ublas::matrix<double> const& input, int const k, boost::numeric::ublas::matrix<double>& m_E, boost::numeric::ublas::vector<double>& v_Lambda);
+	static bool eigen_bdcsvd(boost::numeric::ublas::matrix<double> const& input, int const k, boost::numeric::ublas::matrix<double>& m_E, boost::numeric::ublas::vector<double>& v_Lambda);
 
 
 };

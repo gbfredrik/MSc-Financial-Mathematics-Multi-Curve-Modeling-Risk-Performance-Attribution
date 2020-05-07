@@ -1,8 +1,12 @@
 #include "pch.h"
 #include "matrixOperations.h"
+
 #include <Eigen/Core>
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/matrix_proxy.hpp>
+#include <boost/numeric/ublas/io.hpp>// Temp: remove later
+
+#include <fstream> 
 
 using namespace boost::numeric::ublas;
 using namespace Eigen;
@@ -84,7 +88,7 @@ matrix<double> matrixOperations::diff_matrix(matrix<double>& m_curves) { // Can 
 	return m_2 - m_1;
 }
 
-double matrixOperations::compute_column_average(vector<double> const& vec) {
+double matrixOperations::column_average(vector<double> const& vec) {
 	return sum(vec) / vec.size();
 }
 
@@ -93,12 +97,17 @@ matrix<double> matrixOperations::center_matrix(matrix<double> const& diff_matrix
 	vector<double> column_averages(diff_matrix.size2());
 
 	for (size_t i = 0; i < diff_matrix.size2(); ++i) {
-		column_averages(i) = compute_column_average(column(diff_matrix, i));
+		column_averages(i) = column_average(column(diff_matrix, i));
 	}
 
 	for (size_t i = 0; i < diff_matrix.size1(); ++i) {
 		row(centered_matrix, i) = row(diff_matrix, i) - column_averages;
 	}
+	std::ofstream outf;
+	outf.open("./MSc Git/MScCurveModeling/Data/v_avgs.txt");
+
+	outf << column_averages;
+	outf.close();
 
 	return centered_matrix;
 }
