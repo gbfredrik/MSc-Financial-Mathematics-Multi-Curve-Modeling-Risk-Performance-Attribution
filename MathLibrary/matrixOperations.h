@@ -1,6 +1,6 @@
 #ifndef MATRIXOPERATIONS_H
 #define MATRIXOPERATIONS_H
-
+#include "mex.h"
 #include <boost/numeric/ublas/matrix.hpp>
 #include <Eigen/Core>
 

@@ -1,6 +1,6 @@
 #ifndef UNFGENT
 #define UNFGENT
-
+#include "mex.h"
 #include <boost/numeric/ublas/matrix.hpp>
 
 class unfGenT {

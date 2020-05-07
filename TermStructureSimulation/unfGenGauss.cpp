@@ -1,12 +1,12 @@
 #include "pch.h"
+#include "mex.h"
 #include "unfGenGauss.h"
 #include "../MathLibrary/matrixOperations.h"
 #include "../MathLibrary/rvSim.h"
-#include "../MathLibrary/statistics.h"
+#include "../MathLibrary/statisticsOperations.h"
 
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/matrix_proxy.hpp>
-#include <boost/math/tools/bivariate_statistics.hpp>
 #include <boost/math/distributions/normal.hpp>
 
 
@@ -17,32 +17,30 @@ using namespace boost::math;
 matrix<double> unfGenGauss::GC_sim(matrix<double> const& E, int N) {
 
 	size_t m = E.size1();
-	size_t n = E.size2();
+	size_t k = E.size2();
 
 	// Calculate the correlation matrix
-	matrix<double> corr(n, n);
-	corr = statistics::corrm(E);
+	matrix<double> corr(k, k);
+	corr = statisticsOperations::corrm(E);
 
 	// Perform Cholesky decomposition
-	matrix<double> L(n, n);
+	matrix<double> L(k, k);
 	L = matrixOperations::chol(corr);
 
 	// Generate i.i.d. standard normal random variables
-	matrix<double> X(N, n);
-	for (int i = 0; i < n; i++) {
-		column(X, i) = rvSim::gen_normal(0.0, 1.0, N);
-	}
+	matrix<double> X(k, N);
+	X = rvSim::gen_normal(0.0, 1.0, k, N);
 
 	// Generate Correlated Gaussian samples
-	matrix<double> Z(N, n);
-	Z = prod(X, trans(L));
+	matrix<double> Z(k, N);
+	Z = prod(trans(L), X);
 
 	// Return correlated uniformy distributed random variables
-	matrix<double> U(N, n);
+	matrix<double> U(k, N);
 	normal s;
-	for (int i = 0; i < N; i++) {
-		for (int j = 0; j < n; j++) {
-			U(i, j) = cdf(s, Z(i, j));
+	for (int i = 0; i < k; i++) {
+		for (int j = 0; j < N; j++) {
+			U(i, j) = cdf(s, Z(i, j)); 
 		}
 	}
 	return U;

@@ -1,6 +1,6 @@
 #ifndef UNFGENGAUSS
 #define UNFGENGAUSS
-
+#include "mex.h"
 #include <boost/numeric/ublas/matrix.hpp>
 
 class unfGenGauss {
