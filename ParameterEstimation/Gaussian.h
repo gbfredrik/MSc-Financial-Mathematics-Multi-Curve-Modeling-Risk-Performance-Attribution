@@ -25,6 +25,7 @@ public:
 	double function_value(vector<double> x);
 	vector<double> calcGradients(vector<double> x);
 	void getSeries();
+	double calcStepSize(vector<double> x, vector<double> d);
 
 private:
 	vector<double> GARCH_vec;

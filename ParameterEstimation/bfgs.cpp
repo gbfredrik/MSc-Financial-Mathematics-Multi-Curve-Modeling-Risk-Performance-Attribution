@@ -25,23 +25,13 @@ vector<double> bfgs::minimize(vector<double> x, matrix<double> H_inv, int max_it
 	
 	
 	while (norm_2(dist->calcGradients(x)) > epsilon && k < max_iter) {
-		
-		if ((norm_2(dist->calcGradients(x)) > epsilon)) 
-		{
-			std::cout << "true \n";
-		}
-		else
-		{
-			std::cout << "false \n";
-		}
-		
-		
+
 		gradient_vec = dist->calcGradients(x);
 		std::cout << "H_inv: " << H_inv << "\n";
 		std::cout << "gradient_vec: " << gradient_vec << "\n \n";
 		d = -prod(H_inv, gradient_vec);
 		
-		alpha = calcStepSize(x, d, dist);
+		alpha = dist->calcStepSize(x, d);
 		x_new = x + alpha * d;
 		
 		y = dist->calcGradients(x_new) - dist->calcGradients(x);
@@ -61,7 +51,7 @@ vector<double> bfgs::minimize(vector<double> x, matrix<double> H_inv, int max_it
 	return x;
 }
 
-
+/*
 double bfgs::calcStepSize(vector<double> x, vector<double> d, Distribution* dist) {
 
 	double a = 1;
@@ -85,6 +75,8 @@ double bfgs::calcStepSize(vector<double> x, vector<double> d, Distribution* dist
 
 	return a;
 }
+*/
+
 
 /*
 

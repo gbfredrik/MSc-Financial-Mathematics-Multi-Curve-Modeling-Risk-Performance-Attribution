@@ -23,6 +23,7 @@ public:
 	virtual vector<double> calcGradients(vector<double> x);
 	virtual double function_value(vector<double> x);
 	virtual void getSeries();
+	virtual double calcStepSize(vector<double> x, vector<double> d);
 	~Distribution(void);
 	
 

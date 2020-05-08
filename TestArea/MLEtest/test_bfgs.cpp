@@ -6,18 +6,18 @@ vector<double > simulate_GARCH_process(int n);
 
 int main() {
 
-	vector<double> start(2);
-	//start(0) = 0.02;
-	//start(1) = 0.04;
-	//start(2) = 0.95;
-	start(0) = 5;
-	start(1) = 5;
+	vector<double> start(3);
+	start(0) = 0.01;
+	start(1) = 0.03;
+	start(2) = 0.9;
+	//start(0) = 5;
+	//start(1) = 5;
 	//start(2) = 0.95;
 
 	int max_iter = 100;
 	float epsilon = pow(10,-5);
-	matrix<double> H_inv(2, 2);
-	identity_matrix<double> I(2);
+	matrix<double> H_inv(3, 3);
+	identity_matrix<double> I(3);
 	H_inv = I;
 	
 	
@@ -36,9 +36,15 @@ int main() {
 	std::cout << "\nstartit = " << start << "\n";
 
 
-	std::cout << "Funktionsvärde startparametrar : " << d->function_value(start) << "\n";
+	std::cout << "Funktionsvärde startparametrar : " << gaussian->function_value(start) << "\n";
 
-	vector<double> opt_parameters = bfgs::minimize(start, H_inv, max_iter, epsilon, d);
+	vector<double> theta(3);
+	theta(0) = 0.02;
+	theta(1) = 0.04;
+	theta(2) = 0.95;
+	std::cout << "Optimalt funktionsvärde : " << gaussian->function_value(theta) << "\n\n";
+
+	vector<double> opt_parameters = bfgs::minimize(start, H_inv, max_iter, epsilon, gaussian);
 
 	//std::cout << opt_parameters;
 
@@ -113,6 +119,8 @@ vector<double > simulate_GARCH_process(int n) {
 
 		process(i) = sqrt(nu(i)) * normals(i + 1);
 	}
+
+	std::cout << "In garch process: " << process << "\n";
 	
 	/**
 	for (int i = 0; i < n; i++) {

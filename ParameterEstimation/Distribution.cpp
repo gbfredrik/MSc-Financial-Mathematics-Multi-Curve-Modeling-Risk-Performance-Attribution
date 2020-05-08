@@ -30,5 +30,28 @@ double Distribution::function_value(vector<double> x) {
 	return function_value;
 }
 
+double Distribution::calcStepSize(vector<double> x, vector<double> d) {
+
+	double a = 1;
+	double c1 = pow(10, -4);
+	double c2 = 0.9;
+
+
+	//while (dist->function_value(x + a * d) > dist->function_value(x) + c1 * a * inner_prod(dist->calcGradients(x), d)
+	while (function_value(x + a * d) > function_value(x))
+	{
+		std::cout << "new f : " << function_value(x + a * d) << "\n";
+		std::cout << "old f : " << function_value(x) << "\n";
+		std::cout << "steglängd = " << a << "\n";
+		std::cout << "new parameters2 = " << x(0) + a * d(0) << ", " << x(1) + a * d(1) << "\n";
+		a = a * 0.5;
+	}
+
+	std::cout << "new f : " << function_value(x + a * d) << "\n";
+	std::cout << "old f : " << function_value(x) << "\n";
+	std::cout << "steglängd = " << a << "\n \n";
+
+	return a;
+}
 
 Distribution::~Distribution(void) {}
