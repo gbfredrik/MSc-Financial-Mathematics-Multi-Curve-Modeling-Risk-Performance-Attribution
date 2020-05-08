@@ -57,20 +57,23 @@ bool FactorCalculation::eigen_bdcsvd(boost::numeric::ublas::matrix<double> const
 	// Utilizes BDCSVD from Eigen library
 	int svd_opt = Eigen::ComputeThinU | Eigen::ComputeThinV;
 
-	Eigen::MatrixXd H = matrixOperations::ublasToMatrixXd(input);
+	Eigen::MatrixXd H = matrixOperations::ublasToMatrixXd(input);	//FullPivHouseholderQR<Matrix<double, Dynamic, Size>> fpqr(A.rows(), A.cols());
+	if (H.rows() < H.cols()) {
+		Eigen::HouseholderQR<Eigen::MatrixXd> qr(H.transpose());
+		Eigen::MatrixXd thinQ(Eigen::MatrixXd::Identity(H.cols(), H.rows()));
+		thinQ = qr.householderQ() * thinQ;
+		Eigen::MatrixXd RTR = qr.matrixQR().transpose() * qr.matrixQR();
 
-	//FullPivHouseholderQR<Matrix<double, Dynamic, Size>> fpqr(A.rows(), A.cols());
-	Eigen::HouseholderQR<Eigen::MatrixXd> qr(H.transpose());
-
-	Eigen::MatrixXd thinQ(Eigen::MatrixXd::Identity(H.cols(), H.rows()));
-	thinQ = qr.householderQ() * thinQ;
-	Eigen::MatrixXd RTR = qr.matrixQR().transpose() * qr.matrixQR();
-	Eigen::BDCSVD<Eigen::MatrixXd> bdcsvd(RTR, svd_opt);
-
-	// Return eigenpairs
-	m_E = matrixOperations::matrixXdToUblas(thinQ * bdcsvd.matrixV()); // OK?
-	v_Lambda = matrixOperations::vectorXdToUblas(bdcsvd.singularValues().array().square()); // TODO: Control square method
-	// See: https://stackoverflow.com/questions/34373757/piece-wise-square-of-vector-piece-wise-product-of-two-vectors-in-c-eigen
-	
-	return v_Lambda.size() > 0;
+		Eigen::BDCSVD<Eigen::MatrixXd> bdcsvd(RTR, svd_opt);
+		// Return eigenpairs
+		m_E = matrixOperations::matrixXdToUblas(thinQ * bdcsvd.matrixV()); // OK?
+		v_Lambda = matrixOperations::vectorXdToUblas(bdcsvd.singularValues().array().square()); // TODO: Control square method
+		// See: https://stackoverflow.com/questions/34373757/piece-wise-square-of-vector-piece-wise-product-of-two-vectors-in-c-eigen
+	} else {
+		Eigen::BDCSVD<Eigen::MatrixXd> bdcsvd(H.transpose() * H, svd_opt);
+		m_E = matrixOperations::matrixXdToUblas(bdcsvd.matrixV()); // OK?
+		v_Lambda = matrixOperations::vectorXdToUblas(bdcsvd.singularValues().array().square()); // TODO: Control square method
+	}
+		
+	return v_Lambda.size() > 0; // Ändra så bara k=6 egenpar returneras!
 }

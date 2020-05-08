@@ -45,7 +45,7 @@ BOOL __stdcall ir_measurement_multiXL(BOOL const save_curves) {
 BOOL __stdcall run_all_multiXL(BOOL const compute_curves/*, ...*/) {
 #pragma EXPORT
 
-	bool status{ 0 };
+	bool status{ 1 };
 
 	try {
 		boost::numeric::ublas::matrix<double> m_forward_curves_rf{};
@@ -55,30 +55,30 @@ BOOL __stdcall run_all_multiXL(BOOL const compute_curves/*, ...*/) {
 			// TODO: Replace above to compute curve(s)
 
 			if (status == 1) { // If computation is successful and saving is toggled
-				status = write_txt_matrix(m_forward_curves_rf, "forward_curves_rf.txt");
-				status = status && write_txt_matrix(m_forward_curves_tenor, "forward_curves_tenor.txt");
+				status = write_csv_matrix(m_forward_curves_rf, "forward_curves_rf.csv");
+				status = status && write_csv_matrix(m_forward_curves_tenor, "forward_curves_tenor.csv");
 			}
-		}
-		else { // Read
-			m_forward_curves_rf = read_txt_matrix("25x10950.txt");
-			m_forward_curves_tenor = read_txt_matrix("25x10950.txt");
+		} else { // Read
+			m_forward_curves_rf = read_csv_matrix("fHist.csv");
+			//m_forward_curves_tenor = read_csv_matrix("piHist.csv");
 		}
 
 		boost::numeric::ublas::matrix<double> m_diff{ matrixOperations::diff_matrix(m_forward_curves_rf) };
-		boost::numeric::ublas::matrix<double> m_rf_centered{ matrixOperations::center_matrix(m_forward_curves_rf) };
+		boost::numeric::ublas::matrix<double> m_rf_centered{ matrixOperations::center_matrix(m_diff) };
 
 		int k = 6;
-		status = status && write_txt_matrix(m_rf_centered, "rf_centered.txt");
-		boost::numeric::ublas::matrix<double> m_rf_E(m_diff.size2(), k);
+		boost::numeric::ublas::matrix<double> m_rf_E(m_diff.size2(), k); // Ändra till centered som argument
 		boost::numeric::ublas::vector<double> v_rf_Lambda(k);
 
-		status = status && FactorCalculation::iram(m_rf_centered / std::sqrt(m_rf_centered.size1() - 1), k, m_rf_E, v_rf_Lambda);
+		//status = status && FactorCalculation::iram(m_rf_centered / std::sqrt(m_rf_centered.size1() - 1), k, m_rf_E, v_rf_Lambda);
 		//status = status && FactorCalculation::eigen_bdcsvd(m_rf_centered, k, m_rf_E, v_rf_Lambda);
 		
-		status = status && write_txt_matrix(m_rf_E, "rf_vec.txt");
-		status = status && write_txt_vector(v_rf_Lambda, "rf_val.txt");
+		//status = status && write_csv_matrix(m_rf_E, "rf_vec.csv");
+		//status = status && write_csv_vector(v_rf_Lambda, "rf_val.csv");
 
 
+		//boost::numeric::ublas::vector<double> test{ read_csv_vector("v_rf_val.csv") };
+		//boost::numeric::ublas::matrix<double> test2{ read_csv_matrix("fHist.csv") };
 
 
 

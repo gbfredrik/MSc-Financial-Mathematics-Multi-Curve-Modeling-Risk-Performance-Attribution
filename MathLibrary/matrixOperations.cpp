@@ -103,11 +103,6 @@ matrix<double> matrixOperations::center_matrix(matrix<double> const& diff_matrix
 	for (size_t i = 0; i < diff_matrix.size1(); ++i) {
 		row(centered_matrix, i) = row(diff_matrix, i) - column_averages;
 	}
-	std::ofstream outf;
-	outf.open("./MSc Git/MScCurveModeling/Data/v_avgs.txt");
-
-	outf << column_averages;
-	outf.close();
 
 	return centered_matrix;
 }
