@@ -24,10 +24,10 @@ class bfgs {
 public:
 	static vector<double> minimize(vector<double> start, matrix<double> H_inv, int max_iter, float epsilon, Distribution* dist);
 
-	static Distribution dist;
+	//static Distribution dist;
 	static int function_type;
-	static vector<double> calcGradients(vector<double> x);
+	//static vector<double> calcGradients(vector<double> x);
 	static double calcStepSize(vector<double> x, vector<double> d, Distribution* dist);
-	static double f(vector<double> x);
+	//static double f(vector<double> x);
 	//static double rosenbrock(vector<double> x);
 };

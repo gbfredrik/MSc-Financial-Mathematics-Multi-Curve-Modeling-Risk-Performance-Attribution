@@ -16,8 +16,8 @@ vector<double> Gaussian::create_GARCH_vec(vector<double> x) {
 	garch_vec(0) = pow(time_series(0), 2); // datum växer med index
 
 
-	for (unsigned i = 1; i < garch_vec.size(); i++) {
-		garch_vec(i) = x(0) + x(1) * time_series(i - 1) + x(2) * garch_vec(i - 1);
+	for (size_t i = 1; i < garch_vec.size(); i++) {
+		garch_vec(i) = x(0) + x(1) * pow(time_series(i), 2) + x(2) * garch_vec(i - 1);
 	}
 
 
@@ -28,16 +28,16 @@ vector<double> Gaussian::create_GARCH_vec(vector<double> x) {
 double Gaussian::function_value(vector<double> x) {
 
 	GARCH_vec = create_GARCH_vec(x);
-
+	//std::cout << "\n Garchvec = " << GARCH_vec << std::endl;
 	
-	double sum = 1;
+	double sum = 0;
 
-	for (size_t i = 1; i < GARCH_vec.size() -1; ++i) {
-		sum += log(2 * boost::math::constants::pi<double>() * GARCH_vec(i)) + pow(time_series(i + 1),2) / (2 * GARCH_vec(i));
+	for (size_t i = 1; i < GARCH_vec.size() - 1; ++i) {
+		sum += log(2 * boost::math::constants::pi<double>() * GARCH_vec(i)) + pow(time_series(i + 1),2) / (GARCH_vec(i));
 
 	}
-	sum *= 0.5;
-
+	//sum *= 0.5;
+	sum = sum * 0.5;
 
 
 	return sum;
@@ -55,13 +55,13 @@ vector<double> Gaussian::calcGradients(vector<double> x) {
 	double da = 0;
 	double db = 0;
 
+	double temp{};
+	for (size_t i = 1; i < GARCH_vec.size()-1; i++) {
 	
-	for (unsigned i = 1; i < GARCH_vec.size(); i++) {
-	
-		double temp = (pow(time_series(i), 2) - GARCH_vec(i)) / (pow(GARCH_vec(i), 2));
+		temp = 0.5*(GARCH_vec(i) - pow(time_series(i+1), 2)) / (pow(GARCH_vec(i), 2));
 
 		dw = dw + temp;
-		da = da + temp * time_series(i - 1);
+		da = da + temp * pow(time_series(i), 2);
 		db = db + temp * GARCH_vec(i - 1);
 
 	}

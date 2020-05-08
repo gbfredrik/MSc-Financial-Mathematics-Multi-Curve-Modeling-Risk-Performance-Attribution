@@ -1,10 +1,5 @@
 #include "bfgs.h"
 
-int bfgs::function_type;
-
-vector<double> vec(1);
-Distribution bfgs::dist(vec);
-
 
 vector<double> bfgs::minimize(vector<double> x, matrix<double> H_inv, int max_iter, float epsilon, Distribution* dist) {
 
@@ -30,11 +25,21 @@ vector<double> bfgs::minimize(vector<double> x, matrix<double> H_inv, int max_it
 	
 	
 	while (norm_2(dist->calcGradients(x)) > epsilon && k < max_iter) {
-	//while ( k < max_iter) {
+		
+		if ((norm_2(dist->calcGradients(x)) > epsilon)) 
+		{
+			std::cout << "true \n";
+		}
+		else
+		{
+			std::cout << "false \n";
+		}
+		
+		
 		gradient_vec = dist->calcGradients(x);
 		std::cout << "H_inv: " << H_inv << "\n";
 		std::cout << "gradient_vec: " << gradient_vec << "\n \n";
-		d = prod(H_inv, gradient_vec);
+		d = -prod(H_inv, gradient_vec);
 		
 		alpha = calcStepSize(x, d, dist);
 		x_new = x + alpha * d;
@@ -43,12 +48,13 @@ vector<double> bfgs::minimize(vector<double> x, matrix<double> H_inv, int max_it
 		s = x_new - x;
 		l = 1 / inner_prod(y, s);
 		
-		help_prod = prod((I - l * outer_prod(y, s)), H_inv);
-		H_inv = prod(help_prod, (I - l * outer_prod(s, y))) + l * outer_prod(y, y);
+		help_prod = prod((I - l * outer_prod(s, y)), H_inv);
+		H_inv = prod(help_prod, (I - l * outer_prod(y, s))) + l * outer_prod(s, s);
 		x = x_new;
 		k = k + 1;
 		
-		std::cout << "k = " << k << " ,Function value = " << dist->function_value(x) << " for parameters : " << x << "\n \n";
+		std::cout << "k = " << k << " ,Function value = " << dist->function_value(x) << " for parameters : " << x  
+					<< " and norm of gradients = " << norm_2(dist->calcGradients(x)) << "\n";
 	}
 
 	
@@ -56,6 +62,31 @@ vector<double> bfgs::minimize(vector<double> x, matrix<double> H_inv, int max_it
 }
 
 
+double bfgs::calcStepSize(vector<double> x, vector<double> d, Distribution* dist) {
+
+	double a = 1;
+	double c1 = pow(10, -4);
+	double c2 = 0.9;
+
+
+	//while (dist->function_value(x + a * d) > dist->function_value(x) + c1 * a * inner_prod(dist->calcGradients(x), d)
+	while (dist->function_value(x + a * d) > dist->function_value(x))
+	{
+		std::cout << "new f : " << dist->function_value(x + a * d) << "\n";
+		std::cout << "old f : " << dist->function_value(x) << "\n";
+		std::cout << "steglängd = " << a << "\n";
+		std::cout << "new parameters2 = " << x(0) + a * d(0) << ", " << x(1) + a * d(1) << "\n";
+		a = a * 0.5;
+	}
+
+	std::cout << "new f : " << dist->function_value(x + a * d) << "\n";
+	std::cout << "old f : " << dist->function_value(x) << "\n";
+	std::cout << "steglängd = " << a << "\n \n";
+
+	return a;
+}
+
+/*
 
 double bfgs::calcStepSize(vector<double> x, vector<double> d, Distribution* dist) {
 
@@ -81,19 +112,25 @@ double bfgs::calcStepSize(vector<double> x, vector<double> d, Distribution* dist
 	while (dist->function_value(x + a * d) > dist->function_value(x))
 	{
 		std::cout << "new f : " << dist->function_value(x + a * d) << "\n";
-		std::cout << "old f : " << dist->function_value(x) + c1 * a * inner_prod(dist->calcGradients(x), d) << "\n";
+		std::cout << "old f : " << dist->function_value(x) << "\n";
 		std::cout << "steglängd = " << a << "\n";
+		std::cout << "new parameters2 = " << x(0) + a * d(0) << ", " << x(1) + a * d(1) << ", " << x(2) + a * d(2) << "\n";
 		a = a * 0.5;
 	}
 
 	std::cout << "new f : " << dist->function_value(x + a * d) << "\n";
-	std::cout << "old f : " << dist->function_value(x) + c1 * a * inner_prod(dist->calcGradients(x), d) << "\n";
+	std::cout << "old f : " << dist->function_value(x)  << "\n";
 	std::cout << "steglängd = " << a << "\n \n";
 
 	return a;
 }
 
+*/
 
+
+
+
+/*
 
 double bfgs::f(vector<double> params) {
 	double fun_value;
@@ -109,7 +146,7 @@ vector<double> bfgs::calcGradients(vector<double> x) {
 	return gradients;
 
 }
-
+*/
 /*
 double bfgs::f(vector<double> params) {
 	double fun_value;
