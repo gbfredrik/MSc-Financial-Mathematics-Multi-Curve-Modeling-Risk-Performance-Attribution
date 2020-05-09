@@ -4,6 +4,7 @@
 #include "unfGenGauss.h"
 #include "lhsd.h"
 #include "../MathLibrary/rvSim.h"
+#include "../MathLibrary/statisticsOperations.h"
 #include "mex.h"
 
 #include <boost/numeric/ublas/matrix.hpp>
@@ -14,7 +15,9 @@
 using namespace boost::numeric::ublas;
 
 
-void MultipleYieldSim::simMultipleFull(vector<matrix<double>> const& E, vector<double> const& fZero, matrix<double> const& pi, vector<double> const& kappa, matrix<double> const& xiHat, int d, int N, vector<matrix<double>>& fRes) {
+void MultipleYieldSim::simMultipleFull(vector<matrix<double>> const& E, vector<double> const& fZero, 
+	matrix<double> const& pi, vector<double> const& kappa, matrix<double> const& xiHat, vector<double> const& omega, 
+	vector<double> const& alpha, vector<double> const& beta, vector<matrix<double>> const& hist, int d, int N, vector<matrix<double>>& fRes) {
 	
 	/*
 		E: vector, eigenvector matrices
@@ -22,6 +25,10 @@ void MultipleYieldSim::simMultipleFull(vector<matrix<double>> const& E, vector<d
 		pi: matrix, basis spreads
 		kappa: vector, mean reversion speed parameter of each tau
 		xiHat: vector, long term averages of each tau
+		omega: vector, garch parameter								CHANGE TO MATRIX
+		alpha: vector, garch parameter                              CHANGE TO MATRIX
+		beta: vector, garch parameter								CHANGE TO MATRIX
+		hist: vector, curve data matrices
 		d: int, days ahead to simulate
 		N: int, number of simulations
 		fRes: vector, one matrix for each tenor	
@@ -33,37 +40,32 @@ void MultipleYieldSim::simMultipleFull(vector<matrix<double>> const& E, vector<d
 		k(i) = E(i).size2(); // Get number of risk factors for each tau
 	}
 	
-	/*
-	vector<matrix<double>> U; 
-	vector<matrix<double>> V;
-	vector<matrix<double>> eps;
+	vector<matrix<double>> U(M); 
+	vector<matrix<double>> V(M);
+	vector<matrix<double>> eps(M);
 	
+
+	/*
 		Set number the number of columns in the individual matrices
 		to the number of risk factors of that tenor
 	*/
-	/*
-	for (int i = 0; i < M; i++) { 
-		U(i)(N, k(i));
-		V(i)(N, k(i));
-		eps(i)(N, k(i));
-	}
-	*/
-	vector<matrix<double>> U(M, matrix<double>(6, N));
-	vector<matrix<double>> V(M, matrix<double>(6, N));
-	vector<matrix<double>> eps(M, matrix<double>(6, N));
-
-
-
-	//vector<double> sigma;
-	double sigma = 0.001;
 	
+	for (int i = 0; i < M; i++) { 
+		U(i) = matrix<double>(k(i), N);
+		V(i) = matrix<double>(k(i), N);
+		eps(i) = matrix<double>(k(i), N);
+	}
+	
+	vector<double> sigma(k(0)); // FIX FOR ARBITRARY NUMBER OF RISK FACTORS
+
 
 	for (int i = 0; i < d; i++) {
-		for (int j = 0; j < M; j++) {
-			U(j) = unfGenT::TC_sim(E(j), N); // Generate uniformly correlated random variables
+		for (int j = 0; j < M; j++) { // FIX, CHOOSE COPULA AS INPUT
+			U(j) = unfGenGauss::GC_sim(E(j), N); // Generate uniformly correlated random variables
 			V(j) = lhsd::lhsd_gen(U(j)); // Apply LHSD
-			//sigma(j) = garch::garch_gen(omega, alpha, gamma, beta); // Calculate scaling factor
-			eps(j) = rvSim::gen_eps(U(j), sigma, "normal");
+			
+			sigma = statisticsOperations::GARCH(omega, alpha, beta, E(j), hist(j)); // Calculate scaling factor
+			eps(j) = rvSim::gen_eps(V(j), sigma, "normal");
 		}
 		
 		if (i == 0){ // Simulate N curves the first day
@@ -78,8 +80,8 @@ void MultipleYieldSim::simMultipleFull(vector<matrix<double>> const& E, vector<d
 /*
 	Function to simulate one day ahead N times.
 */
-//void simMultipleDaily(vector<matrix<double>> const& E, vector<double> const& fZero, matrix<double> const& pi, vector<matrix<double>> const& eps, vector<double> const& kappa, matrix<double> xiHat, int M, int N, vector<matrix<double>> *fRes) {
-void MultipleYieldSim::simMultipleDaily(vector<matrix<double>> const& E, vector<double> const& fZero, matrix<double> const& pi, vector<matrix<double>> eps, int M, int N, vector<matrix<double>>& fRes) {
+void MultipleYieldSim::simMultipleDaily(vector<matrix<double>> const& E, vector<double> const& fZero, 
+	matrix<double> const& pi, vector<matrix<double>> const& eps, int M, int N, vector<matrix<double>>& fRes) {
 
 	for (int i = 0; i < N; i++) { // Simulate N times
 		for (int k = 0; k < M; k++) { // Iterate over each tenor curve

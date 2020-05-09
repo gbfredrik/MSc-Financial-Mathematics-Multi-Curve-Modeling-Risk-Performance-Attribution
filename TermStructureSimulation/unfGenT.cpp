@@ -20,12 +20,12 @@ matrix<double> unfGenT::TC_sim(matrix<double> const& E, int N) {
 	size_t m = E.size1();
 	size_t k = E.size2();
 	// Calculate the correlation matrix
-	matrix<double> corr(k, k);
-	corr = statisticsOperations::corrm(E);
+	matrix<double> cov(k, k);
+	cov = statisticsOperations::covm(E);
 
 	// Perform Cholesky decomposition
 	matrix<double> L(k, k);
-	L = matrixOperations::chol(corr);
+	L = matrixOperations::chol(cov);
 
 	// Generate i.i.d. standard normal random variables
 	matrix<double> X(k, N);

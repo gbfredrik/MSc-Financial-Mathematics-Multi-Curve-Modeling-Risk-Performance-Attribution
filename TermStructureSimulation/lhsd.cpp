@@ -17,15 +17,15 @@ matrix<double> lhsd::lhsd_gen(matrix<double> const& U) {
     matrix<double> V(k, N);
 
 	// Calculate rank statistic of U
-	for (int i = 0; i < N; i++) {
-		column(r, i) = rank(column(U, i));
+	for (int i = 0; i < k; i++) {
+		row(r, i) = rank(row(U, i));
 	}
 
 	
 
 	for (int i = 0; i < k; i++) {
 		for (int j = 0; j < N; j++) {
-			V(i, j) = (r(i, j) - 1 / 2) / (k + 1.0);
+			V(i, j) = (r(i, j) - 1 / 2) / (N + 1.0);
 		}
 	}
 
@@ -34,13 +34,13 @@ matrix<double> lhsd::lhsd_gen(matrix<double> const& U) {
 
 // Sort columns after rank
 vector<double> lhsd::rank(vector<double> const& U) {
-	size_t k = U.size();
-	vector<double> r(k);
-	vector<double> rowid(k);
+	size_t N = U.size();
+	vector<double> r(N);
+	vector<double> rowid(N);
 	
 	rowid = sort(U);
 
-	for (int i = 0; i < k; i++) {
+	for (int i = 0; i < N; i++) {
 		r(rowid(i)) = i + 1.0;
 	}
 

@@ -14,8 +14,8 @@ matrix<double> rvSim::gen_test(int rows, int cols) {
 	std::mt19937 mt(rd());
 	std::uniform_real_distribution<double> dist(1.0, 10.0);
 	matrix<double> test(rows, cols);
-	for (int i = 0; i < test.size1(); i++) {
-		for (int j = 0; j < test.size2(); j++) {
+	for (size_t i = 0; i < test.size1(); i++) {
+		for (size_t j = 0; j < test.size2(); j++) {
 			test(i, j) = dist(mt);
 		}
 	}
@@ -35,6 +35,7 @@ matrix<double> rvSim::gen_normal(double m, double s, int k, int N) {
 			rand(i, j) = dist(e2);
 		}
 	}
+	
 	return rand;
 }
 
@@ -75,19 +76,16 @@ double rvSim::gen_uniform(double l, double u) {
 	return distribution(generator);
 }
 
-matrix<double> rvSim::gen_eps(matrix<double> V, double sigma, std::string type) {
+matrix<double> rvSim::gen_eps(matrix<double> V, vector<double> sigma, std::string type) {
 	size_t m = V.size1();
 	size_t n = V.size2();
 
 	matrix<double> eps(m, n);
 	boost::math::normal norm(0.0, 1.0);
 	if (type == "normal") {
-		for (int i = 0; i < m; i++) {
-			for (int j = 0; j < n; j++) {
-				mexPrintf(" ");
-				mexPrintf("%g", V(i, j));
-				eps(i, j) = quantile(norm, V(i, j)) * sigma;
-				
+		for (size_t i = 0; i < m; i++) {
+			for (size_t j = 0; j < n; j++) {
+				eps(i, j) = quantile(norm, V(i, j)) * sigma(i);
 			}
 		}
 	}

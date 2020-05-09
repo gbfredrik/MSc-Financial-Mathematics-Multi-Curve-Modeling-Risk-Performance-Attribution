@@ -13,7 +13,7 @@ public:
 	static double gen_gamma(double a);
 	static double gen_normal(double m, double s);
 	static double gen_uniform(double l, double u);
-	static boost::numeric::ublas::matrix<double> gen_eps(boost::numeric::ublas::matrix<double> V, double sigma, std::string type);
+	static boost::numeric::ublas::matrix<double> gen_eps(boost::numeric::ublas::matrix<double> V, boost::numeric::ublas::vector<double> sigma, std::string type);
 };
 
 
