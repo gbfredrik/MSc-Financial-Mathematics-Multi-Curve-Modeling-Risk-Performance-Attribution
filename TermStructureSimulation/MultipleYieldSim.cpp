@@ -1,11 +1,12 @@
 #include "pch.h"
+#include "mex.h"
+
 #include "MultipleYieldSim.h"
-#include "unfGenT.h"
-#include "unfGenGauss.h"
-#include "lhsd.h"
+#include "unfGen.h"
+#include "varRed.h"
 #include "../MathLibrary/rvSim.h"
 #include "../MathLibrary/statisticsOperations.h"
-#include "mex.h"
+
 
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/matrix_proxy.hpp>
@@ -17,7 +18,8 @@ using namespace boost::numeric::ublas;
 
 void MultipleYieldSim::simMultipleFull(vector<matrix<double>> const& E, vector<double> const& fZero, 
 	matrix<double> const& pi, vector<double> const& kappa, matrix<double> const& xiHat, vector<double> const& omega, 
-	vector<double> const& alpha, vector<double> const& beta, vector<matrix<double>> const& hist, int d, int N, vector<matrix<double>>& fRes) {
+	vector<double> const& alpha, vector<double> const& beta, vector<matrix<double>> const& hist, vector<std::string> marginal,
+	vector<std::string> copula, vector<std::string> varRedType, matrix<double> const& mu, matrix<double> const& df, int d, int N, vector<matrix<double>>& fRes) {
 	
 	/*
 		E: vector, eigenvector matrices
@@ -29,14 +31,21 @@ void MultipleYieldSim::simMultipleFull(vector<matrix<double>> const& E, vector<d
 		alpha: vector, garch parameter                              CHANGE TO MATRIX
 		beta: vector, garch parameter								CHANGE TO MATRIX
 		hist: vector, curve data matrices
+		marginal: vector, marginal distributions used
+		copula: vector, copulas used
+		varRedType: vector, variance reduction type used
+		mu: matrix, mean value of risk factors
+		df: matrix, degrees of freedom for risk factors
 		d: int, days ahead to simulate
 		N: int, number of simulations
 		fRes: vector, one matrix for each tenor	
 	*/
 	
+
+
 	size_t M = E.size(); // Risk-free curve + number of tenor curves
 	vector<int> k(M);
-	for (int i = 0; i < M; i++) {
+	for (size_t i = 0; i < M; i++) {
 		k(i) = E(i).size2(); // Get number of risk factors for each tau
 	}
 	
@@ -50,22 +59,21 @@ void MultipleYieldSim::simMultipleFull(vector<matrix<double>> const& E, vector<d
 		to the number of risk factors of that tenor
 	*/
 	
-	for (int i = 0; i < M; i++) { 
+	for (size_t i = 0; i < M; i++) { 
 		U(i) = matrix<double>(k(i), N);
 		V(i) = matrix<double>(k(i), N);
 		eps(i) = matrix<double>(k(i), N);
 	}
 	
-	vector<double> sigma(k(0)); // FIX FOR ARBITRARY NUMBER OF RISK FACTORS
-
-
 	for (int i = 0; i < d; i++) {
-		for (int j = 0; j < M; j++) { // FIX, CHOOSE COPULA AS INPUT
-			U(j) = unfGenGauss::GC_sim(E(j), N); // Generate uniformly correlated random variables
-			V(j) = lhsd::lhsd_gen(U(j)); // Apply LHSD
+		for (size_t j = 0; j < M; j++) { 
+			U(j) = unfGen::genU(E(j), N, copula(j), column(df, j)); // Generate uniformly correlated random variables with desired copula
+			V(j) = varRed::redVariance(U(j), varRedType(j)); // Apply desired variance reduction
+
 			
+			vector<double> sigma(k(j)); // Set length of sigma depending on the number of risk factors
 			sigma = statisticsOperations::GARCH(omega, alpha, beta, E(j), hist(j)); // Calculate scaling factor
-			eps(j) = rvSim::gen_eps(V(j), sigma, "normal");
+			eps(j) = rvSim::genEps(V(j), E(j), sigma, marginal(j));
 		}
 		
 		if (i == 0){ // Simulate N curves the first day

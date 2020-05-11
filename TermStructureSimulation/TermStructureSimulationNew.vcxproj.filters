@@ -21,16 +21,13 @@
     <ClInclude Include="pch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="lhsd.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="unfGenGauss.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="unfGenT.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="MultipleYieldSim.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="unfGen.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="varRed.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -38,19 +35,16 @@
     <ClCompile Include="pch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="unfGenGauss.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="unfGenT.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="lhsd.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="MultipleYieldSim.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="simMultipleYield.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="unfGen.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="varRed.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -15,6 +15,9 @@ public:
 		boost::numeric::ublas::vector<double> const& kappa, boost::numeric::ublas::matrix<double> const& xiHat, 
 		boost::numeric::ublas::vector<double> const& omega, boost::numeric::ublas::vector<double> const& alpha,
 		boost::numeric::ublas::vector<double> const& beta, boost::numeric::ublas::vector<boost::numeric::ublas::matrix<double>> const& hist,
+		boost::numeric::ublas::vector<std::string> marginal, boost::numeric::ublas::vector<std::string> copula,
+		boost::numeric::ublas::vector<std::string> varRedType, boost::numeric::ublas::matrix<double> const& mu,
+		boost::numeric::ublas::matrix<double> const& df,
 		int d, int N, boost::numeric::ublas::vector<boost::numeric::ublas::matrix<double>>& fRes);
 };
 

@@ -2,7 +2,7 @@
 #include "mex.h"
 #include "MultipleYieldSim.h"
 #include <boost/numeric/ublas/matrix.hpp>
-
+#include <string>
 
 using namespace boost::numeric::ublas;
 
@@ -10,7 +10,9 @@ using namespace boost::numeric::ublas;
 void simConverter(double* EZeroMex, double* ETauMex, double* fZeroMex, double* piMex, 
 	double* kappaMex, double* xiHatMex, int d, double* fZeroResMex, double* 
 	fTauResMex, int m, int kZero, int kTau, int N, double* omegaMex, double* alphaMex,
-	double* betaMex, double* fHistMex, double* piHistMex, int days) {
+	double* betaMex, double* fHistMex, double* piHistMex, int days,
+	std::string marginalZeroMex, std::string marginalTauMex, std::string copulaZeroMex, std::string copulaTauMex,
+	std::string varRedTypeZeroMex, std::string varRedTypeTauMex, double* muMex, double* dfMex) {
 	
 
 	/*Create new variables corresponding to the funtion that is being tested*/
@@ -23,14 +25,18 @@ void simConverter(double* EZeroMex, double* ETauMex, double* fZeroMex, double* p
 	matrix<double> pi(m, 1);
 	vector<double> kappa(kZero);
 	matrix<double> xiHat(kZero, 2);
+	vector<std::string> marginal(2);
+	vector<std::string> copula(2);
+	vector<std::string> varRedType(2);
 	vector<matrix<double>> fRes(2, matrix<double>(m, N));
 	vector<matrix<double>> hist(2, matrix<double>(days, m));
 
 	vector<double> omega(kZero);
 	vector<double> beta(kZero);
 	vector<double> alpha(kZero);
-	
-	
+	matrix<double> mu(kZero, 2);
+	matrix<double> df(kZero, 2);
+
 	/*Convert input variables*/
 	for (int i = 0; i < m; i++) {
 		fZero(i) = fZeroMex[i];
@@ -50,7 +56,9 @@ void simConverter(double* EZeroMex, double* ETauMex, double* fZeroMex, double* p
 	
 	for (int i = 0; i < kZero; i++) {
 		for (int j = 0; j < 2; j++) {
-			xiHat(i, j) = xiHatMex[j + i * 2];
+			xiHat(i, j) = xiHatMex[i + j * kZero];
+			mu(i, j) = muMex[i + j * kZero];
+			df(i, j) = dfMex[i + j * kZero];
 		}
 	}
 
@@ -61,8 +69,6 @@ void simConverter(double* EZeroMex, double* ETauMex, double* fZeroMex, double* p
 		beta(i) = betaMex[i];
 	}
 
-
-
 	for (int j = 0; j < days; j++) {
 		for (int k = 0; k < m; k++) {
 			hist(0)(j, k) = fHistMex[j + k * days];
@@ -70,8 +76,18 @@ void simConverter(double* EZeroMex, double* ETauMex, double* fZeroMex, double* p
 		}
 	}
 
+	marginal(0) = marginalZeroMex;
+	marginal(1) = marginalZeroMex;
+	copula(0) = copulaZeroMex;
+	copula(1) = copulaTauMex;
+	varRedType(0) = varRedTypeZeroMex;
+	varRedType(1) = varRedTypeTauMex;
+
+
 	/*Call function*/
-	MultipleYieldSim::simMultipleFull(E, fZero, pi, kappa, xiHat, omega, alpha, beta, hist, d, N, fRes);
+	MultipleYieldSim::simMultipleFull(E, fZero, pi, kappa, xiHat, omega, 
+		alpha, beta, hist, marginal, copula, varRedType, 
+		mu, df, d, N, fRes);
 
 	/*Convert result*/
 	for (int i = 0; i < m; i++) {
@@ -90,17 +106,28 @@ void mexFunction(int nlhs, mxArray* plhs[],
 	int N = 0;
 
 	int d = 0;
-	double *EZero;			            
-	double *ETau;
-	double *fZero;
-	double *pi;
-	double *kappa;
-	double *xiHat;
-	double *omega;
-	double *alpha;
-	double *beta;
-	double *fHist;
-	double *piHist;
+	double* EZero;			            
+	double* ETau;
+	double* fZero;
+	double* pi;
+	double* kappa;
+	double* xiHat;
+	double* omega;
+	double* alpha;
+	double* beta;
+	double* fHist;
+	double* piHist;
+	double* mu;
+	double* df;
+
+
+	std::string marginalZero;
+	std::string copulaZero;
+	std::string varRedTypeZero;
+
+	std::string marginalTau;
+	std::string copulaTau;
+	std::string varRedTypeTau;
 
 	double *fZeroRes;
 	double *fTauRes;
@@ -109,6 +136,7 @@ void mexFunction(int nlhs, mxArray* plhs[],
 	int m = mxGetM(prhs[2]);
 	int kZero = mxGetN(prhs[2]);
 	int kTau = mxGetN(prhs[3]);
+
 
 	/* get the values of input scalars  */
 	d = mxGetScalar(prhs[0]);
@@ -126,6 +154,15 @@ void mexFunction(int nlhs, mxArray* plhs[],
 	beta = mxGetPr(prhs[10]);
 	fHist = mxGetPr(prhs[11]);
 	piHist = mxGetPr(prhs[12]);
+	mu = mxGetPr(prhs[13]);
+	df = mxGetPr(prhs[14]);
+
+	marginalZero = mxArrayToString(prhs[15]);
+	marginalTau = mxArrayToString(prhs[16]);
+	copulaZero = mxArrayToString(prhs[17]);
+	copulaTau = mxArrayToString(prhs[18]);
+	varRedTypeZero = mxArrayToString(prhs[19]);
+	varRedTypeTau = mxArrayToString(prhs[20]);
 
 	/* create the output matrix */	
 	plhs[0] = mxCreateDoubleMatrix(m, N, mxREAL);
@@ -138,6 +175,9 @@ void mexFunction(int nlhs, mxArray* plhs[],
 	
 	/* call the computational routine */
 	simConverter(EZero, ETau, fZero, pi, kappa, xiHat, d, fZeroRes, 
-		fTauRes, m, kZero, kTau, N, omega, alpha, beta, fHist, piHist, days);
+		fTauRes, m, kZero, kTau, N, omega, alpha, beta, fHist, piHist, days,
+		marginalZero, marginalTau, copulaZero, copulaTau,
+		varRedTypeZero, varRedTypeTau, mu, df);
 
 }
+

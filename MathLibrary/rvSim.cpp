@@ -1,13 +1,14 @@
 #include "pch.h"
 #include "mex.h"
 #include "rvSim.h"
-
+#include "../MathLibrary/statisticsOperations.h"
 #include <random>
 #include <boost/numeric/ublas/matrix.hpp>
-#include <boost/random/normal_distribution.hpp >
+#include <boost/random/normal_distribution.hpp>
+#include <boost/math/distributions/normal.hpp>
 
 using namespace boost::numeric::ublas;
-#include <boost/math/distributions/normal.hpp>
+
 
 matrix<double> rvSim::gen_test(int rows, int cols) {
 	std::random_device rd;
@@ -76,23 +77,32 @@ double rvSim::gen_uniform(double l, double u) {
 	return distribution(generator);
 }
 
-matrix<double> rvSim::gen_eps(matrix<double> V, vector<double> sigma, std::string type) {
+matrix<double> rvSim::genEps(matrix<double> V, matrix<double> E, vector<double> sigma, std::string type) {
 	size_t m = V.size1();
 	size_t n = V.size2();
 
+	matrix<double> cov(m, m);
+	cov = statisticsOperations::covm(E);
+
 	matrix<double> eps(m, n);
-	boost::math::normal norm(0.0, 1.0);
+
+
 	if (type == "normal") {
 		for (size_t i = 0; i < m; i++) {
 			for (size_t j = 0; j < n; j++) {
-				eps(i, j) = quantile(norm, V(i, j)) * sigma(i);
+				eps(i, j) = statisticsOperations::invCDFNorm(V(i, j), 0, sqrt(cov(i, i))) * sigma(i);
 			}
 		}
 	}
-	/*
 	else if (type == "t") {
-
+		for (size_t i = 0; i < m; i++) {
+			for (size_t j = 0; j < n; j++) {
+				eps(i, j) = statisticsOperations::invCDFT(V(i, j), 0, sqrt(cov(i, i)), 5) * sigma(i);
+			}
+		}
 	}
-	*/
+
+	
 	return eps;
 }
+

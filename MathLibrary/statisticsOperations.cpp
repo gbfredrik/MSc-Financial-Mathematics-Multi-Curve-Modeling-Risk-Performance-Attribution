@@ -5,7 +5,8 @@
 
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/matrix_proxy.hpp>
-
+#include <boost/math/distributions/normal.hpp>
+#include <boost/math/distributions/students_t.hpp>
 using namespace boost::numeric::ublas;
 
 
@@ -142,4 +143,28 @@ vector<double> statisticsOperations::GARCH(vector<double> omega, vector<double> 
 
 	return sigma;
 
+}
+
+double statisticsOperations::invCDFNorm(double u, double mu, double sigma) {
+	
+	double q = 0.0;
+	boost::math::normal norm(mu, sigma);
+	q = quantile(norm, u);
+
+	return q;
+
+}
+
+double statisticsOperations::invCDFT(double u, double mu, double sigma, double df) {
+	double q = 0.0;
+	boost::math::students_t t(df); 
+
+	mexPrintf("jappsi");
+
+	q = quantile(t, u);
+
+	return q;
+
+
+	
 }
