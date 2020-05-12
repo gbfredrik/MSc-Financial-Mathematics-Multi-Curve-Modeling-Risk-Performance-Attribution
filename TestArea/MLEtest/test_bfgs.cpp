@@ -2,22 +2,36 @@
 #include "../../ParameterEstimation/Distribution.h"
 #include "../../ParameterEstimation/Gaussian.h"
 
-vector<double > simulate_GARCH_process(int n);
+#include <boost/fusion/algorithm/transformation/push_back.hpp>
+#include <boost/fusion/include/push_back.hpp>
+
+#include <iostream>
+#include <vector>
+#include <string>
+#include <fstream>
+#include <strstream>
+#include <sstream>
+
+
+vector<float> read_time_series(std::string const& file_name);
+vector<double> get_GARCH_process();
+vector<double> simulate_GARCH_process(int n);
 
 int main() {
-
-	vector<double> start(3);
-	start(0) = 0.01;
-	start(1) = 0.03;
+	 
+	vector<double> start(4);
+	start(0) = 0.001;
+	start(1) = 0.05;
 	start(2) = 0.9;
+	start(3) = 0.05;
 	//start(0) = 5;
 	//start(1) = 5;
 	//start(2) = 0.95;
 
 	int max_iter = 100;
 	float epsilon = pow(10,-5);
-	matrix<double> H_inv(3, 3);
-	identity_matrix<double> I(3);
+	matrix<double> H_inv(4, 4);
+	identity_matrix<double> I(4);
 	H_inv = I;
 	
 	
@@ -25,15 +39,34 @@ int main() {
 	vec(0) = 0.5;
 	vec(1) = 0.5;
 	Distribution dist(vec);
-	Distribution* d = &dist;
+	Distribution* rosenbrock = &dist;
+	
+	vector<float> time_series;
 
-	vector<double> time_series = simulate_GARCH_process(10);
+	try {
+		//time_series = get_GARCH_process2();
+		time_series = read_time_series("aapl.csv");
+	}
+
+	catch (std::exception & ex) {
+		std::cout << "Error:" << ex.what() << "\n";
+		return 1;
+	}
+
+	std::cout << "timeseries = " << time_series << "\n";
+
+	vector<float> time_series2(1000);
+	for (size_t i = 0; i < time_series2.size(); ++i) {
+		time_series2(i) = time_series(i);
+	}
+
+
 
 	Gaussian dist2(time_series);
 
 	Gaussian* gaussian = &dist2;
 
-	std::cout << "\nstartit = " << start << "\n";
+	std::cout << "\n startit = " << start << "\n";
 
 
 	std::cout << "Funktionsvärde startparametrar : " << gaussian->function_value(start) << "\n";
@@ -42,7 +75,7 @@ int main() {
 	theta(0) = 0.02;
 	theta(1) = 0.04;
 	theta(2) = 0.95;
-	std::cout << "Optimalt funktionsvärde : " << gaussian->function_value(theta) << "\n\n";
+	//std::cout << "Optimalt funktionsvärde : " << gaussian->function_value(theta) << "\n\n";
 
 	vector<double> opt_parameters = bfgs::minimize(start, H_inv, max_iter, epsilon, gaussian);
 
@@ -51,6 +84,106 @@ int main() {
 
 
 }
+
+vector<float> read_time_series(std::string const& file_name) {
+
+	std::fstream fin;
+	std::string line;
+	std::string value_string;
+	float value = 0;
+
+	fin.open(file_name, std::ios::in);
+
+	if (!fin) {
+		throw std::runtime_error("Could not open file");
+	}
+
+	vector<float> series(7981);
+	int date;
+	int k = 0;
+
+
+	while (getline(fin, line)) {
+
+		std::stringstream s(line);
+
+		//Get value
+		getline(s, value_string, '\n');
+		const char* decimal = value_string.c_str();  // String to const char
+		value = std::atof(decimal); // const char to float.
+		//entry.second = value;
+
+		//series(k) = value;
+		series(series.size() - 1 - k) = value;
+		k = k + 1;
+	}
+
+	fin.close();
+
+	vector<double> log_returns(series.size() - 1);
+	for (int i = 0; i < series.size() - 1; ++i) {
+		log_returns(i) = log(series(i + 1) / series(i));
+	}
+
+
+	return log_returns;
+}
+
+
+
+
+vector<double > get_GARCH_process() {
+
+	std::fstream fin;
+	std::string line;
+	std::string value_string;
+	float value = 0;
+
+	fin.open("MLE_Data.csv", std::ios::in);
+
+	if (!fin) {
+		throw std::runtime_error("Could not open file");
+	}
+	//7981
+	vector<double> values(10);
+
+
+
+
+	//while (getline(fin, line)) {
+	for (int i = 0; i< 10;++i) {
+		(getline(fin, line));
+		std::cout << "string read : " << line << "\n";
+
+		std::stringstream s(line);
+
+		getline(s, value_string, '\n');
+		std::cout << "string read : " << value_string << "\n";
+		const char* decimal = value_string.c_str();  // String to const char
+		value = std::atof(decimal); // const char to float.
+		//values.push_back(value);
+		values(values.size()-1-i) = value;
+	}
+
+	fin.close(); 
+
+
+	
+	vector<double> log_returns(values.size() - 1);
+		for (int i = 0; i < values.size()-1; ++i) {
+			log_returns(i) = log(values(i+1)/values(i));
+		}
+
+	
+
+	vector<double> temp(2);
+	temp(0) = 1;
+	temp(1) = 2;
+	return log_returns;
+}
+
+
+
 
 
 vector<double > simulate_GARCH_process(int n) {

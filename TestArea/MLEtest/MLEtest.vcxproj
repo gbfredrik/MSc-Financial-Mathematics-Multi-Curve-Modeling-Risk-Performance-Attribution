@@ -135,6 +135,9 @@
       <Project>{01b4bc4d-ad93-4b95-b059-8a7d3e2d143d}</Project>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\MLE_Data.csv" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

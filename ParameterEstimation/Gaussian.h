@@ -29,4 +29,9 @@ public:
 
 private:
 	vector<double> GARCH_vec;
+
+	vector<double> derivative_w(vector<double> x, vector<double> GARCH_vec);
+	vector<double> derivative_a(vector<double> x, vector<double> GARCH_vec);
+	vector<double> derivative_b(vector<double> x, vector<double> GARCH_vec);
+
 };
