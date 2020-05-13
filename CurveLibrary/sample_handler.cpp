@@ -60,18 +60,25 @@ ublas::matrix<double> read_csv_matrix(std::string const& file_name) {
 	int rows{ 0 };
 	int cols{ 0 };
 	char delim;
-	inf >> rows >> delim >> cols;
+	inf >> rows >> delim >> cols >> delim;
 	ublas::matrix<double> m(rows, cols);
 	
+	std::string line;
+	std::string val;
 	for (int i = 0; i < rows; ++i) {
+		getline(inf, line);
+		std::stringstream s(line);
+
 		for (int j = 0; j < cols; ++j) {
-			inf >> m(i, j);
-			inf >> delim;
+			getline(s, val, ';');
+			m(i, j) = std::stod(val);
+			//inf >> m(i, j);
+			//inf >> delim;
 		}
 	}
 
 	inf.close();
-	return ublas::matrix<double>();
+	return m;
 }
 
 ublas::vector<double> read_csv_vector(std::string const& file_name) {
@@ -89,12 +96,12 @@ ublas::vector<double> read_csv_vector(std::string const& file_name) {
 	}
 
 	inf.close();
-	return ublas::vector<double>();
+	return v;
 }
 
 bool write_csv_matrix(ublas::matrix<double> const& m, std::string const& file_name) {
 	std::ofstream outf;
-	outf.open("./MSc Git/MScCurveModeling/Data/v_" + file_name); // Appending "m_" to prevent accidental overwriting of important files
+	outf.open("./MSc Git/MScCurveModeling/Data/m_" + file_name); // Appending "m_" to prevent accidental overwriting of important files
 
 	outf << m.size1() << ";" << m.size2() << std::endl;
 

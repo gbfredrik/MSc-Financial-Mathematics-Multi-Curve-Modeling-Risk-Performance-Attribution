@@ -60,7 +60,7 @@ BOOL __stdcall run_all_multiXL(BOOL const compute_curves/*, ...*/) {
 			}
 		} else { // Read
 			m_forward_curves_rf = read_csv_matrix("fHist.csv");
-			//m_forward_curves_tenor = read_csv_matrix("piHist.csv");
+			m_forward_curves_tenor = read_csv_matrix("piHist.csv");
 		}
 
 		boost::numeric::ublas::matrix<double> m_diff{ matrixOperations::diff_matrix(m_forward_curves_rf) };
@@ -71,10 +71,10 @@ BOOL __stdcall run_all_multiXL(BOOL const compute_curves/*, ...*/) {
 		boost::numeric::ublas::vector<double> v_rf_Lambda(k);
 
 		//status = status && FactorCalculation::iram(m_rf_centered / std::sqrt(m_rf_centered.size1() - 1), k, m_rf_E, v_rf_Lambda);
-		//status = status && FactorCalculation::eigen_bdcsvd(m_rf_centered, k, m_rf_E, v_rf_Lambda);
+		status = status && FactorCalculation::eigen_bdcsvd(m_rf_centered, k, m_rf_E, v_rf_Lambda);
 		
-		//status = status && write_csv_matrix(m_rf_E, "rf_vec.csv");
-		//status = status && write_csv_vector(v_rf_Lambda, "rf_val.csv");
+		status = status && write_csv_matrix(m_rf_E, "rf_vec.csv");
+		status = status && write_csv_vector(v_rf_Lambda, "rf_val.csv");
 
 
 		//boost::numeric::ublas::vector<double> test{ read_csv_vector("v_rf_val.csv") };

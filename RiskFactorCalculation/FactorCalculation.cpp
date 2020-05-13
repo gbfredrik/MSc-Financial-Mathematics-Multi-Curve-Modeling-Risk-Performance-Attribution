@@ -57,9 +57,10 @@ bool FactorCalculation::eigen_bdcsvd(boost::numeric::ublas::matrix<double> const
 	// Utilizes BDCSVD from Eigen library
 	int svd_opt = Eigen::ComputeThinU | Eigen::ComputeThinV;
 
-	Eigen::MatrixXd H = matrixOperations::ublasToMatrixXd(input);	//FullPivHouseholderQR<Matrix<double, Dynamic, Size>> fpqr(A.rows(), A.cols());
+	Eigen::MatrixXd H = matrixOperations::ublasToMatrixXd(input);	
 	if (H.rows() < H.cols()) {
-		Eigen::HouseholderQR<Eigen::MatrixXd> qr(H.transpose());
+		Eigen::HouseholderQR<Eigen::MatrixXd> qr(H.transpose());//FullPivHouseholderQR<Matrix<double, Dynamic, Size>> fpqr(A.rows(), A.cols());
+	
 		Eigen::MatrixXd thinQ(Eigen::MatrixXd::Identity(H.cols(), H.rows()));
 		thinQ = qr.householderQ() * thinQ;
 		Eigen::MatrixXd RTR = qr.matrixQR().transpose() * qr.matrixQR();
