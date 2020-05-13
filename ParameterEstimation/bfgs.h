@@ -22,12 +22,12 @@ using namespace boost::numeric::ublas;
 
 class bfgs {
 public:
-	static vector<double> minimize(vector<double> start, matrix<double> H_inv, int max_iter, float epsilon, Distribution* dist);
+	static vector<double> minimize(vector<double> start, matrix<double> H_inv, int max_iter, float epsilon, Distribution* dist, double dt);
 
 	//static Distribution dist;
-	static int function_type;
+	//static int function_type;
 	//static vector<double> calcGradients(vector<double> x);
-	static double calcStepSize(vector<double> x, vector<double> d, Distribution* dist);
+	//static double calcStepSize(vector<double> x, vector<double> d, Distribution* dist);
 	//static double f(vector<double> x);
 	//static double rosenbrock(vector<double> x);
 };

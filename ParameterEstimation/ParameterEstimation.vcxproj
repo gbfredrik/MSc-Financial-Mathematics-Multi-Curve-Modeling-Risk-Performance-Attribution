@@ -127,11 +127,13 @@
     <ClInclude Include="bfgs.h" />
     <ClInclude Include="Distribution.h" />
     <ClInclude Include="Gaussian.h" />
+    <ClInclude Include="Student_t.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="bfgs.cpp" />
     <ClCompile Include="Distribution.cpp" />
     <ClCompile Include="Gaussian.cpp" />
+    <ClCompile Include="Student_t.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

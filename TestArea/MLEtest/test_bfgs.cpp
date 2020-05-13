@@ -12,28 +12,33 @@
 #include <strstream>
 #include <sstream>
 
+matrix<float> read_matrix(std::string const& file_name, int rows, int columns);
+matrix<float> delta_curves(matrix<float> curves);
+vector<float> read_time_series_test(std::string const& file_name);
 
-vector<float> read_time_series(std::string const& file_name);
-vector<double> get_GARCH_process();
-vector<double> simulate_GARCH_process(int n);
 
 int main() {
 	 
 	vector<double> start(4);
+	//omega
 	start(0) = 0.001;
+	//alpha
 	start(1) = 0.05;
+	//beta
 	start(2) = 0.9;
+	//väntevärde
 	start(3) = 0.05;
-	//start(0) = 5;
-	//start(1) = 5;
-	//start(2) = 0.95;
+
 
 	int max_iter = 100;
 	float epsilon = pow(10,-5);
+	double dt = 1 / 252.00;
 	matrix<double> H_inv(4, 4);
 	identity_matrix<double> I(4);
 	H_inv = I;
-	
+	vector<float> time_series;
+	matrix<float> hist_rf;
+	matrix<float> E_rf;
 	
 	vector<double> vec(2);
 	vec(0) = 0.5;
@@ -41,11 +46,11 @@ int main() {
 	Distribution dist(vec);
 	Distribution* rosenbrock = &dist;
 	
-	vector<float> time_series;
+	std::cout << "dt = " << dt << "\n";
 
 	try {
-		//time_series = get_GARCH_process2();
-		time_series = read_time_series("aapl.csv");
+		//Senaste kurvan sist
+		time_series = read_time_series_test("aapl.csv");
 	}
 
 	catch (std::exception & ex) {
@@ -53,31 +58,46 @@ int main() {
 		return 1;
 	}
 
-	std::cout << "timeseries = " << time_series << "\n";
-
-	vector<float> time_series2(1000);
-	for (size_t i = 0; i < time_series2.size(); ++i) {
-		time_series2(i) = time_series(i);
+	//Läs in riskfria kurvan
+	try {
+		//Senaste kurvan sist
+		hist_rf = read_matrix("fHist.csv", 3451, 730);
 	}
 
+	catch (std::exception & ex) {
+		std::cout << "Error:" << ex.what() << "\n";
+		return 1;
+	}
+	// Beräkna delta f på riskfria kurvan.
+	matrix<float> delta_f = delta_curves(hist_rf);
+
+	//Läs in egenmatrisen för riskfria kurvan
+	try {
+		//Senaste kurvan sist
+		E_rf = read_matrix("EZero.csv", 730, 3);
+	}
+
+	catch (std::exception & ex) {
+		std::cout << "Error:" << ex.what() << "\n";
+		return 1;
+	}
+	//std::cout << "delta_f = " << trans(delta_f) << "\n \n";
+
+	matrix<float> hist_risk_faktors = prod(trans(E_rf), trans(delta_f));
+
+	matrix_row<matrix<float> > xi1(hist_risk_faktors, 0);
+	matrix_row<matrix<float> > xi2(hist_risk_faktors, 1);
+	matrix_row<matrix<float> > xi3(hist_risk_faktors, 2);
 
 
-	Gaussian dist2(time_series);
-
+	Gaussian dist2(xi3);
 	Gaussian* gaussian = &dist2;
 
-	std::cout << "\n startit = " << start << "\n";
+
+	//std::cout << "Funktionsvärde startparametrar : " << gaussian->function_value(start, dt) << "\n";
 
 
-	std::cout << "Funktionsvärde startparametrar : " << gaussian->function_value(start) << "\n";
-
-	vector<double> theta(3);
-	theta(0) = 0.02;
-	theta(1) = 0.04;
-	theta(2) = 0.95;
-	//std::cout << "Optimalt funktionsvärde : " << gaussian->function_value(theta) << "\n\n";
-
-	vector<double> opt_parameters = bfgs::minimize(start, H_inv, max_iter, epsilon, gaussian);
+	vector<double> opt_parameters = bfgs::minimize(start, H_inv, max_iter, epsilon, gaussian,dt);
 
 	//std::cout << opt_parameters;
 
@@ -85,7 +105,7 @@ int main() {
 
 }
 
-vector<float> read_time_series(std::string const& file_name) {
+vector<float> read_time_series_test(std::string const& file_name) {
 
 	std::fstream fin;
 	std::string line;
@@ -111,7 +131,7 @@ vector<float> read_time_series(std::string const& file_name) {
 		getline(s, value_string, '\n');
 		const char* decimal = value_string.c_str();  // String to const char
 		value = std::atof(decimal); // const char to float.
-		//entry.second = value;
+
 
 		//series(k) = value;
 		series(series.size() - 1 - k) = value;
@@ -130,141 +150,58 @@ vector<float> read_time_series(std::string const& file_name) {
 }
 
 
-
-
-vector<double > get_GARCH_process() {
+matrix<float> read_matrix(std::string const& file_name, int rows, int columns) {
 
 	std::fstream fin;
 	std::string line;
 	std::string value_string;
 	float value = 0;
+	matrix<float> matrix(rows, columns);
+	
 
-	fin.open("MLE_Data.csv", std::ios::in);
+	fin.open(file_name, std::ios::in);
 
+	//Read curves from file
+	//One row is one curve. Number of columns is number of discretization points
 	if (!fin) {
 		throw std::runtime_error("Could not open file");
 	}
-	//7981
-	vector<double> values(10);
 
-
-
-
-	//while (getline(fin, line)) {
-	for (int i = 0; i< 10;++i) {
-		(getline(fin, line));
-		std::cout << "string read : " << line << "\n";
+	for (size_t i = 0; i < matrix.size1(); ++i) {
+	getline(fin, line);
 
 		std::stringstream s(line);
 
-		getline(s, value_string, '\n');
-		std::cout << "string read : " << value_string << "\n";
-		const char* decimal = value_string.c_str();  // String to const char
-		value = std::atof(decimal); // const char to float.
-		//values.push_back(value);
-		values(values.size()-1-i) = value;
-	}
-
-	fin.close(); 
-
-
-	
-	vector<double> log_returns(values.size() - 1);
-		for (int i = 0; i < values.size()-1; ++i) {
-			log_returns(i) = log(values(i+1)/values(i));
+		for (size_t j = 0; j < matrix.size2(); ++j) {
+			(getline(s, value_string, ','));
+			const char* decimal = value_string.c_str();  // String to const char
+			value = std::atof(decimal); // const char to float.
+			matrix(i,j) = value;
 		}
+		
+	}
 
-	
 
-	vector<double> temp(2);
-	temp(0) = 1;
-	temp(1) = 2;
-	return log_returns;
+	fin.close();
+
+	//matrix_row<matrix<float> > mr(delta_f, 0);
+
+	return matrix;
+}
+
+matrix<float> delta_curves(matrix<float> curves) {
+	//Calculate delta of curves from the curves matrix
+
+	matrix<float> delta_f(curves.size1() - 1, curves.size2());
+
+	for (size_t i = 0; i < delta_f.size1(); ++i) {
+
+		for (size_t j = 0; j < delta_f.size2(); ++j) {
+			delta_f(i, j) = curves(i + 1, j) - curves(i, j);
+		}
+	}
+
+	return delta_f;
 }
 
 
-
-
-
-vector<double > simulate_GARCH_process(int n) {
-	
-	vector<double> normals(n);
-	/*
-	//boost::mt19937 rng; // I don't seed it on purpouse (it's not relevant)
-	typedef boost::mt19937 base_generator_type;
-
-	base_generator_type generator(42u);
-	
-
-
-	boost::normal_distribution<> nd(0.0, 1.0);
-
-	boost::variate_generator<boost::mt19937&,
-	boost::normal_distribution<> > var_nor(generator, nd);
-
-	for (	int i = 0; i < n; ++i)
-	{
-		normals(i) = var_nor();
-		//generator.seed(static_cast<unsigned int>(std::time(0)));
-	}
-
-	*/
-
-	normals(0) = 1;
-	normals(1) = 1;
-	normals(2) = 1;
-	normals(3) = 1;
-	normals(4) = 1;
-	normals(5) = 1;
-	normals(6) = 1;
-	normals(7) = 1;
-	normals(8) = 1;
-	normals(9) = 1;
-	//normals(0) = -0.532011376808821;
-	//normals(1) = 1.68210359466318;
-	//normals(2) = -0.875729346160017;
-	//normals(3) = -0.483815050110121;
-	//normals(4) = -0.712004549027423;
-	//normals(5) = -1.17421233145682;
-	//normals(6) = -0.192239517539275;
-	//normals(7) = -0.274070229932602;
-	//normals(8) = 1.53007251442410;
-	//normals(9) = -0.249024742513714;
-
-	double w = 0.02;
-	double alpha = 0.04;
-	double beta = 0.95;
-
-	vector<double> nu(n);
-
-	nu(0) = pow(normals(0), 2);
-
-	for (int i = 1; i < n; ++i) {
-		nu(i) = w + alpha * nu(i - 1) * pow(normals(i), 2) + beta * nu(i - 1);
-	}
-
-	std::cout << "In garch normals: " << normals << "\n";
-	std::cout << "In garch nu: " << nu << "\n";
-
-	
-	vector<double> process(n - 1);
-	for (int i = 0; i < n - 1; ++i) {
-
-		process(i) = sqrt(nu(i)) * normals(i + 1);
-	}
-
-	std::cout << "In garch process: " << process << "\n";
-	
-	/**
-	for (int i = 0; i < n; i++) {
-
-		garch(i) = sqrt(nu(i));
-	}
-	*/
-	
-	//vector<double> process = element_prod(nu, normals);
-
-	std::cout << process;
-
-	return process;
-}

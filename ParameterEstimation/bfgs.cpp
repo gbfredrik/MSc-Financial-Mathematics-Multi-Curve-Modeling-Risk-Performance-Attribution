@@ -1,7 +1,7 @@
 #include "bfgs.h"
 
 
-vector<double> bfgs::minimize(vector<double> x, matrix<double> H_inv, int max_iter, float epsilon, Distribution* dist) {
+vector<double> bfgs::minimize(vector<double> x, matrix<double> H_inv, int max_iter, float epsilon, Distribution* dist, double dt) {
 
 	std::cout << "in minimize: ";
 	dist->getSeries();
@@ -23,17 +23,17 @@ vector<double> bfgs::minimize(vector<double> x, matrix<double> H_inv, int max_it
 	
 	
 	
-	while (norm_2(dist->calcGradients(x)) > epsilon && k < max_iter) {
+	while (norm_2(dist->calcGradients(x, dt)) > epsilon && k < max_iter) {
 
-		gradient_vec = dist->calcGradients(x);
+		gradient_vec = dist->calcGradients(x, dt);
 		std::cout << "H_inv: " << H_inv << "\n";
 		std::cout << "gradient_vec: " << gradient_vec << "\n \n";
 		d = -prod(H_inv, gradient_vec);
 		
-		alpha = dist->calcStepSize(x, d);
+		alpha = dist->calcStepSize(x, d, dt);
 		x_new = x + alpha * d;
 		
-		y = dist->calcGradients(x_new) - dist->calcGradients(x);
+		y = dist->calcGradients(x_new, dt) - dist->calcGradients(x, dt);
 		s = x_new - x;
 		l = 1 / inner_prod(y, s);
 		
@@ -42,8 +42,8 @@ vector<double> bfgs::minimize(vector<double> x, matrix<double> H_inv, int max_it
 		x = x_new;
 		k = k + 1;
 		
-		std::cout << "k = " << k << " ,Function value = " << dist->function_value(x) << " for parameters : " << x  
-					<< " and norm of gradients = " << norm_2(dist->calcGradients(x)) << "\n";
+		std::cout << "k = " << k << " ,Function value = " << dist->function_value(x, dt) << " for parameters : " << x  
+					<< " and norm of gradients = " << norm_2(dist->calcGradients(x, dt)) << "\n";
 	}
 
 	

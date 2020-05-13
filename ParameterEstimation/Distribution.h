@@ -20,10 +20,10 @@ class Distribution {
 public:
 	Distribution(vector<double> time_series);
 	vector<double> time_series;
-	virtual vector<double> calcGradients(vector<double> x);
-	virtual double function_value(vector<double> x);
+	virtual vector<double> calcGradients(vector<double> x, double dt);
+	virtual double function_value(vector<double>, double dt);
 	virtual void getSeries();
-	virtual double calcStepSize(vector<double> x, vector<double> d);
+	virtual double calcStepSize(vector<double> x, vector<double> d, double dt);
 	~Distribution(void);
 	
 

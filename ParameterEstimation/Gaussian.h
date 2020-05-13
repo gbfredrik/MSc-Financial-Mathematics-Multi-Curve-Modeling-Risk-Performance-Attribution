@@ -21,17 +21,17 @@ using namespace boost::numeric::ublas;
 class Gaussian : public Distribution {
 public: 
 	Gaussian(vector<double> series);
-	vector<double> create_GARCH_vec(vector<double> x);
-	double function_value(vector<double> x);
-	vector<double> calcGradients(vector<double> x);
+	vector<double> create_GARCH_vec(vector<double> x, double dt);
+	double function_value(vector<double> x, double dt);
+	vector<double> calcGradients(vector<double> x, double dt);
 	void getSeries();
-	double calcStepSize(vector<double> x, vector<double> d);
+	double calcStepSize(vector<double> x, vector<double> d, double dt);
 
 private:
 	vector<double> GARCH_vec;
 
-	vector<double> derivative_w(vector<double> x, vector<double> GARCH_vec);
-	vector<double> derivative_a(vector<double> x, vector<double> GARCH_vec);
-	vector<double> derivative_b(vector<double> x, vector<double> GARCH_vec);
+	vector<double> derivative_w(vector<double> x, vector<double> GARCH_vec, double dt);
+	vector<double> derivative_a(vector<double> x, vector<double> GARCH_vec, double dt);
+	vector<double> derivative_b(vector<double> x, vector<double> GARCH_vec, double dt);
 
 };

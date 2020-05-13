@@ -10,7 +10,7 @@ void Gaussian::getSeries() {
 	std::cout << "In gaussian: " << time_series << "\n";
 }
 
-vector<double> Gaussian::create_GARCH_vec(vector<double> x) {
+vector<double> Gaussian::create_GARCH_vec(vector<double> x, double dt) {
 	vector<double> garch_vec(time_series.size()+1);
 
 	//garch_vec(0) = pow(time_series(0), 2); // datum växer med index
@@ -24,9 +24,9 @@ vector<double> Gaussian::create_GARCH_vec(vector<double> x) {
 	return garch_vec;
 }
 
-double Gaussian::function_value(vector<double> x) {
+double Gaussian::function_value(vector<double> x, double dt) {
 
-	GARCH_vec = create_GARCH_vec(x);
+	GARCH_vec = create_GARCH_vec(x, dt);
 
 	
 	double sum = 0;
@@ -43,7 +43,7 @@ double Gaussian::function_value(vector<double> x) {
 }
 
 
-vector<double> Gaussian::derivative_w(vector<double> x, vector<double> GARCH_vec) {
+vector<double> Gaussian::derivative_w(vector<double> x, vector<double> GARCH_vec, double dt) {
 	vector<double> inner_dw(time_series.size());
 
 	inner_dw(0) = 0;
@@ -55,19 +55,19 @@ vector<double> Gaussian::derivative_w(vector<double> x, vector<double> GARCH_vec
 	return inner_dw;
 }
 
-vector<double> Gaussian::derivative_a(vector<double> x, vector<double> GARCH_vec) {
+vector<double> Gaussian::derivative_a(vector<double> x, vector<double> GARCH_vec, double dt) {
 	vector<double> inner_da(time_series.size());
 
 	inner_da(0) = 0;
 
 	for (size_t i = 1; i < inner_da.size(); ++i) {
-		inner_da(i) = pow(time_series(i - 1), 2) * 252 + x(2) * inner_da(i - 1);
+		inner_da(i) = pow(time_series(i - 1), 2)*252 + x(2) * inner_da(i - 1);
 	}
 
 	return inner_da;
 }
 
-vector<double> Gaussian::derivative_b(vector<double> x, vector<double> GARCH_vec) {
+vector<double> Gaussian::derivative_b(vector<double> x, vector<double> GARCH_vec, double dt) {
 	vector<double> inner_db(time_series.size());
 
 	inner_db(0) = 0;
@@ -80,25 +80,25 @@ vector<double> Gaussian::derivative_b(vector<double> x, vector<double> GARCH_vec
 }
 
 
-vector<double> Gaussian::calcGradients(vector<double> x) {
+vector<double> Gaussian::calcGradients(vector<double> x, double dt) {
 
-	GARCH_vec = create_GARCH_vec(x);
+	GARCH_vec = create_GARCH_vec(x, dt);
 	
 	double dw = 0;
 	double da = 0;
 	double db = 0;
 	double dmu = 0;
 
-	vector<double> inner_w  = derivative_w(x, GARCH_vec);
-	vector<double> inner_a = derivative_a(x, GARCH_vec);
-	vector<double> inner_b = derivative_b(x, GARCH_vec);
+	vector<double> inner_w  = derivative_w(x, GARCH_vec, dt);
+	vector<double> inner_a = derivative_a(x, GARCH_vec, dt);
+	vector<double> inner_b = derivative_b(x, GARCH_vec, dt);
 
 	double temp{};
 	for (size_t i = 0; i < GARCH_vec.size()-1; i++) {
 	
 		temp = 0.5*(GARCH_vec(i) - pow(time_series(i)-x(3)/252, 2)*252) / (pow(GARCH_vec(i), 2));
 
-		dmu = dmu - 2 * (time_series(i) - x(3) / 252) / GARCH_vec(i);
+		dmu = dmu - 2 * (time_series(i) - x(3)/252) / GARCH_vec(i);
 
 		dw = dw + temp * inner_w(i);
 		da = da + temp * inner_a(i);
@@ -136,7 +136,7 @@ vector<double> Gaussian::calcGradients(vector<double> x) {
 	return gradients;
 }
 
-double Gaussian::calcStepSize(vector<double> x, vector<double> d) {
+double Gaussian::calcStepSize(vector<double> x, vector<double> d, double dt) {
 
 	double a = 1;
 	double c1 = pow(10, -4);
@@ -156,18 +156,18 @@ double Gaussian::calcStepSize(vector<double> x, vector<double> d) {
 
 
 
-	while (function_value(x + a * d) > function_value(x) + c1 * a * inner_prod(calcGradients(x), d))
+	while (function_value(x + a * d, dt) > function_value(x, dt) + c1 * a * inner_prod(calcGradients(x, dt), d))
 	//while (function_value(x + a * d) > function_value(x))
 	{
-		std::cout << "new f : " << function_value(x + a * d) << "\n";
-		std::cout << "old f : " << function_value(x) << "\n";
+		std::cout << "new f : " << function_value(x + a * d, dt) << "\n";
+		std::cout << "old f : " << function_value(x, dt) << "\n";
 		std::cout << "steglängd = " << a << "\n";
 		std::cout << "new parameters2 = " << x(0) + a * d(0) << ", " << x(1) + a * d(1) << ", " << x(2) + a * d(2) << x(3) + a * d(3) << "\n";
 		a = a * 0.5;
 	}
 
-	std::cout << "new f : " << function_value(x + a * d) << "\n";
-	std::cout << "old f : " << function_value(x) << "\n";
+	std::cout << "new f : " << function_value(x + a * d, dt) << "\n";
+	std::cout << "old f : " << function_value(x, dt) << "\n";
 	std::cout << "steglängd = " << a << "\n \n";
 
 	return a;
