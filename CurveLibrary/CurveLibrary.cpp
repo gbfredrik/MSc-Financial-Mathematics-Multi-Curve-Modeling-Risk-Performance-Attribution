@@ -10,6 +10,11 @@
 #include "../RiskFactorCalculation/FactorCalculation.h"
 
 #include <boost/numeric/ublas/matrix.hpp>
+#include <boost/numeric/ublas/matrix_proxy.hpp>
+
+#include <algorithm>
+
+using namespace boost::numeric;
 
 LONG __stdcall squareXL(int x, int &y) {
 #pragma EXPORT
@@ -24,8 +29,8 @@ BOOL __stdcall ir_measurement_multiXL(BOOL const save_curves) {
 	bool status{ 0 };
 
 	try	{
-		boost::numeric::ublas::matrix<double> m_forward_curves_rf;
-		boost::numeric::ublas::matrix<double> m_forward_curves_tenor;
+		ublas::matrix<double> m_forward_curves_rf;
+		ublas::matrix<double> m_forward_curves_tenor;
 		
 		status = placeholder_ir_measurement_multi(m_forward_curves_rf, m_forward_curves_tenor);
 
@@ -48,8 +53,8 @@ BOOL __stdcall run_all_multiXL(BOOL const compute_curves/*, ...*/) {
 	bool status{ 1 };
 
 	try {
-		boost::numeric::ublas::matrix<double> m_forward_curves_rf{};
-		boost::numeric::ublas::matrix<double> m_forward_curves_tenor{};
+		ublas::matrix<double> m_forward_curves_rf{};
+		ublas::matrix<double> m_forward_curves_tenor{};
 		if (compute_curves) { // Compute
 			status = placeholder_ir_measurement_multi(m_forward_curves_rf, m_forward_curves_tenor);
 			// TODO: Replace above to compute curve(s)
@@ -63,23 +68,28 @@ BOOL __stdcall run_all_multiXL(BOOL const compute_curves/*, ...*/) {
 			m_forward_curves_tenor = read_csv_matrix("piHist.csv");
 		}
 
-		boost::numeric::ublas::matrix<double> m_diff{ matrixOperations::diff_matrix(m_forward_curves_rf) };
-		boost::numeric::ublas::matrix<double> m_rf_centered{ matrixOperations::center_matrix(m_diff) };
+		ublas::matrix<double> m_diff{ matrixOperations::diff_matrix(m_forward_curves_rf) };
+		// Todo: Clean data here and process:
+		ublas::matrix_range<ublas::matrix<double>> m_diff_clean (m_diff, ublas::range(0, min(1500, m_diff.size1())), ublas::range(0, m_diff.size2()));
+		ublas::matrix<double> m_rf_centered{ matrixOperations::center_matrix(m_diff_clean) };
 
 		int k = 6;
-		boost::numeric::ublas::matrix<double> m_rf_E(m_diff.size2(), k); // Ändra till centered som argument
-		boost::numeric::ublas::vector<double> v_rf_Lambda(k);
+		ublas::matrix<double> m_rf_E(m_rf_centered.size2(), k);
+		ublas::vector<double> v_rf_Lambda(k);
 
-		//status = status && FactorCalculation::iram(m_rf_centered / std::sqrt(m_rf_centered.size1() - 1), k, m_rf_E, v_rf_Lambda);
-		status = status && FactorCalculation::eigen_bdcsvd(m_rf_centered, k, m_rf_E, v_rf_Lambda);
+		enum class PCA_Algo {IRAM, BDCSVD};
+		PCA_Algo pca_algo{ PCA_Algo::IRAM };
+		if (pca_algo == PCA_Algo::IRAM) {
+			status = status && FactorCalculation::iram(m_rf_centered / std::sqrt(m_rf_centered.size1() - 1), k, m_rf_E, v_rf_Lambda);
+		} else if (pca_algo == PCA_Algo::BDCSVD) {
+			status = status && FactorCalculation::eigen_bdcsvd(m_rf_centered / std::sqrt(m_rf_centered.size1() - 1), k, m_rf_E, v_rf_Lambda);
+		}
 		
 		status = status && write_csv_matrix(m_rf_E, "rf_vec.csv");
 		status = status && write_csv_vector(v_rf_Lambda, "rf_val.csv");
 
-
-		//boost::numeric::ublas::vector<double> test{ read_csv_vector("v_rf_val.csv") };
-		//boost::numeric::ublas::matrix<double> test2{ read_csv_matrix("fHist.csv") };
-
+		ublas::matrix<double> m_rf_delta_xi{ FactorCalculation::compute_risk_factors(m_rf_E, m_diff) };
+		status = status && write_csv_matrix(m_rf_delta_xi, "rf_delta_xi.csv");
 
 
 	} catch (const std::exception&) {
