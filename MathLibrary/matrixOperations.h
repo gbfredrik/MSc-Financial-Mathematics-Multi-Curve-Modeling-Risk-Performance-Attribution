@@ -13,5 +13,9 @@ public:
 	static boost::numeric::ublas::vector<double> vectorXdToUblas(Eigen::VectorXd const& xdVector);
 	static Eigen::VectorXd ublasToVectorXd(boost::numeric::ublas::vector<double> const& uVector);
     
-    static boost::numeric::ublas::matrix<double> diff_matrix(boost::numeric::ublas::matrix<double>& m_curves);
+	static boost::numeric::ublas::matrix<double> diff_matrix(boost::numeric::ublas::matrix<double>& m_curves);
+	static boost::numeric::ublas::matrix<double> center_matrix(boost::numeric::ublas::matrix<double> const& diff_matrix);
+
+private:
+	static double column_average(boost::numeric::ublas::vector<double> const& vec);
 };

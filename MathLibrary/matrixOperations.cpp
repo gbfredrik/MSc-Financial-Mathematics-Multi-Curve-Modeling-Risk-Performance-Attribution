@@ -1,8 +1,12 @@
 #include "pch.h"
 #include "matrixOperations.h"
+
 #include <Eigen/Core>
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/matrix_proxy.hpp>
+#include <boost/numeric/ublas/io.hpp>// Temp: remove later
+
+#include <fstream> 
 
 using namespace boost::numeric::ublas;
 using namespace Eigen;
@@ -82,4 +86,23 @@ matrix<double> matrixOperations::diff_matrix(matrix<double>& m_curves) { // Can 
 
 	//matrix<double> m_diff(m_2 - m_1);
 	return m_2 - m_1;
+}
+
+double matrixOperations::column_average(vector<double> const& vec) {
+	return sum(vec) / vec.size();
+}
+
+matrix<double> matrixOperations::center_matrix(matrix<double> const& diff_matrix) {
+	matrix<double> centered_matrix(diff_matrix.size1(), diff_matrix.size2());
+	vector<double> column_averages(diff_matrix.size2());
+
+	for (size_t i = 0; i < diff_matrix.size2(); ++i) {
+		column_averages(i) = column_average(column(diff_matrix, i));
+	}
+
+	for (size_t i = 0; i < diff_matrix.size1(); ++i) {
+		row(centered_matrix, i) = row(diff_matrix, i) - column_averages;
+	}
+
+	return centered_matrix;
 }
