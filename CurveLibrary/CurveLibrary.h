@@ -1,12 +1,9 @@
-// The following ifdef block is the standard way of creating macros which make exporting
-// from a DLL simpler. All files within this DLL are compiled with the CURVELIBRARY_EXPORTS
-// symbol defined on the command line. This symbol should not be defined on any project
-// that uses this DLL. This way any other project whose source files include this file see
-// CURVELIBRARY_API functions as being imported from a DLL, whereas this DLL sees symbols
-// defined with this macro as being exported.
-
+// CurveLibrary.h : Declares all DLL functions
+#pragma once
 #define EXPORT comment(linker, "/EXPORT:" __FUNCTION__ "=" __FUNCDNAME__)
 
+LONG __stdcall squareXL(int, int&);
 
-int __stdcall squareXL(int, int &);
+BOOL __stdcall ir_measurement_multiXL(BOOL const);
+BOOL __stdcall run_all_multiXL(BOOL const);
 
