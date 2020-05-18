@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "matrixOperations.h"
 
+#include "mex.h"
 #include <Eigen/Core>
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/matrix_proxy.hpp>
@@ -10,7 +11,6 @@
 
 using namespace boost::numeric::ublas;
 using namespace Eigen;
-
 
 matrix<double> matrixOperations::chol(matrix<double> const& input) {
 	size_t n = input.size1();

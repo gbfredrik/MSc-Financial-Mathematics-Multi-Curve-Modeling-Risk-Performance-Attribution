@@ -1,10 +1,10 @@
 #pragma once
 
+#include "mex.h"
 #include <boost/numeric/ublas/matrix.hpp>
 #include <Eigen/Core>
 
 class matrixOperations {
-
 public:
     static boost::numeric::ublas::matrix<double> chol(boost::numeric::ublas::matrix<double> const& input);
 
