@@ -8,16 +8,18 @@
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/matrix_proxy.hpp>
 #include <Spectra/MatOp/DenseSymMatProd.h>
-//#include <Spectra/MatOp/SparseGenMatProd.h>
-//#include <Spectra/MatOp/DenseCholesky.h>
-//#include <Spectra/SymGEigsSolver.h>
 #include <Spectra/SymEigsSolver.h>
 
 #include <iostream>
 
 using namespace boost::numeric;
 
-bool FactorCalculation::iram(ublas::matrix<double> const& input, int const k, ublas::matrix<double>& m_E, ublas::vector<double>& v_Lambda) {
+bool FactorCalculation::iram(
+	ublas::matrix<double> const& input, 
+	int const k, 
+	ublas::matrix<double>& m_E, 
+	ublas::vector<double>& v_Lambda
+) {
 	// Utilizes the SymEigsSolver (IRAM) from the Spectra library
 	using namespace Spectra;
 	
@@ -72,7 +74,12 @@ bool FactorCalculation::iram(ublas::matrix<double> const& input, int const k, ub
 	return v_Lambda.size() > 0;
 }
 
-bool FactorCalculation::eigen_bdcsvd(ublas::matrix<double> const& input, int const k, ublas::matrix<double>& m_E, boost::numeric::ublas::vector<double>& v_Lambda) {
+bool FactorCalculation::eigen_bdcsvd(
+	ublas::matrix<double> const& input, 
+	int const k, 
+	ublas::matrix<double>& m_E, 
+	boost::numeric::ublas::vector<double>& v_Lambda
+) {
 	// Utilizes BDCSVD from Eigen library
 	int svd_opt = Eigen::ComputeThinU | Eigen::ComputeThinV;
 
@@ -99,6 +106,9 @@ bool FactorCalculation::eigen_bdcsvd(ublas::matrix<double> const& input, int con
 	return v_Lambda.size() > 0;
 }
 
-ublas::matrix<double> FactorCalculation::compute_risk_factors(ublas::matrix<double> const& m_E_k, ublas::matrix<double> const& m_delta_f) {
+ublas::matrix<double> FactorCalculation::compute_risk_factors(
+	ublas::matrix<double> const& m_E_k, 
+	ublas::matrix<double> const& m_delta_f
+) {
 	return ublas::prod(ublas::trans(m_E_k), ublas::trans(m_delta_f));
 }
