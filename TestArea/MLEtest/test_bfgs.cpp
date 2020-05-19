@@ -12,15 +12,16 @@
 #include <strstream>
 #include <sstream>
 
-matrix<float> read_matrix(std::string const& file_name, int rows, int columns);
-matrix<float> delta_curves(matrix<float> curves);
-vector<float> read_time_series_test(std::string const& file_name);
+matrix<double> read_matrix(std::string const& file_name, int rows, int columns);
+matrix<double> delta_curves(matrix<double> curves);
+vector<double> read_time_series_test(std::string const& file_name);
 
 
 int main() {
 	 
 	vector<double> start(4);
-	//omega
+	
+	/*omega
 	start(0) = 0.001;
 	//alpha
 	start(1) = 0.05;
@@ -28,17 +29,30 @@ int main() {
 	start(2) = 0.9;
 	//väntevärde
 	start(3) = 0.05;
+	*/
 
+	//omega
+	start(0) = 0.001;
+	//alpha
+	start(1) = 0.05;
+	//beta
+	start(2) = 0.92;
+	//väntevärde
+	start(3) = 0.05;
+
+	vector<double> start_r(2);
+	start_r(0) = 5;
+	start_r(1) = -5;
 
 	int max_iter = 100;
-	float epsilon = pow(10,-5);
-	double dt = 1 / 252.00;
+	double epsilon = pow(10,-7);
+	double dt = 1.00;
 	matrix<double> H_inv(4, 4);
 	identity_matrix<double> I(4);
 	H_inv = I;
-	vector<float> time_series;
-	matrix<float> hist_rf;
-	matrix<float> E_rf;
+	vector<double> time_series;
+	matrix<double> hist_rf;
+	matrix<double> E_rf;
 	
 	vector<double> vec(2);
 	vec(0) = 0.5;
@@ -47,7 +61,7 @@ int main() {
 	Distribution* rosenbrock = &dist;
 	
 	std::cout << "dt = " << dt << "\n";
-
+	
 	try {
 		//Senaste kurvan sist
 		time_series = read_time_series_test("aapl.csv");
@@ -57,7 +71,7 @@ int main() {
 		std::cout << "Error:" << ex.what() << "\n";
 		return 1;
 	}
-
+	
 	//Läs in riskfria kurvan
 	try {
 		//Senaste kurvan sist
@@ -69,7 +83,7 @@ int main() {
 		return 1;
 	}
 	// Beräkna delta f på riskfria kurvan.
-	matrix<float> delta_f = delta_curves(hist_rf);
+	matrix<double> delta_f = delta_curves(hist_rf);
 
 	//Läs in egenmatrisen för riskfria kurvan
 	try {
@@ -83,21 +97,26 @@ int main() {
 	}
 	//std::cout << "delta_f = " << trans(delta_f) << "\n \n";
 
-	matrix<float> hist_risk_faktors = prod(trans(E_rf), trans(delta_f));
-
-	matrix_row<matrix<float> > xi1(hist_risk_faktors, 0);
-	matrix_row<matrix<float> > xi2(hist_risk_faktors, 1);
-	matrix_row<matrix<float> > xi3(hist_risk_faktors, 2);
+	matrix<double> hist_risk_faktors = prod(trans(E_rf), trans(delta_f));
 
 
-	Gaussian dist2(xi3);
+	matrix_row<matrix<double> > xi1(hist_risk_faktors, 0);
+	matrix_row<matrix<double> > xi2(hist_risk_faktors, 1);
+	matrix_row<matrix<double> > xi3(hist_risk_faktors, 2);
+
+	//std::cout << "Riskfaktor 1 = " << xi1 << "\n\n";
+	//std::cout << "Time_series = " << time_series << "\n\n";
+
+	
+
+	Gaussian dist2(time_series);
 	Gaussian* gaussian = &dist2;
 
 
 	//std::cout << "Funktionsvärde startparametrar : " << gaussian->function_value(start, dt) << "\n";
 
 
-	vector<double> opt_parameters = bfgs::minimize(start, H_inv, max_iter, epsilon, gaussian,dt);
+	vector<double> opt_parameters = bfgs::minimize(start, H_inv, max_iter, epsilon, gaussian);
 
 	//std::cout << opt_parameters;
 
@@ -105,12 +124,12 @@ int main() {
 
 }
 
-vector<float> read_time_series_test(std::string const& file_name) {
+vector<double> read_time_series_test(std::string const& file_name) {
 
 	std::fstream fin;
 	std::string line;
 	std::string value_string;
-	float value = 0;
+	double value = 0;
 
 	fin.open(file_name, std::ios::in);
 
@@ -118,8 +137,7 @@ vector<float> read_time_series_test(std::string const& file_name) {
 		throw std::runtime_error("Could not open file");
 	}
 
-	vector<float> series(7981);
-	int date;
+	vector<double> series(7981);
 	int k = 0;
 
 
@@ -130,7 +148,7 @@ vector<float> read_time_series_test(std::string const& file_name) {
 		//Get value
 		getline(s, value_string, '\n');
 		const char* decimal = value_string.c_str();  // String to const char
-		value = std::atof(decimal); // const char to float.
+		value = std::strtod(decimal,NULL); // const char to float.
 
 
 		//series(k) = value;
@@ -141,7 +159,7 @@ vector<float> read_time_series_test(std::string const& file_name) {
 	fin.close();
 
 	vector<double> log_returns(series.size() - 1);
-	for (int i = 0; i < series.size() - 1; ++i) {
+	for (size_t i = 0; i < series.size() - 1; ++i) {
 		log_returns(i) = log(series(i + 1) / series(i));
 	}
 
@@ -150,13 +168,13 @@ vector<float> read_time_series_test(std::string const& file_name) {
 }
 
 
-matrix<float> read_matrix(std::string const& file_name, int rows, int columns) {
+matrix<double> read_matrix(std::string const& file_name, int rows, int columns) {
 
 	std::fstream fin;
 	std::string line;
 	std::string value_string;
-	float value = 0;
-	matrix<float> matrix(rows, columns);
+	double value = 0;
+	matrix<double> matrix(rows, columns);
 	
 
 	fin.open(file_name, std::ios::in);
@@ -189,10 +207,10 @@ matrix<float> read_matrix(std::string const& file_name, int rows, int columns) {
 	return matrix;
 }
 
-matrix<float> delta_curves(matrix<float> curves) {
+matrix<double> delta_curves(matrix<double> curves) {
 	//Calculate delta of curves from the curves matrix
 
-	matrix<float> delta_f(curves.size1() - 1, curves.size2());
+	matrix<double> delta_f(curves.size1() - 1, curves.size2());
 
 	for (size_t i = 0; i < delta_f.size1(); ++i) {
 

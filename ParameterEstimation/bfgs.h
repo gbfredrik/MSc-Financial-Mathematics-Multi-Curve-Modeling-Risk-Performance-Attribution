@@ -22,7 +22,7 @@ using namespace boost::numeric::ublas;
 
 class bfgs {
 public:
-	static vector<double> minimize(vector<double> start, matrix<double> H_inv, int max_iter, float epsilon, Distribution* dist, double dt);
+	static vector<double> minimize(vector<double> start, matrix<double> H_inv, int max_iter, double epsilon, Distribution* dist);
 
 	//static Distribution dist;
 	//static int function_type;
