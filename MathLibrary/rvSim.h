@@ -1,14 +1,13 @@
-#ifndef RVSIM_H
-#define RVSIM_H
+#pragma once
+
 #include "mex.h"
 #include <boost/numeric/ublas/matrix.hpp>
+
 #include <iostream>
 
 extern boost::numeric::ublas::matrix<double> hehe;
 
 class rvSim {
-private:
-
 public:
 	static boost::numeric::ublas::matrix<double> gen_test(int rows, int cols);
 	static boost::numeric::ublas::matrix<double> gen_normal(double m, double s, size_t k, size_t N);
@@ -20,6 +19,3 @@ public:
 		boost::numeric::ublas::vector<double> mu, boost::numeric::ublas::vector<double> sigma, std::string type,
 		boost::numeric::ublas::vector<double> dfM);
 };
-
-
-#endif

@@ -1,13 +1,10 @@
-#ifndef STATISTICSOPERATIONS
-#define STATISTICSOPERATIONS
+#pragma once
 
 #include "mex.h"
 #include <boost/numeric/ublas/matrix.hpp>
 
 
 class statisticsOperations {
-private:
-	static double vectorMean(boost::numeric::ublas::vector<double> const& input);
 public:
 	static boost::numeric::ublas::matrix<double> covm(boost::numeric::ublas::matrix<double> const& input);
 	static boost::numeric::ublas::matrix<double> corrm(boost::numeric::ublas::matrix<double> const& input);
@@ -21,7 +18,7 @@ public:
 		boost::numeric::ublas::vector<double> fPrev, boost::numeric::ublas::vector<double> fPrevPrev, boost::numeric::ublas::vector<double> sigmaPrev);
 	static double invCDFNorm(double u, double mu, double sigma);
 	static double invCDFT(double u, double df);
+
+private:
+	static double vectorMean(boost::numeric::ublas::vector<double> const& input);
 };
-
-
-#endif

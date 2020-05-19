@@ -1,11 +1,14 @@
 #include "pch.h"
-#include "mex.h"
 #include "rvSim.h"
+
 #include "../MathLibrary/statisticsOperations.h"
-#include <random>
+
+#include "mex.h"
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/random/normal_distribution.hpp>
 #include <boost/math/distributions/normal.hpp>
+
+#include <random>
 
 using namespace boost::numeric::ublas;
 
@@ -22,17 +25,17 @@ matrix<double> rvSim::gen_test(int rows, int cols) {
 	std::mt19937 mt(rd());
 	std::uniform_real_distribution<double> dist(1.0, 10.0);
 	matrix<double> test(rows, cols);
-	for (size_t i = 0; i < test.size1(); i++) {
-		for (size_t j = 0; j < test.size2(); j++) {
+	for (size_t i = 0; i < test.size1(); ++i) {
+		for (size_t j = 0; j < test.size2(); ++j) {
 			test(i, j) = dist(mt);
 		}
 	}
+
 	return test;
 }
 */
 // Generate n normal variables with mean m and standard deviation s
 matrix<double> rvSim::gen_normal(double m, double s, size_t k, size_t N) {
-
 	//static std::random_device rd{};
 	//std::seed_seq seed{ rd(), rd(), rd(), rd(), rd(), rd(), rd(), rd() };
 	
@@ -89,7 +92,6 @@ matrix<double> rvSim::genEps(matrix<double> V, vector<double> mu, vector<double>
 		}
 	}
 
-	
 	return eps;
 }
 

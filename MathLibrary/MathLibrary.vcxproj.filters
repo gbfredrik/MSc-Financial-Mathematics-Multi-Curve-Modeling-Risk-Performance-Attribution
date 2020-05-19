@@ -18,10 +18,10 @@
     <ClCompile Include="rvSim.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\CurveLibrary\pch.cpp">
+    <ClCompile Include="matrixOperations.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="matrixOperations.cpp">
+    <ClCompile Include="pch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="statisticsOperations.cpp">
@@ -35,10 +35,10 @@
     <ClInclude Include="matrixOperations.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\CurveLibrary\pch.h">
+    <ClInclude Include="framework.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\CurveLibrary\framework.h">
+    <ClInclude Include="pch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="statisticsOperations.h">
