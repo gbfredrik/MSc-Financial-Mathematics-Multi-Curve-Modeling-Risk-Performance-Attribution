@@ -45,8 +45,6 @@ BOOL __stdcall ir_measurement_multiXL(BOOL const save_curves) {
 	return status;
 }
 
-
-
 BOOL __stdcall run_all_multiXL(BOOL const compute_curves/*, ...*/) {
 #pragma EXPORT
 
@@ -91,7 +89,7 @@ BOOL __stdcall run_all_multiXL(BOOL const compute_curves/*, ...*/) {
 		ublas::matrix<double> m_rf_delta_xi{ FactorCalculation::compute_risk_factors(m_rf_E, m_diff) };
 		status = status && write_csv_matrix(m_rf_delta_xi, "rf_delta_xi.csv");
 
-
+		//...
 	} catch (const std::exception&) {
 		return 0;
 	}
