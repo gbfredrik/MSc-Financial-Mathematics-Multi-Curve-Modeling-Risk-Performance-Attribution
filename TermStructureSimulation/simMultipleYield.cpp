@@ -3,181 +3,188 @@
 #include "MultipleYieldSim.h"
 #include <boost/numeric/ublas/matrix.hpp>
 #include <string>
+#include "../MathLibrary/rvSim.h"
 
 using namespace boost::numeric::ublas;
-
-
-void simConverter(double* EZeroMex, double* ETauMex, double* fZeroMex, double* piMex, 
-	double* kappaMex, double* xiHatMex, int d, double* fZeroResMex, double* 
-	fTauResMex, int m, int kZero, int kTau, int N, double* omegaMex, double* alphaMex,
-	double* betaMex, double* fHistMex, double* piHistMex, int days,
-	std::string marginalZeroMex, std::string marginalTauMex, std::string copulaZeroMex, std::string copulaTauMex,
-	std::string varRedTypeZeroMex, std::string varRedTypeTauMex, double* muMex, double* dfMex) {
-	
-
-	/*Create new variables corresponding to the funtion that is being tested*/
-	vector<matrix<double>> E(2);
-	E(0) = matrix<double>(m, kZero);
-	E(1) = matrix<double>(m, kTau);
-
-
-	vector<double> fZero(m);
-	matrix<double> pi(m, 1);
-	vector<double> kappa(kZero);
-	matrix<double> xiHat(kZero, 2);
-	vector<std::string> marginal(2);
-	vector<std::string> copula(2);
-	vector<std::string> varRedType(2);
-	vector<matrix<double>> fRes(2, matrix<double>(m, N));
-	vector<matrix<double>> hist(2, matrix<double>(days, m));
-
-	vector<double> omega(kZero);
-	vector<double> beta(kZero);
-	vector<double> alpha(kZero);
-	matrix<double> mu(kZero, 2);
-	matrix<double> df(kZero, 2);
-
-	/*Convert input variables*/
-	for (int i = 0; i < m; i++) {
-		fZero(i) = fZeroMex[i];
-		pi(i, 0) = piMex[i];
-	}
-
-	for (int i = 0; i < m; i++) {		
-		for (int j = 0; j < kZero; j++) {
-			E(0)(i, j) = EZeroMex[i + j*m];
-		}
-	}
-	for (int i = 0; i < m; i++) {
-		for (int j = 0; j < kTau; j++) {
-			E(1)(i, j) = ETauMex[i + j * m];
-		}
-	}
-	
-	for (int i = 0; i < kZero; i++) {
-		for (int j = 0; j < 2; j++) {
-			xiHat(i, j) = xiHatMex[i + j * kZero];
-			mu(i, j) = muMex[i + j * kZero];
-			df(i, j) = dfMex[i + j * kZero];
-		}
-	}
-
-	for (int i = 0; i < kZero; i++) {
-		kappa(i) = kappaMex[i];
-		omega(i) = omegaMex[i];
-		alpha(i) = alphaMex[i];
-		beta(i) = betaMex[i];
-	}
-
-	for (int j = 0; j < days; j++) {
-		for (int k = 0; k < m; k++) {
-			hist(0)(j, k) = fHistMex[j + k * days];
-			hist(1)(j, k) = piHistMex[j + k * days];
-		}
-	}
-
-	marginal(0) = marginalZeroMex;
-	marginal(1) = marginalZeroMex;
-	copula(0) = copulaZeroMex;
-	copula(1) = copulaTauMex;
-	varRedType(0) = varRedTypeZeroMex;
-	varRedType(1) = varRedTypeTauMex;
-
-
-	/*Call function*/
-	MultipleYieldSim::simMultipleFull(E, fZero, pi, kappa, xiHat, omega, 
-		alpha, beta, hist, marginal, copula, varRedType, 
-		mu, df, d, N, fRes);
-
-	/*Convert result*/
-	for (int i = 0; i < m; i++) {
-		for (int j = 0; j < N; j++) {
-			fZeroResMex[i + j * m] = fRes(0)(i, j);
-			fTauResMex[i + j * m] = fRes(1)(i, j);
-		}
-	} 
-}
 
 
 /* The gateway function */
 void mexFunction(int nlhs, mxArray* plhs[],
 	int nrhs, const mxArray* prhs[]) {
 
-	int N = 0;
+	// Get sizes
+	size_t n = mxGetM(mxGetField(prhs[0], 0, mxGetFieldNameByNumber(prhs[0], 0)));
+	size_t m = mxGetM(mxGetField(prhs[6], 0, mxGetFieldNameByNumber(prhs[6], 0)));
+	size_t M = 2;
+	vector<size_t> k(M);
+	for (size_t i = 0; i < M; i++) {
+		k(i) = mxGetN(mxGetField(prhs[0], 0, mxGetFieldNameByNumber(prhs[0], i)));
+	}
 
-	int d = 0;
-	double* EZero;			            
-	double* ETau;
-	double* fZero;
-	double* pi;
-	double* kappa;
-	double* xiHat;
-	double* omega;
-	double* alpha;
-	double* beta;
-	double* fHist;
-	double* piHist;
-	double* mu;
-	double* df;
-
-
-	std::string marginalZero;
-	std::string copulaZero;
-	std::string varRedTypeZero;
-
-	std::string marginalTau;
-	std::string copulaTau;
-	std::string varRedTypeTau;
-
-	double *fZeroRes;
-	double *fTauRes;
 	
-	int days = mxGetN(prhs[11]);
-	int m = mxGetM(prhs[2]);
-	int kZero = mxGetN(prhs[2]);
-	int kTau = mxGetN(prhs[3]);
+
+	// Get E, rho
+	vector<double*> EMex(M);
+	vector<double*> rhoMex(M);
+	vector<matrix<double>> E(M);
+	vector<matrix<double>> rho(M);
+	for (size_t i = 0; i < M; i++) {
+		EMex(i) = mxGetPr(mxGetField(prhs[0], 0, mxGetFieldNameByNumber(prhs[0], i)));
+		rhoMex(i) = mxGetPr(mxGetField(prhs[1], 0, mxGetFieldNameByNumber(prhs[1], i)));
+		E(i) = matrix<double>(n, k(i));
+		rho(i) = matrix<double>(k(i), k(i));
+	}
+	
+	for (size_t i = 0; i < M; i++) {
+		for (size_t j = 0; j < n; j++) {
+			for (size_t l = 0; l < k(i); l++) {
+				E(i)(j, l) = EMex(i)[j + l * n];
+			}
+		}
+	}
+	
+	for (size_t i = 0; i < M; i++) {
+		for (size_t j = 0; j < k(i); j++) {
+			for (size_t l = 0; l < k(i); l++) {
+				rho(i)(j, l) = rhoMex(i)[j + l * k(i)];
+			}
+		}
+	}
+	   
+
+	// Get mu, omega, alpha, beta, gamma
+	vector<double*> muMex(M);
+	vector<double*> omegaMex(M);
+	vector<double*> alphaMex(M);
+	vector<double*> betaMex(M);
+	vector<double*> gammaMex(M);
+	vector<double*> dfCMex(M);
+	vector<double*> dfMMex(M);
+	vector<double*> xiHatMex(M);
+	vector<vector<double>> mu(M);
+	vector<vector<double>> omega(M);
+	vector<vector<double>> alpha(M);
+	vector<vector<double>> beta(M);
+	vector<vector<double>> gamma(M);
+	vector<vector<double>> dfC(M);
+	vector<vector<double>> dfM(M);
+	vector<vector<double>> xiHat(M);
+	for (size_t i = 0; i < M; i++) {
+		muMex(i) = mxGetPr(mxGetField(prhs[2], 0, mxGetFieldNameByNumber(prhs[2], i)));
+		omegaMex(i) = mxGetPr(mxGetField(prhs[3], 0, mxGetFieldNameByNumber(prhs[3], i)));
+		alphaMex(i) = mxGetPr(mxGetField(prhs[4], 0, mxGetFieldNameByNumber(prhs[4], i)));
+		betaMex(i) = mxGetPr(mxGetField(prhs[5], 0, mxGetFieldNameByNumber(prhs[5], i)));
+		gammaMex(i) = mxGetPr(mxGetField(prhs[13], 0, mxGetFieldNameByNumber(prhs[13], i)));
+		xiHatMex(i) = mxGetPr(mxGetField(prhs[15], 0, mxGetFieldNameByNumber(prhs[15], i)));
+		dfCMex(i) = mxGetPr(mxGetField(prhs[16], 0, mxGetFieldNameByNumber(prhs[16], i)));
+		dfMMex(i) = mxGetPr(mxGetField(prhs[17], 0, mxGetFieldNameByNumber(prhs[17], i)));
+		mu(i) = vector<double>(k(i));
+		omega(i) = vector<double>(k(i));
+		alpha(i) = vector<double>(k(i));
+		beta(i) = vector<double>(k(i));
+		gamma(i) = vector<double>(k(i));
+		xiHat(i) = vector<double>(k(i));
+		dfC(i) = vector<double>(k(i));
+		dfM(i) = vector<double>(k(i));
+	}
+	for (size_t i = 0; i < M; i++) {
+		for (size_t j = 0; j < k(i); j++) {
+			mu(i)(j) = muMex(i)[j];
+			omega(i)(j) = omegaMex(i)[j];
+			alpha(i)(j) = alphaMex(i)[j];
+			beta(i)(j) = betaMex(i)[j];
+			gamma(i)(j) = gammaMex(i)[j];
+			xiHat(i)(j) = xiHatMex(i)[j];
+			dfC(i)(j) = dfCMex(i)[j];
+			dfM(i)(j) = dfMMex(i)[j];
+		}
+	}
 
 
-	/* get the values of input scalars  */
-	d = mxGetScalar(prhs[0]);
-	N = mxGetScalar(prhs[1]);
+	// Get hist
+	vector<double*> histMex(M);
+	vector<matrix<double>> hist(M);
+	for (size_t i = 0; i < M; i++) {
+		histMex(i) = mxGetPr(mxGetField(prhs[6], 0, mxGetFieldNameByNumber(prhs[6], i)));
+		hist(i) = matrix<double>(m, n);
+	}
+	for (size_t i = 0; i < M; i++) {
+		for (size_t j = 0; j < m; j++) {
+			for (size_t k = 0; k < n; k++) {
+				hist(i)(j, k) = histMex(i)[j + k * m];
+			}
+		}
+	}
 
-	/* get the values of input matrices  */
-	EZero = mxGetPr(prhs[2]);
-	ETau = mxGetPr(prhs[3]);
-	fZero = mxGetPr(prhs[4]);
-	pi = mxGetPr(prhs[5]);
-	kappa = mxGetPr(prhs[6]);
-	xiHat = mxGetPr(prhs[7]);
-	omega = mxGetPr(prhs[8]);
-	alpha = mxGetPr(prhs[9]);
-	beta = mxGetPr(prhs[10]);
-	fHist = mxGetPr(prhs[11]);
-	piHist = mxGetPr(prhs[12]);
-	mu = mxGetPr(prhs[13]);
-	df = mxGetPr(prhs[14]);
 
-	marginalZero = mxArrayToString(prhs[15]);
-	marginalTau = mxArrayToString(prhs[16]);
-	copulaZero = mxArrayToString(prhs[17]);
-	copulaTau = mxArrayToString(prhs[18]);
-	varRedTypeZero = mxArrayToString(prhs[19]);
-	varRedTypeTau = mxArrayToString(prhs[20]);
+	// Get marginal, copula, varRedType, kappa
+	vector<std::string> marginal(M);
+	vector<std::string> copula(M);
+	vector<std::string> varRedType(M);
+	double* kappaMex;
+	vector<double> kappa(M);
+	kappaMex = mxGetPr(prhs[14]);
+	for (size_t i = 0; i < M; i++) {
+		marginal(i) = mxArrayToString(mxGetField(prhs[7], 0, mxGetFieldNameByNumber(prhs[7], i)));
+		copula(i) = mxArrayToString(mxGetField(prhs[8], 0, mxGetFieldNameByNumber(prhs[8], i)));
+		varRedType(i) = mxArrayToString(mxGetField(prhs[9], 0, mxGetFieldNameByNumber(prhs[9], i)));
+		kappa(i) = kappaMex[i];
+	}
+	
 
-	/* create the output matrix */	
-	plhs[0] = mxCreateDoubleMatrix(m, N, mxREAL);
-	plhs[1] = mxCreateDoubleMatrix(m, N, mxREAL);
+	// Get d, N
+	size_t N;
+	size_t d;
+	d = mxGetScalar(prhs[10]);
+	N = mxGetScalar(prhs[11]);
 
-	/* get a pointer to the real data in the output matrix */
-	fZeroRes = mxGetPr(plhs[0]);
-	fTauRes = mxGetPr(plhs[1]);
+
+	// Get fRes (create the output matrix and pointer)
+	vector<double*> fResMex(M);
+	vector<matrix<double>> fRes(M, matrix<double>(n, N));
+	for (size_t i = 0; i < M; i++) {
+		plhs[i] = mxCreateDoubleMatrix(n, N, mxREAL);
+		fResMex(i) = mxGetPr(plhs[i]);
+	}
+	
+	mexPrintf("%d", nlhs);
+
+	
+	double* randomMex;
+	plhs[2] = mxCreateDoubleMatrix(3, 2000, mxREAL);
+	randomMex = mxGetPr(plhs[2]);
 	
 	
-	/* call the computational routine */
-	simConverter(EZero, ETau, fZero, pi, kappa, xiHat, d, fZeroRes, 
-		fTauRes, m, kZero, kTau, N, omega, alpha, beta, fHist, piHist, days,
-		marginalZero, marginalTau, copulaZero, copulaTau,
-		varRedTypeZero, varRedTypeTau, mu, df);
+		/* call the computational routine */
+		MultipleYieldSim::simMultipleFull(E, rho, mu, omega, alpha, beta, hist,
+			marginal, copula, varRedType, d, N, fRes, gamma, kappa,
+			xiHat, dfC, dfM);
+	
+	mexPrintf(" efter simcall ");
 
+	/*Convert result*/
+	for (size_t i = 0; i < M; i++) {
+		for (size_t j = 0; j < n; j++) {
+			for (size_t k = 0; k < N; k++) {
+				fResMex(i)[j + k * n] = fRes(i)(j, k);
+			}
+		}
+	}
+	/*
+	mexPrintf("%g", hehe(0, 0));
+	mexPrintf(" ");
+	mexPrintf("%g", hehe(2, 1999));
+	mexPrintf(" ");
+	*/
+	
+	for (size_t i = 0; i < 3; i++) {
+		for (size_t j = 0; j < 2000; j++) {
+			randomMex[i + j * 3] = hehe(i, j);
+		}
+	}
+	
+
+
+	
 }
 

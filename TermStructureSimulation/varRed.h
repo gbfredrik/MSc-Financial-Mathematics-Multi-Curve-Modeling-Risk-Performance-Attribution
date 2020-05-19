@@ -10,7 +10,7 @@ private:
 	static boost::numeric::ublas::vector<double> sort(boost::numeric::ublas::vector<double> const& U);
 
 public:
-	static boost::numeric::ublas::matrix<double> redVariance(boost::numeric::ublas::matrix<double> U, std::string varRedType);
+	static boost::numeric::ublas::matrix<double> redVariance(boost::numeric::ublas::matrix<double> const& U, std::string varRedType);
 };
 
 #endif

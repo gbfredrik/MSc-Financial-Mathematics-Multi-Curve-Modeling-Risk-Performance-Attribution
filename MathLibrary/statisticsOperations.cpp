@@ -84,10 +84,10 @@ double statisticsOperations::pearson_rho(vector<double> const& X, vector<double>
 
 // Calculates the first garch volatility values with the full dataset
 // Check if the GJR-term is needed
-vector<double> statisticsOperations::GARCH(vector<double> omega, vector<double> alpha, vector<double> beta, matrix<double> E, matrix<double> fHist) {
+vector<double> statisticsOperations::GARCH(vector<double> const& omega, vector<double> const& alpha, vector<double> const& beta,
+	vector<double> const& gamma, matrix<double> const& E, matrix<double> const& fHist) {
 
 	size_t m = fHist.size1(); // Number of days in fHist
-	size_t n = fHist.size2(); // Number of discretization points on the curves
 	size_t k = E.size2(); // Number of risk factors
 
 	vector<double> dXi(k);
@@ -99,7 +99,10 @@ vector<double> statisticsOperations::GARCH(vector<double> omega, vector<double> 
 
 	
 	for (size_t i = 0; i < k; i++) {
+
+
 		sigmaPrevSq(i) = omega(i) + alpha(i) * pow(dXi(i), 2) + beta(i) * pow(dXi(i), 2);
+
 	}
 	
 	for (size_t i = 3; i < m; i++) {
@@ -109,6 +112,8 @@ vector<double> statisticsOperations::GARCH(vector<double> omega, vector<double> 
 		for (size_t j = 0; j < k; j++) {
 			sigmaSq(j) = omega(j) + alpha(j) * pow(dXi(j), 2) + beta(j) * sigmaPrevSq(j);
 			sigmaPrevSq(j) = sigmaSq(j);
+			//mexPrintf("%g", dXi(j));
+			//mexPrintf(" ");
 		}
 	}
 
@@ -122,24 +127,21 @@ vector<double> statisticsOperations::GARCH(vector<double> omega, vector<double> 
 
 // Calculates the updated garch volatility
 // Check if the GJR-term is needed
-vector<double> statisticsOperations::GARCH(vector<double> omega, vector<double> alpha, vector<double> beta, matrix<double> E, vector<double> ft1, vector<double> ft2, vector<double> sigmat1) {
+vector<double> statisticsOperations::GARCH(vector<double> omega, vector<double> alpha, vector<double> beta, 
+	vector<double> gamma, matrix<double> E, vector<double> fPrev, vector<double> fPrevPrev, vector<double> sigmaPrev) {
 	
-	size_t n = ft1.size(); // Number of discretization points on the curves
 	size_t k = E.size2(); // Number of risk factors
 
 	vector<double> dXi(k);
-	vector<double> sigmaPrevSq(k);
 	vector<double> sigmaSq(k);
 	vector<double> sigma(k);
 
-	dXi = prod(trans(E), trans(ft1 - ft2));
+	dXi = prod(trans(E), trans(fPrev - fPrevPrev));
 
 	for (size_t i = 0; i < k; i++) {
-		sigmaSq(k) = omega(i) + alpha(i) * pow(dXi(i), 2) + beta(i) * pow(sigmat1(i), 2);
+		sigmaSq(i) = omega(i) + alpha(i) * pow(dXi(i), 2) + beta(i) * pow(sigmaPrev(i), 2);
 		sigma(i) = sqrt(sigmaSq(i));
 	}
-
-
 
 	return sigma;
 
@@ -155,11 +157,9 @@ double statisticsOperations::invCDFNorm(double u, double mu, double sigma) {
 
 }
 
-double statisticsOperations::invCDFT(double u, double mu, double sigma, double df) {
+double statisticsOperations::invCDFT(double u, double df) {
 	double q = 0.0;
 	boost::math::students_t t(df); 
-
-	mexPrintf("jappsi");
 
 	q = quantile(t, u);
 

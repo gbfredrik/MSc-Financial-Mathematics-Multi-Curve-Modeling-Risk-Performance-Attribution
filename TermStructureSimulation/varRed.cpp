@@ -16,7 +16,7 @@
 
 using namespace boost::numeric::ublas;
 
-matrix<double> varRed::redVariance(matrix<double> U, std::string varRedType) {
+matrix<double> varRed::redVariance(matrix<double> const& U, std::string varRedType) {
 	
 	size_t k = U.size1(); // Number of risk factors
 	size_t N = U.size2(); // Number of simulations

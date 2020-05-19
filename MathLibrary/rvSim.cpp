@@ -9,7 +9,14 @@
 
 using namespace boost::numeric::ublas;
 
+boost::numeric::ublas::matrix<double> hehe(3, 2000);
+//static std::seed_seq seed{ 1, 2, 3, 4, 5 };
+//static std::default_random_engine e2;
+static std::normal_distribution<double> distNorm(0.0, 1.0);
+static std::uniform_real_distribution<double> distU(0.0, 1.0);
+static std::mt19937 e2(0);
 
+/*
 matrix<double> rvSim::gen_test(int rows, int cols) {
 	std::random_device rd;
 	std::mt19937 mt(rd());
@@ -22,82 +29,62 @@ matrix<double> rvSim::gen_test(int rows, int cols) {
 	}
 	return test;
 }
-
+*/
 // Generate n normal variables with mean m and standard deviation s
-matrix<double> rvSim::gen_normal(double m, double s, int k, int N) {
+matrix<double> rvSim::gen_normal(double m, double s, size_t k, size_t N) {
 
-	static std::random_device rd;
-	static std::mt19937 e2(rd());
-	std::normal_distribution<> dist(m, s);
+	//static std::random_device rd{};
+	//std::seed_seq seed{ rd(), rd(), rd(), rd(), rd(), rd(), rd(), rd() };
+	
+	//std::seed_seq seed{ 1, 2, 3, 4, 5 };
+	//static std::mt19937 e2(seed);
+
+	//static std::default_random_engine dre;
+	//std::normal_distribution<double> dist(0.0, 1.0);
 	matrix<double> rand(k, N);
 
-	for (int i = 0; i < k; i++) {
-		for (int j = 0; j < N; j++) {
-			rand(i, j) = dist(e2);
+	for (size_t i = 0; i < k; i++) {
+		for (size_t j = 0; j < N; j++) {
+			rand(i, j) = distNorm(e2);
+			hehe(i, j) = rand(i, j);
+			//mexPrintf("%g",rand(i, j));
+			//mexPrintf(" ");
 		}
 	}
 	
+
+
+
 	return rand;
 }
 
 // R.v.s from the gamma distribution using the same method as Matlab (Marsaglia, G. and Tsang, W.W. (2000))
-double rvSim::gen_gamma(double a) {
-	double d, c, x, v, u;
-	d = a - 1. / 3.;
-	c = 1. / sqrt(9. * d);
+double rvSim::gen_gamma(double df) {
 
-	for (;;) {
-		do {
-			x = gen_normal(0.0, 1.0);
-			v = pow(1. + c * x, 3);
-		} while (v <= 0);
+	return std::tgamma(df);
 
-		u = gen_uniform(0.0, 1.0);
-		if (u < 1 - 0.0331 * pow(x, 4)) {
-			return d * v;
-		}
-
-		if (log(u) < 0.5 * pow(x, 2) + d * (1. - v + log(v))) {
-			return (d * v);
-		}
-	}
 }
 
-double rvSim::gen_normal(double m, double s) {
-	std::random_device rd;
-	std::default_random_engine generator(rd());
-	std::normal_distribution<double> distribution(m, s);
-	return distribution(generator);
-}
 
-double rvSim::gen_uniform(double l, double u) {
-	std::random_device rd;
-	std::default_random_engine generator(rd());
-	std::uniform_real_distribution<double> distribution(l, u);
-	return distribution(generator);
-}
+matrix<double> rvSim::genEps(matrix<double> V, vector<double> mu, vector<double> sigma, std::string type, 
+	vector<double> dfM) {
+	
+	size_t k = V.size1();
+	size_t N = V.size2();
 
-matrix<double> rvSim::genEps(matrix<double> V, matrix<double> E, vector<double> sigma, std::string type) {
-	size_t m = V.size1();
-	size_t n = V.size2();
-
-	matrix<double> cov(m, m);
-	cov = statisticsOperations::covm(E);
-
-	matrix<double> eps(m, n);
-
-
+	matrix<double> eps(k, N);
+	
 	if (type == "normal") {
-		for (size_t i = 0; i < m; i++) {
-			for (size_t j = 0; j < n; j++) {
-				eps(i, j) = statisticsOperations::invCDFNorm(V(i, j), 0, sqrt(cov(i, i))) * sigma(i);
+		for (size_t i = 0; i < k; i++) {
+			for (size_t j = 0; j < N; j++) {
+				eps(i, j) = mu(i) + statisticsOperations::invCDFNorm(V(i, j), 0, 1) * sigma(i); 
 			}
 		}
 	}
 	else if (type == "t") {
-		for (size_t i = 0; i < m; i++) {
-			for (size_t j = 0; j < n; j++) {
-				eps(i, j) = statisticsOperations::invCDFT(V(i, j), 0, sqrt(cov(i, i)), 5) * sigma(i);
+		for (size_t i = 0; i < k; i++) {
+			for (size_t j = 0; j < N; j++) {
+				eps(i, j) = mu(i) + statisticsOperations::invCDFT(V(i, j), dfM(i)) * sigma(i);
 			}
 		}
 	}
@@ -106,3 +93,23 @@ matrix<double> rvSim::genEps(matrix<double> V, matrix<double> E, vector<double> 
 	return eps;
 }
 
+vector<double> rvSim::genEps(vector<double> V, vector<double> mu, vector<double> sigma, std::string type,
+	vector<double> dfM) {
+
+	size_t k = V.size();
+	vector<double> eps(k);
+
+	if (type == "normal") {
+		for (size_t i = 0; i < k; i++) {
+			eps(i) = mu(i) + statisticsOperations::invCDFNorm(V(i), 0, 1) * sigma(i);
+		}
+	}
+	else if (type == "t") {
+		for (size_t i = 0; i < k; i++) {
+			eps(i) = mu(i) + statisticsOperations::invCDFT(V(i), dfM(i)) * sigma(i);
+		}
+	}
+
+
+	return eps;
+}
