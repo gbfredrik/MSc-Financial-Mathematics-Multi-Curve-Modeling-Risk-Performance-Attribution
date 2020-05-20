@@ -66,9 +66,6 @@ vector<double> Gaussian::calcNumGradients(vector<double> x) {
 	num_gradients(2) = (function_value(x_2diff) - function_value(x)) / (x_2diff(2) - x(2));
 	num_gradients(3) = (function_value(x_3diff) - function_value(x)) / (x_3diff(3) - x(3));
 
-	std::cout << "value new w = " << function_value(x_0diff) << " , Old value = " << function_value(x) << " , h = " << x_0diff(3) - x(0) << "\n\n";
-
-	std::cout << "value new mu = " << function_value(x_3diff) << " , Old value = " << function_value(x) << " , h = " << x_3diff(3) - x(3) << "\n\n";
 
 	return num_gradients;
 }
