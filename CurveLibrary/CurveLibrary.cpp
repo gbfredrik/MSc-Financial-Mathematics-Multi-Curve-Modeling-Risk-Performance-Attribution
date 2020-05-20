@@ -71,7 +71,7 @@ BOOL __stdcall run_all_multiXL(BOOL const compute_curves/*, ...*/) {
 		ublas::matrix_range<ublas::matrix<double>> m_diff_clean (m_diff, ublas::range(0, min(1500, m_diff.size1())), ublas::range(0, m_diff.size2()));
 		ublas::matrix<double> m_rf_centered{ matrixOperations::center_matrix(m_diff_clean) };
 
-		int k = 6;
+		int k{ 6 };
 		ublas::matrix<double> m_rf_E(m_rf_centered.size2(), k);
 		ublas::vector<double> v_rf_Lambda(k);
 
@@ -90,7 +90,7 @@ BOOL __stdcall run_all_multiXL(BOOL const compute_curves/*, ...*/) {
 		status = status && write_csv_matrix(m_rf_delta_xi, "rf_delta_xi.csv");
 
 		//...
-	} catch (const std::exception&) {
+	} catch (std::exception const&) {
 		return 0;
 	}
 

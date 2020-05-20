@@ -83,6 +83,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <TargetName>CURVELIBRARY</TargetName>
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>X:\Dependencies\spectra-0.8.1\spectra-0.8.1\include;X:\Dependencies\eigen-3.3.7;X:\Dependencies\boost_1_72_0;C:\Program Files\Matlab\R2019a\extern\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <TargetName>CURVELIBRARY</TargetName>

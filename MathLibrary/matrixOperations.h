@@ -17,5 +17,5 @@ public:
 	static boost::numeric::ublas::matrix<double> center_matrix(boost::numeric::ublas::matrix<double> const& diff_matrix);
 
 private:
-	static double column_average(boost::numeric::ublas::vector<double> const& vec);
+	static double vector_average(boost::numeric::ublas::vector<double> const& vec);
 };

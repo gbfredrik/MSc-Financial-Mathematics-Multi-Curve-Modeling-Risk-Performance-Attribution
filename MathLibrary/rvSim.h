@@ -9,9 +9,9 @@ extern boost::numeric::ublas::matrix<double> hehe;
 
 class rvSim {
 public:
-	static boost::numeric::ublas::matrix<double> gen_test(int rows, int cols);
-	static boost::numeric::ublas::matrix<double> gen_normal(double m, double s, size_t k, size_t N);
-	static double gen_gamma(double df);
+	//static boost::numeric::ublas::matrix<double> gen_test(int const rows, int const cols);
+	static boost::numeric::ublas::matrix<double> gen_normal(double const m, double const s, size_t const k, size_t const N);
+	static double gen_gamma(double const df);
 	static boost::numeric::ublas::matrix<double> genEps(
 		boost::numeric::ublas::matrix<double> const& V,
 		boost::numeric::ublas::vector<double> const& mu,

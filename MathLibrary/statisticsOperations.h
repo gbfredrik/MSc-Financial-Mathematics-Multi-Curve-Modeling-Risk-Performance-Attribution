@@ -3,7 +3,6 @@
 //#include "mex.h"
 #include <boost/numeric/ublas/matrix.hpp>
 
-
 class statisticsOperations {
 public:
 	static boost::numeric::ublas::matrix<double> covm(boost::numeric::ublas::matrix<double> const& input);

@@ -21,7 +21,7 @@ void mexFunction(int nlhs, mxArray* plhs[],
 		k(i) = mxGetN(mxGetField(prhs[0], 0, mxGetFieldNameByNumber(prhs[0], i)));
 	}
 
-	
+
 
 	// Get E, rho
 	vector<double*> EMex(M);
@@ -34,7 +34,7 @@ void mexFunction(int nlhs, mxArray* plhs[],
 		E(i) = matrix<double>(n, k(i));
 		rho(i) = matrix<double>(k(i), k(i));
 	}
-	
+
 	for (size_t i = 0; i < M; i++) {
 		for (size_t j = 0; j < n; j++) {
 			for (size_t l = 0; l < k(i); l++) {
@@ -42,7 +42,7 @@ void mexFunction(int nlhs, mxArray* plhs[],
 			}
 		}
 	}
-	
+
 	for (size_t i = 0; i < M; i++) {
 		for (size_t j = 0; j < k(i); j++) {
 			for (size_t l = 0; l < k(i); l++) {
@@ -50,7 +50,7 @@ void mexFunction(int nlhs, mxArray* plhs[],
 			}
 		}
 	}
-	   
+
 
 	// Get mu, omega, alpha, beta, gamma
 	vector<double*> muMex(M);
@@ -130,7 +130,7 @@ void mexFunction(int nlhs, mxArray* plhs[],
 		varRedType(i) = mxArrayToString(mxGetField(prhs[9], 0, mxGetFieldNameByNumber(prhs[9], i)));
 		kappa(i) = kappaMex[i];
 	}
-	
+
 
 	// Get d, N
 	size_t N;
@@ -146,20 +146,20 @@ void mexFunction(int nlhs, mxArray* plhs[],
 		plhs[i] = mxCreateDoubleMatrix(n, N, mxREAL);
 		fResMex(i) = mxGetPr(plhs[i]);
 	}
-	
+
 	mexPrintf("%d", nlhs);
 
-	
+
 	double* randomMex;
 	plhs[2] = mxCreateDoubleMatrix(3, 2000, mxREAL);
 	randomMex = mxGetPr(plhs[2]);
-	
-	
-		/* call the computational routine */
-		MultipleYieldSim::simMultipleFull(E, rho, mu, omega, alpha, beta, hist,
-			marginal, copula, varRedType, d, N, fRes, gamma, kappa,
-			xiHat, dfC, dfM);
-	
+
+
+	/* call the computational routine */
+	MultipleYieldSim::simMultipleFull(E, rho, mu, omega, alpha, beta, hist,
+		marginal, copula, varRedType, d, N, fRes, gamma, kappa,
+		xiHat, dfC, dfM);
+
 	mexPrintf(" efter simcall ");
 
 	/*Convert result*/
@@ -176,15 +176,14 @@ void mexFunction(int nlhs, mxArray* plhs[],
 	mexPrintf("%g", hehe(2, 1999));
 	mexPrintf(" ");
 	*/
-	
+
 	for (size_t i = 0; i < 3; i++) {
 		for (size_t j = 0; j < 2000; j++) {
 			randomMex[i + j * 3] = hehe(i, j);
 		}
 	}
-	
 
 
-	
+
+
 }
-
