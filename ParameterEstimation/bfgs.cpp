@@ -29,6 +29,7 @@ vector<double> bfgs::minimize(vector<double> x, matrix<double> H_inv, int max_it
 		gradient_vec = dist->calcGradients(x);
 		std::cout << "H_inv: " << H_inv << "\n\n";
 		std::cout << "gradient_vec: " << gradient_vec << "\n \n";
+		std::cout << "Numerical gradient_vec: " << dist->calcNumGradients(x) << "\n \n";
 		d = -prod(H_inv, gradient_vec);
 		
 		std::cout << "d : " << d << "\n\n";

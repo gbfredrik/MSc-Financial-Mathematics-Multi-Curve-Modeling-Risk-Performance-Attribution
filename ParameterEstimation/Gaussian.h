@@ -29,6 +29,7 @@ public:
 	Gaussian(vector<double> series);
 	void update_GARCH_vec(vector<double> x);
 	double function_value(vector<double> x);
+	vector<double> calcNumGradients(vector<double> x);
 	vector<double> calcGradients(vector<double> x);
 	void getSeries();
 	double calcStepSize(vector<double> x, vector<double> d);

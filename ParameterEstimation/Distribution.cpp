@@ -5,6 +5,25 @@
 Distribution::Distribution(vector<double> series):
 	time_series(series) {}
 
+vector<double> Distribution::calcNumGradients(vector<double> x) {
+
+
+
+	double increment{ 0.00001 };
+	vector<double> num_gradients(4);
+	vector<double> x_0diff(x);
+	x_0diff(0) += increment;
+	vector<double> x_1diff(x);
+	x_1diff(1) += increment;
+
+	num_gradients(0) = (function_value(x_0diff) - function_value(x)) / increment;
+	num_gradients(1) = (function_value(x_1diff) - function_value(x)) / increment;
+
+	return num_gradients;
+}
+
+
+
 vector<double> Distribution::calcGradients(vector<double> x) {
 
 	std::cout << "calcGradients in Distribution \n";
