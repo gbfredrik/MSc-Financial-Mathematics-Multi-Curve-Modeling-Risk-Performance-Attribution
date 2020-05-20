@@ -68,7 +68,7 @@ BOOL __stdcall run_all_multiXL(BOOL const compute_curves/*, ...*/) {
 
 		ublas::matrix<double> m_diff{ matrixOperations::diff_matrix(m_forward_curves_rf) };
 		// Todo: Clean data here and process:
-		ublas::matrix_range<ublas::matrix<double>> m_diff_clean (m_diff, ublas::range(0, min(1500, m_diff.size1())), ublas::range(0, m_diff.size2()));
+		ublas::matrix_range<ublas::matrix<double>> m_diff_clean(m_diff, ublas::range(0, min(1500, m_diff.size1())), ublas::range(0, m_diff.size2()));
 		ublas::matrix<double> m_rf_centered{ matrixOperations::center_matrix(m_diff_clean) };
 
 		int k{ 6 };

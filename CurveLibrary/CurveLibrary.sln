@@ -109,6 +109,7 @@ Global
 		{D7F43FD7-48FE-441A-9391-D42AD730F92F}.Release|x64.ActiveCfg = Release|x64
 		{D7F43FD7-48FE-441A-9391-D42AD730F92F}.Release|x64.Build.0 = Release|x64
 		{D7F43FD7-48FE-441A-9391-D42AD730F92F}.Release|x86.ActiveCfg = Release|Win32
+		{D7F43FD7-48FE-441A-9391-D42AD730F92F}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

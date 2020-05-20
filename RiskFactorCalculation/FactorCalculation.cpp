@@ -24,13 +24,13 @@ bool FactorCalculation::iram(
 	using namespace Spectra;
 	
 	// Transform ublas matrix into Eigen::matrix
-	Eigen::MatrixXd D = matrixOperations::ublasToMatrixXd(input);
+	Eigen::MatrixXd D{ matrixOperations::ublasToMatrixXd(input) };
 	
 	if (D.rows() < D.cols()) {
 		Eigen::HouseholderQR<Eigen::MatrixXd> qr(D.transpose());
 
 		// Define the positive definite RTR matrix
-		Eigen::MatrixXd RTR = qr.matrixQR().transpose() * qr.matrixQR();
+		Eigen::MatrixXd RTR{ qr.matrixQR().transpose() * qr.matrixQR() };
 		Eigen::MatrixXd thinQ(Eigen::MatrixXd::Identity(D.cols(), D.rows()));
 		thinQ = qr.householderQ() * thinQ;
 
@@ -38,11 +38,11 @@ bool FactorCalculation::iram(
 		DenseSymMatProd<double> op(RTR);
 
 		// Construct eigen solver object, requesting the largest k eigenvalues in magnitude
-		SymEigsSolver<double, LARGEST_ALGE, DenseSymMatProd<double>> eigs(&op, k, 2.0 * k + 1.0);
+		SymEigsSolver<double, LARGEST_ALGE, DenseSymMatProd<double>> eigs(&op, k, 2 * k + 1);
 
 		// Initialize and compute
 		eigs.init();
-		int nconv = eigs.compute();
+		int nconv{ eigs.compute() };
 
 		// Retrieve results
 		if (eigs.info() == SUCCESSFUL) {
@@ -52,16 +52,16 @@ bool FactorCalculation::iram(
 		}
 	} else {
 		// Define the positive definite C matrix
-		Eigen::MatrixXd C = D.transpose() * D;
+		Eigen::MatrixXd C{ D.transpose() * D };
 
 		// Construct matrix operation objects
 		DenseSymMatProd<double> op(C);
 
 		// Construct eigen solver object, requesting the largest k eigenvalues in magnitude
-		SymEigsSolver<double, LARGEST_ALGE, DenseSymMatProd<double>> eigs(&op, k, 2.0 * k + 1.0);
+		SymEigsSolver<double, LARGEST_ALGE, DenseSymMatProd<double>> eigs(&op, k, 2 * k + 1);
 
 		eigs.init();
-		int nconv = eigs.compute();
+		int nconv{ eigs.compute() };
 
 		// Retrieve results
 		if (eigs.info() == SUCCESSFUL) {
@@ -81,15 +81,15 @@ bool FactorCalculation::eigen_bdcsvd(
 	boost::numeric::ublas::vector<double>& v_Lambda
 ) {
 	// Utilizes BDCSVD from Eigen library
-	int svd_opt = Eigen::ComputeThinU | Eigen::ComputeThinV;
+	int svd_opt{ Eigen::ComputeThinU | Eigen::ComputeThinV };
 
-	Eigen::MatrixXd H = matrixOperations::ublasToMatrixXd(input);	
+	Eigen::MatrixXd H{ matrixOperations::ublasToMatrixXd(input) };
 
 	if (H.rows() < H.cols()) {
 		Eigen::HouseholderQR<Eigen::MatrixXd> qr(H.transpose()); // FullPivHouseholderQR<Matrix<double, Dynamic, Size>> fpqr(A.rows(), A.cols());
 		Eigen::MatrixXd thinQ(Eigen::MatrixXd::Identity(H.cols(), H.rows()));
 		thinQ = qr.householderQ() * thinQ;
-		Eigen::MatrixXd RTR = qr.matrixQR().transpose() * qr.matrixQR();
+		Eigen::MatrixXd RTR{ qr.matrixQR().transpose() * qr.matrixQR() };
 
 		Eigen::BDCSVD<Eigen::MatrixXd> bdcsvd(RTR, svd_opt);
 
