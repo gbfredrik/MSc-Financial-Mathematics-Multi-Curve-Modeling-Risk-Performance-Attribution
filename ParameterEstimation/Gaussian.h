@@ -22,6 +22,10 @@
 #include <boost/accumulators/statistics/variance.hpp>
 #include <boost/bind.hpp>
 
+
+#include <boost/qvm/mat_operations.hpp>
+
+
 using namespace boost::numeric::ublas;
 
 class Gaussian : public Distribution {
@@ -29,6 +33,7 @@ public:
 	Gaussian(vector<double> series);
 	void update_GARCH_vec(vector<double> x);
 	double function_value(vector<double> x);
+	matrix<double> calcNumHessian(vector<double> x);
 	vector<double> calcNumGradients(vector<double> x);
 	vector<double> calcGradients(vector<double> x);
 	void getSeries();

@@ -20,6 +20,7 @@ class Distribution {
 public:
 	Distribution(vector<double> time_series);
 	vector<double> time_series;
+	virtual matrix<double> calcNumHessian(vector<double> x);
 	virtual vector<double> calcNumGradients(vector<double> x);
 	virtual vector<double> calcGradients(vector<double> x);
 	virtual double function_value(vector<double>);

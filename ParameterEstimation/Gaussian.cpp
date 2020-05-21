@@ -1,5 +1,9 @@
 #include "Gaussian.h"
+#include "../MathLibrary/matrixOperations.h"
 
+#include <Eigen/Dense>
+
+using namespace boost::numeric::ublas;
 
 Gaussian::Gaussian(vector<double> series) : Distribution(series) {
 	time_series = series;
@@ -72,6 +76,74 @@ vector<double> Gaussian::calcNumGradients(vector<double> x) {
 
 
 // Hessian: https://v8doc.sas.com/sashtml/ormp/chap5/sect28.htm
+
+matrix<double> Gaussian::calcNumHessian(vector<double> x) {
+	
+	//double epsilon = 2.2 * pow(10, -16);
+	//vector<double> increment(0.00001);
+	double increment = 0.0000001;
+	vector<double> num_gradients(4);
+
+	vector<double> h(4);
+	for (size_t i = 0; i < h.size(); ++i) {
+		h(i) = 0;
+	}
+
+	double epsilon = 4.8 * pow(10, -6);
+	
+	vector<double> inc(4);
+	inc(0) = epsilon * (1 + abs(x(0)));
+	inc(1) = epsilon * (1 + abs(x(1)));
+	inc(2) = epsilon * (1 + abs(x(2)));
+	inc(3) = epsilon * (1 + abs(x(3)));
+	
+	vector<double> hw = h;
+	hw(0) += inc(0);
+	vector<double> ha = h;
+	ha(1) += inc(1);
+	vector<double> hb = h;
+	hb(2) += inc(2);
+	vector<double> hmu = h;
+	hmu(3) += inc(3);
+
+	
+	double dw2 = (calcGradients(x + hw)(0) - calcGradients(x - hw)(0)) / (4.0 * inc(0)) + (calcGradients(x + hw)(0) - calcGradients(x - hw)(0)) / (4.0 * inc(0));
+	double dwa = (calcGradients(x + ha)(0) - calcGradients(x - ha)(0)) / (4.0 * inc(1)) + (calcGradients(x + hw)(1) - calcGradients(x - hw)(1)) / (4.0 * inc(0));
+	double dwb = (calcGradients(x + hb)(0) - calcGradients(x - hb)(0)) / (4.0 * inc(2)) + (calcGradients(x + hw)(2) - calcGradients(x - hw)(2)) / (4.0 * inc(0));
+	double dwmu = (calcGradients(x + hmu)(0) - calcGradients(x - hmu)(0)) / (4.0 * inc(3)) + (calcGradients(x + hw)(3) - calcGradients(x - hw)(3)) / (4.0 * inc(0));
+	double dab = (calcGradients(x + hb)(1) - calcGradients(x - hb)(1)) / (4.0 * inc(2)) + (calcGradients(x + ha)(2) - calcGradients(x - ha)(2)) / (4.0 * inc(1));
+	double damu = (calcGradients(x + hmu)(1) - calcGradients(x - hmu)(1)) / (4.0 * inc(3)) + (calcGradients(x + ha)(3) - calcGradients(x - ha)(3)) / (4.0 * inc(1));
+	double dbmu = (calcGradients(x + hmu)(2) - calcGradients(x - hmu)(2)) / (4.0 * inc(3)) + (calcGradients(x + hb)(3) - calcGradients(x - hb)(3)) / (4.0 * inc(2));
+	double da2 = (calcGradients(x + ha)(1) - calcGradients(x - ha)(1)) / (4.0 * inc(1)) + (calcGradients(x + ha)(1) - calcGradients(x - ha)(1)) / (4.0 * inc(1));
+	double db2 = (calcGradients(x + hb)(2) - calcGradients(x - hb)(2)) / (4.0 * inc(2)) + (calcGradients(x + hb)(2) - calcGradients(x - hb)(2)) / (4.0 * inc(2));
+	double dmu2 = (calcGradients(x + hmu)(3) - calcGradients(x - hmu)(3)) / (4.0 * inc(3)) + (calcGradients(x + hmu)(3) - calcGradients(x - hmu)(3)) / (4.0 * inc(3));
+
+	matrix<double> Hessian(4, 4);
+	Hessian(0, 0) = dw2;
+	Hessian(0, 1) = dwa;
+	Hessian(0, 2) = dwb;
+	Hessian(0, 3) = dwmu;
+	Hessian(1, 0) = dwa;
+	Hessian(1, 1) = da2;
+	Hessian(1, 2) = dab;
+	Hessian(1, 3) = damu;
+	Hessian(2, 0) = dwb;
+	Hessian(2, 1) = dab;
+	Hessian(2, 2) = db2;
+	Hessian(2, 3) = dbmu;
+	Hessian(3, 0) = dwmu;
+	Hessian(3, 1) = damu;
+	Hessian(3, 2) = dbmu;
+	Hessian(3, 3) = dmu2;
+
+
+
+	matrix<double> Hessian_inv = matrixOperations::matrixXdToUblas( matrixOperations::ublasToMatrixXd(Hessian).inverse() );
+
+
+
+	return Hessian_inv;
+}
 
 
 //Calculate gradients, x = [omega alpha beta mu]
@@ -155,7 +227,6 @@ double Gaussian::calcStepSize(vector<double> x, vector<double> d) {
 
 	while (x(0) + a * d(0) < 0 || x(1) + a * d(1) < 0 || x(2) + a * d(2) < 0 || x(1) + a * d(1) + x(2) + a * d(2) >= 1) {
 		a = a * 0.5;
-		std::cout << "i bivillkorsuppföljning : " << x + a * d << "\n\n";
 
 		if (a == 0) {
 			break;
@@ -169,7 +240,6 @@ double Gaussian::calcStepSize(vector<double> x, vector<double> d) {
 	while (function_value(x + a * d) > function_value(x)+0.000001)
 	{
 		a = a * 0.5;
-		std::cout << "i funktionsvärdestest : \n" << " gammalt x = " <<  x  <<  " Nytt x = " << x + a*d << "\n\n";
 
 	}
 

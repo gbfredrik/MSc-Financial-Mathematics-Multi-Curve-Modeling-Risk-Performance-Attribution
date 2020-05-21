@@ -22,6 +22,11 @@ vector<double> Distribution::calcNumGradients(vector<double> x) {
 	return num_gradients;
 }
 
+matrix<double> Distribution::calcNumHessian(vector<double> x) {
+	matrix<double> v(0,0);
+	return v;
+}
+
 
 
 vector<double> Distribution::calcGradients(vector<double> x) {
