@@ -1,14 +1,11 @@
-#include "../TermStructureSimulation/unfGenGauss.h"
-#include "../TermStructureSimulation/unfGenT.h"
-#include "../TermStructureSimulation/lhsd.h"
 #include "../MathLibrary/rvSim.h"
-#include "../MathLibrary/matrixOperations.h"
-#include "../RiskFactorCalculation/FactorCalculation.h"
+//#include "../MathLibrary/matrixOperations.h"
+//#include "../RiskFactorCalculation/FactorCalculation.h"
 
 #include <iostream>
-#include <numeric>
-#include <Eigen/Core>
-#include <tuple>
+//#include <numeric>
+//#include <Eigen/Core>
+//#include <tuple>
 
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/matrix_proxy.hpp>
@@ -18,19 +15,31 @@
 
 using namespace boost::numeric::ublas;
 using namespace boost::range;
-using namespace Eigen;
+//using namespace Eigen;
 
 //void test_algo4_5();
 //void test_matrix();
 //void test_arnoldi();
-
+void testRv();
 int main() {
 
 	//test_algo4_5();
 	//test_matrix();
 	//test_arnoldi();
+	testRv();
+}
+
+
+void testRv() {
+
+
+	matrix<double> test(1, 1);
+	test = rvSim::gen_normal(0.0, 1.0, 3, 3);
+
+	std::cout << test << std::endl;
 
 }
+
 
 /*
 

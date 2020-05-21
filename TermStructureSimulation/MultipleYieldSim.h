@@ -3,7 +3,8 @@
 #include "mex.h"
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/optional/optional.hpp>
-#include <boost/none_t.hpp>
+
+//extern boost::numeric::ublas::matrix<double> test;
 
 class MultipleYieldSim {
 private:

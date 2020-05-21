@@ -1,13 +1,14 @@
 %% Estimate forward curves
-load('fHist.mat')
-load('piHist.mat')
+load('10YrCurves.mat')
+%load('fHist.mat')
+%load('piHist.mat')
 
 %% Simulate curves - All arguments
 startDay = 1;
 endDay = 3400;
 
-DZero = fHist(2:end-1000,:) - fHist(1:end-1001,:);
-DTau = piHist(2:end-1000,:) - piHist(1:end-1001,:);
+DZero = fAll(2:end-1000,:) - fAll(1:end-1001,:);
+DTau = piAll(2:end-1000,:) - piAll(1:end-1001,:);
 
 kZero = 3;
 kTau = 3;
@@ -95,12 +96,12 @@ betaT.Zero = [0.935425526459519, 0.88423290065623, 0.917777792980412];
 betaT.Tau = [0.799200766350339, 0.887354806233473, 0.685203018906688];
 
 hist = {};
-hist.f = fHist(end-1000:end,:);
-hist.pi = piHist(end-1000:end,:);
+hist.f = fAll(end-1000:end,:);
+hist.pi = piAll(end-1000:end,:);
 
 fRes = {};
-fRes.Zero = zeros(size(fHist, 2), N);
-fRes.Tau = zeros(size(fHist, 2), N);
+fRes.Zero = zeros(size(fAll, 2), N);
+fRes.Tau = zeros(size(fAll, 2), N);
 
 gammaGauss = {};
 gammaGauss.Zero = zeros(kZero, 1);
