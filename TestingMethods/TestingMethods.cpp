@@ -4,10 +4,12 @@
 #include "../MathLibrary/rvSim.h"
 #include "../MathLibrary/matrixOperations.h"
 #include "../Backtesting/backtesting.h"
+#include "../RiskFactorCalculation/FactorCalculation.h"
 
 #include <iostream>
 #include <numeric>
 #include <Eigen/Core>
+#include <tuple>
 
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/matrix_proxy.hpp>
@@ -21,8 +23,10 @@ using namespace Eigen;
 
 //void test_algo4_5();
 //void test_matrix();
+//void test_arnoldi();
 void test_likelihood();
 void test_likelihood2();
+
 int main() {
 
 	//test_algo4_5();
@@ -30,6 +34,12 @@ int main() {
 	//test_matrix();
 	test_likelihood();
 	test_likelihood2();
+
+
+	//test_algo4_5();
+	//test_matrix();
+	//test_arnoldi();
+
 }
 
 /*
@@ -68,7 +78,6 @@ void test_algo4_5() {
 */
 
 /*
-
 void test_matrix() {
 
 	size_t m = 5;
@@ -192,3 +201,22 @@ void test_likelihood2() {
 
 }
 
+/*
+void test_arnoldi() {
+
+	size_t m = 20;
+	size_t n = 20;
+
+	int k = 6;
+
+	matrix<double> D(m, n);
+	matrix<double> E(m, n);
+	vector<double> lambda(k);
+	D = rvSim::gen_test(m, n);
+
+	tie(E, lambda) = arnoldi::iram(D, k);
+
+	std::cout << E << std::endl;
+	std::cout << lambda << std::endl;
+}
+*/
