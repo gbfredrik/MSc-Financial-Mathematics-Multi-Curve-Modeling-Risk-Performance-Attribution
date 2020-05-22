@@ -27,8 +27,8 @@ vector<double> bfgs::minimize(vector<double> x, matrix<double> H_inv, int max_it
 	while (norm_2(dist->calcGradients(x)) > epsilon && k < max_iter) {
 		std::cout << "New iteration \n\n";
 		gradient_vec = dist->calcGradients(x);
-		std::cout << "H_inv: " << H_inv << "\n\n";
-		std::cout << "Mumerical H_inv: " << dist->calcNumHessian(x) << "\n\n";
+		std::cout << "    H_inv: " << H_inv << "\n\n";
+		std::cout << "Num H_inv: " << dist->calcNumHessian(x) << "\n\n";
 		std::cout << "gradient_vec: " << gradient_vec << "\n \n";
 		std::cout << "Numerical gradient_vec: " << dist->calcNumGradients(x) << "\n \n";
 		d = -prod(H_inv, gradient_vec);

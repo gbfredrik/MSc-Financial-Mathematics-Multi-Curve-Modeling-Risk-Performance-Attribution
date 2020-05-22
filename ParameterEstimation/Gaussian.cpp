@@ -76,12 +76,12 @@ vector<double> Gaussian::calcNumGradients(vector<double> x) {
 
 
 // Hessian: https://v8doc.sas.com/sashtml/ormp/chap5/sect28.htm
-
+//
 matrix<double> Gaussian::calcNumHessian(vector<double> x) {
 	
 	//double epsilon = 2.2 * pow(10, -16);
 	//vector<double> increment(0.00001);
-	double increment = 0.0000001;
+	//double increment = 0.001;
 	vector<double> num_gradients(4);
 
 	vector<double> h(4);
@@ -92,10 +92,19 @@ matrix<double> Gaussian::calcNumHessian(vector<double> x) {
 	double epsilon = 4.8 * pow(10, -6);
 	
 	vector<double> inc(4);
-	inc(0) = epsilon * (1 + abs(x(0)));
-	inc(1) = epsilon * (1 + abs(x(1)));
-	inc(2) = epsilon * (1 + abs(x(2)));
-	inc(3) = epsilon * (1 + abs(x(3)));
+	//inc(0) = epsilon * (1 + abs(x(0)));
+	//inc(1) = epsilon * (1 + abs(x(1)));
+	//inc(2) = epsilon * (1 + abs(x(2)));
+	//inc(3) = epsilon * (1 + abs(x(3)));
+
+	//for (size_t i = 0; i < inc.size(); ++i) {
+	//	inc(i) = 0.00000000001;
+	//}
+
+	inc(0) = 0.0000000000001;
+	inc(1) = 0.0000000000001;
+	inc(2) = 0.0000000000001;
+	inc(3) = 0.0000000000001;
 	
 	vector<double> hw = h;
 	hw(0) += inc(0);
@@ -237,7 +246,8 @@ double Gaussian::calcStepSize(vector<double> x, vector<double> d) {
 
 
 	//while (function_value(x + a * d) > function_value(x) + c1 * a * inner_prod(calcGradients(x), d))
-	while (function_value(x + a * d) > function_value(x)+0.000001)
+	//while (function_value(x + a * d) > function_value(x)+0.000001)
+	while (function_value(x + a * d) > function_value(x))
 	{
 		a = a * 0.5;
 

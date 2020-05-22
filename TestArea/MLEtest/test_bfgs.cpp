@@ -21,15 +21,15 @@ int main() {
 	 
 	vector<double> start(4);
 	
-	/*omega
-	start(0) = 0.001;
-	//alpha
-	start(1) = 0.05;
-	//beta
-	start(2) = 0.9;
-	//väntevärde
-	start(3) = 0.05;
-	*/
+	////omega
+	//start(0) = 0.001;
+	////alpha
+	//start(1) = 0.05;
+	////beta
+	//start(2) = 0.9;
+	////väntevärde
+	//start(3) = 0.05;
+	//
 	//FÖR XI1
 	//omega
 	start(0) = 0.001;
@@ -40,29 +40,29 @@ int main() {
 	//väntevärde
 	start(3) = 0;
 
-	//omega xi2
+	////omega xi2
 	//start(0) = 0.00000001;
-	//alpha
+	////alpha
 	//start(1) = 0.0496;
-	//beta
+	////beta
 	//start(2) = 0.950399;
-	//väntevärde
+	////väntevärde
 	//start(3) = -0.00003199;
 
-	//omega
-	//start(0) = 0.00000001;
-	//alpha
-	//start(1) = 0.0496;
-	//beta
-	//start(2) = 0.950399;
-	//väntevärde
-	//start(3) = -0.00003199;
+	////omega
+	//start(0) = 0.001;
+	////alpha
+	//start(1) = 0.05;
+	////beta
+	//start(2) = 0.9;
+	////väntevärde
+	//start(3) = 0;
 
 	vector<double> start_r(2);
 	start_r(0) = 5;
 	start_r(1) = -5;
 
-	int max_iter = 200;
+	int max_iter = 500;
 	double epsilon = pow(10,-7);
 	double dt = 1.00;
 	matrix<double> H_inv(4, 4);
@@ -126,11 +126,11 @@ int main() {
 	//std::cout << "Time_series = " << time_series << "\n\n";
 
 	
-
+	
 	Gaussian dist2(xi1);
 	Gaussian* gaussian = &dist2;
 
-	//H_inv = gaussian->calcNumHessian(start);
+	//H_inv = (gaussian->calcNumHessian(start));
 
 	//std::cout << "Funktionsvärde startparametrar : " << gaussian->function_value(start, dt) << "\n";
 
