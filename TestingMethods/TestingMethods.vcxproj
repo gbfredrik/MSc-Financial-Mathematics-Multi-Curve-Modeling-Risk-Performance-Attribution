@@ -106,6 +106,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>X:\Dependencies\eigen-3.3.7;X:\Dependencies\boost_1_72_0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -154,6 +155,9 @@
     <ClCompile Include="TestingMethods.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Backtesting\Backtesting.vcxproj">
+      <Project>{61306c73-edc9-401b-9f84-0542cdd2e2a4}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\MathLibrary\MathLibrary.vcxproj">
       <Project>{a18252bf-632c-435a-9887-422029fc1503}</Project>
     </ProjectReference>
