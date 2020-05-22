@@ -130,7 +130,6 @@ vector<double> delta_T_calc(size_t length, vector<double> maturity_input) {
 	delta_T = maturity1 - maturity0;
 
 	return delta_T;
-
 }
 
 
