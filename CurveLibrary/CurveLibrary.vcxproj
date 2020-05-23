@@ -75,6 +75,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <TargetName>CURVELIBRARY</TargetName>
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>\\ad.liu.se\home\corwe099\Documents\Dependencies\eigen-3.3.7;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <TargetName>CURVELIBRARY</TargetName>
