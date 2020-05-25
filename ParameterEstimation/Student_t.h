@@ -21,14 +21,14 @@ using namespace boost::numeric::ublas;
 class Student_t : public Distribution {
 public:
 	Student_t(vector<double> series);
-	vector<double> create_GARCH_vec(vector<double> x);
+	void update_GARCH_vec(vector<double> x);
 	double function_value(vector<double> x);
 	vector<double> calcGradients(vector<double> x);
 	void getSeries();
 	double calcStepSize(vector<double> x, vector<double> d);
 
 private:
-	vector<double> GARCH_vec;
+	vector<double> m_GARCH_vec;
 
 	vector<double> derivative_w(vector<double> x, vector<double> GARCH_vec);
 	vector<double> derivative_a(vector<double> x, vector<double> GARCH_vec);

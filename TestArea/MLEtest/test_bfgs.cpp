@@ -11,11 +11,13 @@
 #include <fstream>
 #include <strstream>
 #include <sstream>
+#include <random>
+//#include <boost\filesystem\operations.hpp>
 
 matrix<double> read_matrix(std::string const& file_name, int rows, int columns);
 matrix<double> delta_curves(matrix<double> curves);
 vector<double> read_time_series_test(std::string const& file_name);
-
+matrix<double> gen_start_params(int n);
 
 int main() {
 	 
@@ -62,7 +64,7 @@ int main() {
 	start_r(0) = 5;
 	start_r(1) = -5;
 
-	int max_iter = 500;
+	int max_iter = 100;
 	double epsilon = pow(10,-7);
 	double dt = 1.00;
 	matrix<double> H_inv(4, 4);
@@ -113,7 +115,7 @@ int main() {
 		std::cout << "Error:" << ex.what() << "\n";
 		return 1;
 	}
-	//std::cout << "delta_f = " << trans(delta_f) << "\n \n";
+
 
 	matrix<double> hist_risk_faktors = prod(trans(E_rf), trans(delta_f));
 
@@ -122,26 +124,68 @@ int main() {
 	matrix_row<matrix<double> > xi2(hist_risk_faktors, 1);
 	matrix_row<matrix<double> > xi3(hist_risk_faktors, 2);
 
-	//std::cout << "Riskfaktor 1 = " << xi1 << "\n\n";
-	//std::cout << "Time_series = " << time_series << "\n\n";
 
-	
-	
-	Gaussian dist2(xi1);
+	Gaussian dist2(xi3);
 	Gaussian* gaussian = &dist2;
 
-	//H_inv = (gaussian->calcNumHessian(start));
+	// Create start parameters
+	int nSolutions = 20;
 
-	//std::cout << "Funktionsvärde startparametrar : " << gaussian->function_value(start, dt) << "\n";
+	matrix<double> params(4, nSolutions);
+	boost::numeric::ublas::vector<double> FV(nSolutions);
+	matrix<double> opt_params(4, nSolutions);
+	
+	params = gen_start_params(nSolutions);
+
+	for (size_t i = 0; i < params.size2(); ++i) {
+
+		vector<double> results = bfgs::minimize(column(params,i), H_inv, max_iter, epsilon, gaussian);
+		
+		for (size_t j = 0; j < opt_params.size1(); ++j) {
+			column(opt_params,i)(j) = results(j);
+		}
+		FV(i) = results(4);
+	}
+
+	double smallest = FV(0);
+	int index = 0;
+
+	for (vector<double>::iterator it = FV.begin(); it != FV.end() ; it ++) {
+
+		if (*it < smallest) {
+			smallest = *it;
+			index = it - FV.begin();
+		}
+	}
 
 
-	vector<double> opt_parameters = bfgs::minimize(start, H_inv, max_iter, epsilon, gaussian);
-
-	//std::cout << opt_parameters;
-
-
-
+	
+	std::cout << "OPT FV = " << smallest << " at params = " << column(opt_params, index) <<  "\n\n";
 }
+
+matrix<double> gen_start_params(int n){
+
+	vector<double> params(4);
+	matrix<double> param_matrix(4, n);
+
+	std::default_random_engine generator;
+	std::uniform_real_distribution<double> distribution(0.7,0.95);
+
+	
+
+	for (size_t i = 0; i < n; ++i) {
+		
+		params(0) = 0;
+		params(2) = distribution(generator);
+		params(1) = 1 - params(2) - 0.001;
+		params(3) = 0;
+
+		column(param_matrix, i) = params;
+	}
+
+	return param_matrix;
+}
+
 
 vector<double> read_time_series_test(std::string const& file_name) {
 

@@ -3,6 +3,17 @@
 
 Student_t::Student_t(vector<double> series) : Distribution(series) {
 	time_series = series;
+	vector<double> garch_vec(time_series.size() + 1);
+	m_GARCH_vec = garch_vec;
+
+	//Calc variance for timeseries
+	boost::accumulators::accumulator_set<double, boost::accumulators::stats<boost::accumulators::tag::variance> > acc;
+	for_each(time_series.begin(), time_series.end(), boost::bind<void>(boost::ref(acc), _1));
+
+	//Set variance as first element
+	m_GARCH_vec(0) = boost::accumulators::variance(acc);
+
+	std::cout << "GARCH0 = " << m_GARCH_vec(0) << "\n\n";
 }
 
 
@@ -10,26 +21,19 @@ void Student_t::getSeries() {
 	std::cout << "In gaussian: " << time_series << "\n";
 }
 
-vector<double> Student_t::create_GARCH_vec(vector<double> x) {
+void Student_t::update_GARCH_vec(vector<double> x) {
 	vector<double> garch_vec(time_series.size() + 1);
 
-	//garch_vec(0) = pow(time_series(0), 2); // datum växer med index
-
-	garch_vec(0) = 0.1059;
-
 	for (size_t i = 0; i < time_series.size(); i++) {
-		garch_vec(i + 1) = x(0) + x(1) * pow(time_series(i), 2) * 252 + x(2) * garch_vec(i);
+		m_GARCH_vec(i + 1) = x(0) + x(1) * pow(time_series(i), 2) + x(2) * m_GARCH_vec(i);
 	}
-
-	return garch_vec;
 }
 
 double Student_t::function_value(vector<double> x) {
 
-	GARCH_vec = create_GARCH_vec(x);
+	update_GARCH_vec(x);
 
 	double sum = 0;
-
 
 	for (size_t i = 1; i < GARCH_vec.size() - 1; ++i) {
 		sum += log(GARCH_vec(i))
