@@ -16,6 +16,12 @@
 
 #include <boost/math/constants/constants.hpp>
 
+
+#include <boost/accumulators/accumulators.hpp>
+#include <boost/accumulators/statistics/stats.hpp>
+#include <boost/accumulators/statistics/variance.hpp>
+#include <boost/bind.hpp>
+
 using namespace boost::numeric::ublas;
 
 class Student_t : public Distribution {
@@ -30,8 +36,8 @@ public:
 private:
 	vector<double> m_GARCH_vec;
 
-	vector<double> derivative_w(vector<double> x, vector<double> GARCH_vec);
-	vector<double> derivative_a(vector<double> x, vector<double> GARCH_vec);
-	vector<double> derivative_b(vector<double> x, vector<double> GARCH_vec);
+	vector<double> derivative_w(vector<double> x);
+	vector<double> derivative_a(vector<double> x);
+	vector<double> derivative_b(vector<double> x);
 
 };
