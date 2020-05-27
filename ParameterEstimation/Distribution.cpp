@@ -5,7 +5,7 @@
 Distribution::Distribution(vector<double> series):
 	time_series(series) {}
 
-vector<double> Distribution::calcNumGradients(vector<double> x) {
+vector<double> Distribution::calcNumGradients(vector<double> const& x) {
 
 
 
@@ -22,14 +22,14 @@ vector<double> Distribution::calcNumGradients(vector<double> x) {
 	return num_gradients;
 }
 
-matrix<double> Distribution::calcNumHessian(vector<double> x) {
+matrix<double> Distribution::calcNumHessian(vector<double> const& x) {
 	matrix<double> v(0,0);
 	return v;
 }
 
 
 
-vector<double> Distribution::calcGradients(vector<double> x) {
+vector<double> Distribution::calcGradients(vector<double> const& x) {
 
 	std::cout << "calcGradients in Distribution \n";
 
@@ -48,13 +48,13 @@ void Distribution::getSeries() {
 }
 
 
-double Distribution::function_value(vector<double> x) {
+double Distribution::function_value(vector<double> const& x) {
 
 	double function_value = pow(1 - x(0), 2) + 100 * pow(x(1) - x(0) * x(0), 2);
 	return function_value;
 }
 
-double Distribution::calcStepSize(vector<double> x, vector<double> d) {
+double Distribution::calcStepSize(vector<double> const& x, vector<double> const& d) {
 
 	double a = 1;
 	double c1 = pow(10, -4);

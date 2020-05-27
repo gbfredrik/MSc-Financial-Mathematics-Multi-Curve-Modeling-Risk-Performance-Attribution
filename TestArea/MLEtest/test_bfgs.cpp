@@ -1,6 +1,7 @@
 #include "../../ParameterEstimation/bfgs.h"
 #include "../../ParameterEstimation/Distribution.h"
 #include "../../ParameterEstimation/Gaussian.h"
+#include "../../ParameterEstimation/Student_t.h"
 
 #include <boost/fusion/algorithm/transformation/push_back.hpp>
 #include <boost/fusion/include/push_back.hpp>
@@ -17,30 +18,21 @@
 matrix<double> read_matrix(std::string const& file_name, int rows, int columns);
 matrix<double> delta_curves(matrix<double> curves);
 vector<double> read_time_series_test(std::string const& file_name);
-matrix<double> gen_start_params(int n);
+matrix<double> gen_start_params(int n, std::string dist);
 
 int main() {
 	 
-	vector<double> start(4);
 	
-	////omega
-	//start(0) = 0.001;
-	////alpha
-	//start(1) = 0.05;
-	////beta
-	//start(2) = 0.9;
-	////väntevärde
-	//start(3) = 0.05;
-	//
+
 	//FÖR XI1
 	//omega
-	start(0) = 0.001;
+	//start(0) = 0.001;
 	//alpha
-	start(1) = 0.05;
+	//start(1) = 0.05;
 	//beta
-	start(2) = 0.9;
+	//start(2) = 0.9;
 	//väntevärde
-	start(3) = 0;
+	//start(3) = 0;
 
 	////omega xi2
 	//start(0) = 0.00000001;
@@ -60,26 +52,26 @@ int main() {
 	////väntevärde
 	//start(3) = 0;
 
+
+	/*
 	vector<double> start_r(2);
 	start_r(0) = 5;
 	start_r(1) = -5;
-
-	int max_iter = 100;
-	double epsilon = pow(10,-7);
-	double dt = 1.00;
-	matrix<double> H_inv(4, 4);
-	identity_matrix<double> I(4);
-	H_inv = I;
-	vector<double> time_series;
-	matrix<double> hist_rf;
-	matrix<double> E_rf;
-	
 	vector<double> vec(2);
 	vec(0) = 0.5;
 	vec(1) = 0.5;
 	Distribution dist(vec);
 	Distribution* rosenbrock = &dist;
+	*/
+
+	double dt = 1.00;
+	vector<double> time_series;
+	matrix<double> hist_rf;
+	matrix<double> E_rf;
+
 	
+	
+
 	std::cout << "dt = " << dt << "\n";
 	
 	try {
@@ -125,32 +117,69 @@ int main() {
 	matrix_row<matrix<double> > xi3(hist_risk_faktors, 2);
 
 
-	Gaussian dist2(xi3);
-	Gaussian* gaussian = &dist2;
-
-	// Create start parameters
-	int nSolutions = 20;
-
-	matrix<double> params(4, nSolutions);
-	boost::numeric::ublas::vector<double> FV(nSolutions);
-	matrix<double> opt_params(4, nSolutions);
 	
-	params = gen_start_params(nSolutions);
+	//vector<double> start(4);
+	
+	
+	
+	
+	
+	// Create start parameters 
 
+
+	std::string dist_choice = "t";
+	int nSolutions = 20;
+	vector<double> series = xi1;
+	int max_iter = 100;
+	double epsilon = pow(10, -7);
+
+	//Initiate gaussian
+	int nParams = 4;
+	Gaussian dist(series);
+	Gaussian* distribution = &dist;
+	
+	Student_t dist_t(series);
+	Student_t* distribution_t = &dist_t;
+
+
+	if (dist_choice == "t") {
+		nParams = 5;
+		
+	}
+
+	matrix<double> H_inv(nParams, nParams);
+	identity_matrix<double> I(nParams);
+	H_inv = I;
+	
+	matrix<double> params(nParams, nSolutions);
+	boost::numeric::ublas::vector<double> FV(nSolutions);
+	matrix<double> opt_params(nParams, nSolutions);
+	
+	//params = gen_start_params(nSolutions, dist_choice);
+
+	vector<double> test_x(5);
+	test_x(0) = 0.00000005379722106733691;
+	test_x(1) = 0.043558331112312;
+	test_x(2) = 0.935302736808228;
+	test_x(3) = -0.0001904288328934271;
+	test_x(4) = 5.269578291031785;
+
+	std::cout << "Test LL = " << distribution_t->function_value(test_x);
+	/*
 	for (size_t i = 0; i < params.size2(); ++i) {
 
-		vector<double> results = bfgs::minimize(column(params,i), H_inv, max_iter, epsilon, gaussian);
+		vector<double> results = bfgs::minimize(column(params,i), H_inv, max_iter, epsilon, distribution_t);
 		
 		for (size_t j = 0; j < opt_params.size1(); ++j) {
 			column(opt_params,i)(j) = results(j);
 		}
-		FV(i) = results(4);
+		FV(i) = results(params.size1());
 	}
 
 	double smallest = FV(0);
 	int index = 0;
 
-	for (vector<double>::iterator it = FV.begin(); it != FV.end() ; it ++) {
+	for (vector<double>::iterator it = FV.begin(); it != FV.end() ; it++) {
 
 		if (*it < smallest) {
 			smallest = *it;
@@ -161,24 +190,33 @@ int main() {
 
 	
 	std::cout << "OPT FV = " << smallest << " at params = " << column(opt_params, index) <<  "\n\n";
-}
+	*/
+	}
 
-matrix<double> gen_start_params(int n){
-
-	vector<double> params(4);
-	matrix<double> param_matrix(4, n);
+matrix<double> gen_start_params(int n, std::string dist){
+	int nParams = 4;
+	if (dist == "normal") {
+		nParams = 4;
+	}
+	else if (dist == "t") {
+		nParams = 5;
+	}
+	vector<double> params(nParams);
+	matrix<double> param_matrix(nParams, n);
 
 	std::default_random_engine generator;
 	std::uniform_real_distribution<double> distribution(0.7,0.95);
 
-	
-
 	for (size_t i = 0; i < n; ++i) {
 		
-		params(0) = 0;
+		params(0) = 0.0001;
 		params(2) = distribution(generator);
 		params(1) = 1 - params(2) - 0.001;
-		params(3) = 0;
+		params(3) = 0.0001;
+		
+		if (dist == "t") {
+			params(4) = 5;
+		}
 
 		column(param_matrix, i) = params;
 	}

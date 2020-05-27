@@ -22,15 +22,13 @@ vector<double> bfgs::minimize(boost::numeric::ublas::vector<double> x, matrix<do
 	identity_matrix<double> I(n);
 
 	
-	
-	
 	while (norm_2(dist->calcGradients(x)) > epsilon && k < max_iter) {
-		//std::cout << "New iteration \n\n";
+		std::cout << "New iteration \n\n";
 		gradient_vec = dist->calcGradients(x);
-		//std::cout << "    H_inv: " << H_inv << "\n\n";
+		std::cout << "    H_inv: " << H_inv << "\n\n";
 		//std::cout << "Num H_inv: " << dist->calcNumHessian(x) << "\n\n";
-		//std::cout << "gradient_vec: " << gradient_vec << "\n \n";
-		//std::cout << "Numerical gradient_vec: " << dist->calcNumGradients(x) << "\n \n";
+		std::cout << "gradient_vec: " << gradient_vec << "\n \n";
+		std::cout << "Numerical gradient_vec: " << dist->calcNumGradients(x) << "\n \n";
 		d = -prod(H_inv, gradient_vec);
 		
 		//std::cout << "d : " << d << "\n\n";
@@ -63,14 +61,14 @@ vector<double> bfgs::minimize(boost::numeric::ublas::vector<double> x, matrix<do
 	std::cout << "Final k = " << k << " , Function value = " << dist->function_value(x) << " for parameters : " << x
 		<< " and norm of gradients = " << norm_2(dist->calcGradients(x)) << "\n \n \n\n";
 	
-	boost::numeric::ublas::vector<double> results(5);
+	boost::numeric::ublas::vector<double> results(n+1);
 
 	
 	for (size_t i = 0; i < results.size() - 1; i++) {
 		results(i) = x(i);
 	}
 
-	results(4) = dist -> function_value(x);
+	results(n) = dist -> function_value(x);
 
 	return results;
 }
