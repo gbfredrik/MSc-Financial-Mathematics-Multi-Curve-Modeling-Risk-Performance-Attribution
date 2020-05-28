@@ -33,19 +33,21 @@ double Student_t::function_value(vector<double> const& x) {
 	update_GARCH_vec(x);
 
 	double sum = 0;
+	double constant = std::lgamma((x(4) + 1) / 2) - lgamma(x(4) / 2) - 0.5 * log(boost::math::constants::pi<double>())
+		- 0.5 * log(x(4));
 
 	for (size_t i = 0; i < m_GARCH_vec.size() - 1; ++i) {
 		//sum += log(m_GARCH_vec(i))
 		//	+ (x(4) + 1) / 2 * log(1 + pow(time_series(i)-x(3), 2) / (m_GARCH_vec(i) * (x(4) - 2)));
 	
-		sum += log(m_GARCH_vec(i)) + (x(4) + 1) * log(1 + pow(time_series(i) - x(3), 2) / (x(4) * m_GARCH_vec(i)));
+		//sum = sum - 0.5*(log(m_GARCH_vec(i)) - (x(4) + 1) * log(1 + pow(time_series(i) - x(3), 2) / (x(4) * m_GARCH_vec(i))))
+		sum = sum + constant - 0.5 * log(m_GARCH_vec(i)) - 0.5 * (x(4) + 1) * log(1 + pow(time_series(i) - x(3), 2) / (x(4) * m_GARCH_vec(i)));
 	} 
 
 	//sum = 0.5*sum - log(std::tgamma((x(4) + 1) / 2) / (std::sqrt(x(4) - 2) * std::tgamma(x(4) / 2)));
-	sum = 0.5 * sum - std::lgamma((x(4) + 1) / 2) + lgamma(x(4) / 2) + 1 / 2 * log(boost::math::constants::pi<double>())
-		+ 1 / 2 * log(x(4));
+	
 
-	return sum;
+	return - sum;
 
 }
 
@@ -79,7 +81,7 @@ vector<double> Student_t::derivative_b(vector<double> const& x) {
 
 	inner_db(0) = 0;
 
-	for (size_t i = 1; i < inner_db.size(); ++i) {
+	for (size_t i = 1, n = inner_db.size(); i < n; ++i) {
 		inner_db(i) = m_GARCH_vec(i - 1) + x(2) * inner_db(i - 1);
 	}
 

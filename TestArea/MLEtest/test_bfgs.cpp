@@ -21,64 +21,16 @@ vector<double> read_time_series_test(std::string const& file_name);
 matrix<double> gen_start_params(int n, std::string dist);
 
 int main() {
-	 
 	
-
-	//FÖR XI1
-	//omega
-	//start(0) = 0.001;
-	//alpha
-	//start(1) = 0.05;
-	//beta
-	//start(2) = 0.9;
-	//väntevärde
-	//start(3) = 0;
-
-	////omega xi2
-	//start(0) = 0.00000001;
-	////alpha
-	//start(1) = 0.0496;
-	////beta
-	//start(2) = 0.950399;
-	////väntevärde
-	//start(3) = -0.00003199;
-
-	////omega
-	//start(0) = 0.001;
-	////alpha
-	//start(1) = 0.05;
-	////beta
-	//start(2) = 0.9;
-	////väntevärde
-	//start(3) = 0;
-
-
-	/*
-	vector<double> start_r(2);
-	start_r(0) = 5;
-	start_r(1) = -5;
-	vector<double> vec(2);
-	vec(0) = 0.5;
-	vec(1) = 0.5;
-	Distribution dist(vec);
-	Distribution* rosenbrock = &dist;
-	*/
-
-	double dt = 1.00;
 	vector<double> time_series;
 	matrix<double> hist_rf;
 	matrix<double> E_rf;
-
 	
-	
-
-	std::cout << "dt = " << dt << "\n";
 	
 	try {
 		//Senaste kurvan sist
 		time_series = read_time_series_test("aapl.csv");
 	}
-
 	catch (std::exception & ex) {
 		std::cout << "Error:" << ex.what() << "\n";
 		return 1;
@@ -89,51 +41,38 @@ int main() {
 		//Senaste kurvan sist
 		hist_rf = read_matrix("fHist.csv", 3451, 730);
 	}
-
 	catch (std::exception & ex) {
 		std::cout << "Error:" << ex.what() << "\n";
 		return 1;
 	}
-	// Beräkna delta f på riskfria kurvan.
-	matrix<double> delta_f = delta_curves(hist_rf);
 
 	//Läs in egenmatrisen för riskfria kurvan
 	try {
 		//Senaste kurvan sist
 		E_rf = read_matrix("EZero.csv", 730, 3);
 	}
-
 	catch (std::exception & ex) {
 		std::cout << "Error:" << ex.what() << "\n";
 		return 1;
 	}
 
-
+	// Beräkna riskfaktorer på riskfria kurvan.
+	matrix<double> delta_f = delta_curves(hist_rf);
 	matrix<double> hist_risk_faktors = prod(trans(E_rf), trans(delta_f));
-
 
 	matrix_row<matrix<double> > xi1(hist_risk_faktors, 0);
 	matrix_row<matrix<double> > xi2(hist_risk_faktors, 1);
 	matrix_row<matrix<double> > xi3(hist_risk_faktors, 2);
 
-
-	
-	//vector<double> start(4);
-	
-	
-	
-	
-	
-	// Create start parameters 
-
+	// OPtimization problem options
 
 	std::string dist_choice = "t";
-	int nSolutions = 20;
 	vector<double> series = xi1;
+	int nSolutions = 10;
 	int max_iter = 100;
 	double epsilon = pow(10, -7);
 
-	//Initiate gaussian
+	//Initiate distribution and 
 	int nParams = 4;
 	Gaussian dist(series);
 	Gaussian* distribution = &dist;
@@ -144,7 +83,6 @@ int main() {
 
 	if (dist_choice == "t") {
 		nParams = 5;
-		
 	}
 
 	matrix<double> H_inv(nParams, nParams);
@@ -152,26 +90,17 @@ int main() {
 	H_inv = I;
 	
 	matrix<double> params(nParams, nSolutions);
-	boost::numeric::ublas::vector<double> FV(nSolutions);
-	matrix<double> opt_params(nParams, nSolutions);
+	vector<double> FV(nSolutions);
+	//matrix<double> opt_params(nParams, nSolutions);
 	
-	//params = gen_start_params(nSolutions, dist_choice);
+	params = gen_start_params(nSolutions, dist_choice);
 
-	vector<double> test_x(5);
-	test_x(0) = 0.00000005379722106733691;
-	test_x(1) = 0.043558331112312;
-	test_x(2) = 0.935302736808228;
-	test_x(3) = -0.0001904288328934271;
-	test_x(4) = 5.269578291031785;
-
-	std::cout << "Test LL = " << distribution_t->function_value(test_x);
-	/*
 	for (size_t i = 0; i < params.size2(); ++i) {
 
 		vector<double> results = bfgs::minimize(column(params,i), H_inv, max_iter, epsilon, distribution_t);
 		
-		for (size_t j = 0; j < opt_params.size1(); ++j) {
-			column(opt_params,i)(j) = results(j);
+		for (size_t j = 0; j < params.size1(); ++j) {
+			column(params,i)(j) = results(j);
 		}
 		FV(i) = results(params.size1());
 	}
@@ -187,10 +116,9 @@ int main() {
 		}
 	}
 
+	std::cout << "All FV:S : " << FV << "\n\n";
+	std::cout << "OPT FV = " << smallest << " at params = " << column(params, index) <<  "\n\n";
 
-	
-	std::cout << "OPT FV = " << smallest << " at params = " << column(opt_params, index) <<  "\n\n";
-	*/
 	}
 
 matrix<double> gen_start_params(int n, std::string dist){
