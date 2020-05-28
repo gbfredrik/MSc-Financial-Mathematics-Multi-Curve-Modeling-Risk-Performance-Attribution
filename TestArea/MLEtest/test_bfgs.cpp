@@ -67,15 +67,19 @@ int main() {
 	// OPtimization problem options
 
 	std::string dist_choice = "t";
-	vector<double> series = xi1;
+	matrix<double> series(xi1.size(), 1);
+	matrix_column<matrix<double> > mc(series, 0);
+	mc = xi1;
+
+	//vector<double> series = xi1;
 	int nSolutions = 10;
 	int max_iter = 100;
 	double epsilon = pow(10, -7);
 
 	//Initiate distribution and 
 	int nParams = 4;
-	Gaussian dist(series);
-	Gaussian* distribution = &dist;
+	//Gaussian dist(series);
+	//Gaussian* distribution = &dist;
 	
 	Student_t dist_t(series);
 	Student_t* distribution_t = &dist_t;

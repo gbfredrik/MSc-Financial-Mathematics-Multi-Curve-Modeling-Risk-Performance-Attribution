@@ -18,7 +18,7 @@ using namespace boost::numeric::ublas;
 
 class Distribution {
 public:
-	Distribution(vector<double> time_series);
+	Distribution(matrix<double> time_series);
 	vector<double> time_series;
 	virtual matrix<double> calcNumHessian(vector<double> const& x);
 	virtual vector<double> calcNumGradients(vector<double> const& x);

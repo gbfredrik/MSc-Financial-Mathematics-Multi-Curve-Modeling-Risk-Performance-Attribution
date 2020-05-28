@@ -5,8 +5,10 @@
 
 using namespace boost::numeric::ublas;
 
-Gaussian::Gaussian(vector<double> series) : Distribution(series) {
-	time_series = series;
+Gaussian::Gaussian(matrix<double> series) : Distribution(series) {
+	matrix_column<matrix<double> > x(series, 0);
+	time_series = x;
+
 	vector<double> garch_vec(time_series.size() + 1);
 	m_GARCH_vec = garch_vec;
 

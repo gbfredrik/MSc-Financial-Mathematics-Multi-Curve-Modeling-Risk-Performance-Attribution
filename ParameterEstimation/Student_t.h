@@ -26,7 +26,7 @@ using namespace boost::numeric::ublas;
 
 class Student_t : public Distribution {
 public:
-	Student_t(vector<double> series);
+	Student_t(matrix<double> series);
 	void update_GARCH_vec(vector<double> const& x);
 	double function_value(vector<double> const& x);
 	vector<double> calcGradients(vector<double> const& x);
@@ -36,7 +36,7 @@ public:
 
 private:
 	vector<double> m_GARCH_vec;
-
+	vector<double> time_series;
 	vector<double> derivative_w(vector<double> const& x);
 	vector<double> derivative_a(vector<double> const& x);
 	vector<double> derivative_b(vector<double> const& x);

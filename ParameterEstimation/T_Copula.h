@@ -22,27 +22,20 @@
 #include <boost/accumulators/statistics/variance.hpp>
 #include <boost/bind.hpp>
 
-
-#include <boost/qvm/mat_operations.hpp>
-
-
 using namespace boost::numeric::ublas;
 
-class Gaussian : public Distribution {
-public: 
-	Gaussian(matrix<double> series);
-	void update_GARCH_vec(vector<double> const& x);
+class T_Copula : public Distribution {
+public:
+	T_Copula(matrix<double> series);
 	double function_value(vector<double> const& x);
-	matrix<double> calcNumHessian(vector<double> const& x);
-	vector<double> calcNumGradients(vector<double> const& x);
 	vector<double> calcGradients(vector<double> const& x);
+	vector<double> calcNumGradients(vector<double> const& x);
 	void getSeries();
 	double calcStepSize(vector<double> const& x, vector<double> const& d);
 
 private:
-	vector<double> time_series;
 	vector<double> m_GARCH_vec;
-	double garch0;
+	matrix<double> time_series;
 	vector<double> derivative_w(vector<double> const& x);
 	vector<double> derivative_a(vector<double> const& x);
 	vector<double> derivative_b(vector<double> const& x);

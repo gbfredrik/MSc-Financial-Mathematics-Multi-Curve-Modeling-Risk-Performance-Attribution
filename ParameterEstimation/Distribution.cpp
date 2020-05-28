@@ -2,9 +2,12 @@
 
 
 
-Distribution::Distribution(vector<double> series):
-	time_series(series) {}
-
+Distribution::Distribution(matrix<double> series)
+	//: time_series(series) {}
+{
+	matrix_column<matrix<double> > x(series, 0);
+	time_series = x;
+}
 vector<double> Distribution::calcNumGradients(vector<double> const& x) {
 
 

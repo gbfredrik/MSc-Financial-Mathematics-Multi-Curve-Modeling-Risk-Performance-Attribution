@@ -1,8 +1,10 @@
 #include "Student_t.h"
 
 
-Student_t::Student_t(vector<double> series) : Distribution(series) {
-	time_series = series;
+Student_t::Student_t(matrix<double> series) : Distribution(series) {
+	matrix_column<matrix<double> > x(series, 0);
+	time_series = x;
+
 	vector<double> garch_vec(time_series.size() + 1);
 	m_GARCH_vec = garch_vec;
 
