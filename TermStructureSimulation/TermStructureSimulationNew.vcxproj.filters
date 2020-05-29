@@ -30,6 +30,9 @@
     <ClInclude Include="varRed.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="FXMultipleYieldSim.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -45,6 +48,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="varRed.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FXsimMultipleYield.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FXMultipleYieldSim.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

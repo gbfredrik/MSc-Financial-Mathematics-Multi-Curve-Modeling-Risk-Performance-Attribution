@@ -1,6 +1,9 @@
 #include "../MathLibrary/rvSim.h"
-//#include "../MathLibrary/matrixOperations.h"
-//#include "../RiskFactorCalculation/FactorCalculation.h"
+
+#include "../MathLibrary/matrixOperations.h"
+#include "../Backtesting/backtesting.h"
+#include "../RiskFactorCalculation/FactorCalculation.h"
+
 
 #include <iostream>
 //#include <numeric>
@@ -20,8 +23,19 @@ using namespace boost::range;
 //void test_algo4_5();
 //void test_matrix();
 //void test_arnoldi();
+
 void testRv();
+void test_likelihood();
+void test_likelihood2();
+
 int main() {
+
+	//test_algo4_5();
+
+	//test_matrix();
+	test_likelihood();
+	test_likelihood2();
+
 
 	//test_algo4_5();
 	//test_matrix();
@@ -101,6 +115,104 @@ void test_matrix() {
 
 }
 */
+void test_likelihood() {
+	matrix<double> functions1(2, 3);
+	matrix<double> functions2(2, 3);
+	matrix<double> d_i(2, 3);
+	vector<double> d(2);
+	vector<double> sigma(2);
+	vector<double> s(2);
+	vector<double> p(2);
+	vector<double> confidence_level(2);
+	matrix<double> prices1(2,3);
+	matrix<double> prices2(2,3);
+	matrix<double> dR_i(2, 2);
+	functions2(0, 0) = 1;
+	functions2(0, 1) = 2;
+	functions2(0, 2) = 3;
+	functions2(1, 0) = 4;
+	functions2(1, 1) = 5;
+	functions2(1, 2) = 6;
+	functions1(0, 0) = 7;
+	functions1(0, 1) = 8;
+	functions1(0, 2) = 9;
+	functions1(1, 0) = 10;
+	functions1(1, 1) = 11;
+	functions1(1, 2) = 12;
+
+	prices2(0, 0) = 1.1;
+	prices2(0, 1) = 2.1;
+	prices2(0, 2) = 3.5;
+	prices2(1, 0) = 3.9;
+	prices2(1, 1) = 5.1;
+	prices2(1, 2) = 6.5;
+	prices1(0, 0) = 7.1;
+	prices1(0, 1) = 8.2;
+	prices1(0, 2) = 9.3;
+	prices1(1, 0) = 10.2;
+	prices1(1, 1) = 10.9;
+	prices1(1, 2) = 11.8;
+
+	double N = 3.0;
+	confidence_level(0)= 0.95;
+	confidence_level(1) = 0.95;
+
+	std::cout << "functions1: " << functions1 << std::endl;
+	std::cout << "prices1: " << prices1 << std::endl;
+	d_i = Likelihood::d_i(functions1, functions2);
+	std::cout << "d_i: " << d_i << std::endl;
+	d = Likelihood::d(d_i, N);
+	std::cout << "d: " << d << std::endl;
+	sigma = Likelihood::sigma(d,d_i, N);
+	std::cout << "sigma: " << sigma << std::endl;
+	s = Likelihood::s(sigma, N);
+	std::cout << "s: " << s << std::endl;
+	dR_i = Likelihood::dResidual_i(functions1, functions2, prices1, prices2);
+	std::cout << "dR_i: " << dR_i << std::endl;
+	p = Likelihood::probability(d, s, confidence_level);
+	std::cout << "p: " << p << std::endl;
+}
+
+void test_likelihood2() {
+	matrix<double> functions1(2, 3);
+	matrix<double> functions2(2, 3);
+	matrix<double> prices1(2, 3);
+	matrix<double> prices2(2, 3);
+	functions2(0, 0) = 1;
+	functions2(0, 1) = 2;
+	functions2(0, 2) = 3;
+	functions2(1, 0) = 4;
+	functions2(1, 1) = 5;
+	functions2(1, 2) = 6;
+	functions1(0, 0) = 7;
+	functions1(0, 1) = 8;
+	functions1(0, 2) = 9;
+	functions1(1, 0) = 10;
+	functions1(1, 1) = 11;
+	functions1(1, 2) = 12;
+
+	prices2(0, 0) = 1.1;
+	prices2(0, 1) = 2.1;
+	prices2(0, 2) = 3.5;
+	prices2(1, 0) = 3.9;
+	prices2(1, 1) = 5.1;
+	prices2(1, 2) = 6.5;
+	prices1(0, 0) = 7.1;
+	prices1(0, 1) = 8.2;
+	prices1(0, 2) = 9.3;
+	prices1(1, 0) = 10.2;
+	prices1(1, 1) = 10.9;
+	prices1(1, 2) = 11.8;
+
+	vector<double> p(2);
+	vector<double> p2(2);
+
+	p = Likelihood::likelihoodRatioTest(functions1, functions2);
+	std::cout << "p2: " << p << std::endl;
+	p2 = Likelihood::likelihoodRatioTestResidual(functions1, functions2, prices1, prices2);
+	std::cout << "p3: " << p2 << std::endl;
+
+}
 
 /*
 void test_arnoldi() {
@@ -121,6 +233,3 @@ void test_arnoldi() {
 	std::cout << lambda << std::endl;
 }
 */
-
-
-
