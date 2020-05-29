@@ -20,6 +20,7 @@ LONG __stdcall squareXL(int x, int &y) {
 #pragma EXPORT
 
 	y += 100;
+
 	return x * x;
 }
 
@@ -34,8 +35,8 @@ BOOL __stdcall ir_measurement_multiXL(BOOL const save_curves) {
 		
 		status = placeholder_ir_measurement_multi(m_forward_curves_rf, m_forward_curves_tenor);
 
-		if (status == 1 && save_curves) { // If computation is successful and saving is toggled
-			status = write_txt_matrix(m_forward_curves_rf, "forward_curves_rf.txt");
+		if (save_curves) { // If computation is successful and saving is toggled
+			status = status && write_txt_matrix(m_forward_curves_rf, "forward_curves_rf.txt");
 			status = status && write_txt_matrix(m_forward_curves_tenor, "forward_curves_tenor.txt");
 		}
 	} catch (const std::exception&) {
@@ -57,10 +58,9 @@ BOOL __stdcall run_all_multiXL(BOOL const compute_curves/*, ...*/) {
 			status = placeholder_ir_measurement_multi(m_forward_curves_rf, m_forward_curves_tenor);
 			// TODO: Replace above to compute curve(s)
 
-			if (status == 1) { // If computation is successful and saving is toggled
-				status = write_csv_matrix(m_forward_curves_rf, "forward_curves_rf.csv");
-				status = status && write_csv_matrix(m_forward_curves_tenor, "forward_curves_tenor.csv");
-			}
+			// If computation is successful
+			status = status && write_csv_matrix(m_forward_curves_rf, "forward_curves_rf.csv");
+			status = status && write_csv_matrix(m_forward_curves_tenor, "forward_curves_tenor.csv");
 		} else { // Read
 			m_forward_curves_rf = read_csv_matrix("fHist.csv");
 			m_forward_curves_tenor = read_csv_matrix("piHist.csv");
@@ -68,7 +68,9 @@ BOOL __stdcall run_all_multiXL(BOOL const compute_curves/*, ...*/) {
 
 		ublas::matrix<double> m_diff{ matrixOperations::diff_matrix(m_forward_curves_rf) };
 		// Todo: Clean data here and process:
-		ublas::matrix_range<ublas::matrix<double>> m_diff_clean(m_diff, ublas::range(0, min(1500, m_diff.size1())), ublas::range(0, m_diff.size2()));
+		ublas::matrix_range<ublas::matrix<double>> m_diff_clean(
+			m_diff, ublas::range(0, min(1500, m_diff.size1())), ublas::range(0, m_diff.size2())
+		);
 		ublas::matrix<double> m_rf_centered{ matrixOperations::center_matrix(m_diff_clean) };
 
 		int k{ 6 };

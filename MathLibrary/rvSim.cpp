@@ -35,7 +35,7 @@ ublas::matrix<double> rvSim::gen_test(int const rows, int const cols) {
 }
 */
 
-// Generate n normal variables with mean m and standard deviation s
+// Generate k times n normal variables with mean 0.0 and standard deviation 1.0
 ublas::matrix<double> rvSim::gen_normal(double const m, double const s, size_t const k, size_t const N) {
 	//static std::random_device rd{};
 	//std::seed_seq seed{ rd(), rd(), rd(), rd(), rd(), rd(), rd(), rd() };
@@ -59,7 +59,6 @@ ublas::matrix<double> rvSim::gen_normal(double const m, double const s, size_t c
 	return rand;
 }
 
-// R.v.s from the gamma distribution using the same method as Matlab (Marsaglia, G. and Tsang, W.W. (2000))
 double rvSim::gen_gamma(double const df) {
 	return std::tgamma(df);
 }

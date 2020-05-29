@@ -14,10 +14,8 @@ using namespace boost::numeric;
 // TODO: Ersätt med den andra implementationen.
 // Calculates the covariance matrix
 ublas::matrix<double> statisticsOperations::covm(ublas::matrix<double> const& input) {
-
 	size_t m{ input.size1() };
 	size_t n{ input.size2() };
-
 	ublas::matrix<double> cov(n, n);
 	ublas::matrix<double> A(m, n);
 	double mean{ 0.0 };

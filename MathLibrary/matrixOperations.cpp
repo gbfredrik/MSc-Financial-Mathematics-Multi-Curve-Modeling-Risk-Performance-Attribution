@@ -5,7 +5,6 @@
 #include <Eigen/Core>
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/matrix_proxy.hpp>
-//#include <boost/numeric/ublas/io.hpp>// Temp: remove later
 
 #include <fstream> 
 
@@ -81,10 +80,17 @@ Eigen::VectorXd matrixOperations::ublasToVectorXd(ublas::vector<double> const& u
 }
 
 ublas::matrix<double> matrixOperations::diff_matrix(ublas::matrix<double>& m_curves) { // Can this be "streamlined"? E.g. by directly returning a subset - a subset?
-	ublas::matrix_range<ublas::matrix<double>> m_1(m_curves, ublas::range(0, m_curves.size1() - 1), ublas::range(0, m_curves.size2()));
-	ublas::matrix_range<ublas::matrix<double>> m_2(m_curves, ublas::range(1, m_curves.size1()), ublas::range(0, m_curves.size2()));
+	ublas::matrix_range<ublas::matrix<double>> m_1(
+		m_curves, 
+		ublas::range(0, m_curves.size1() - 1), 
+		ublas::range(0, m_curves.size2())
+	);
+	ublas::matrix_range<ublas::matrix<double>> m_2(
+		m_curves, 
+		ublas::range(1, m_curves.size1()), 
+		ublas::range(0, m_curves.size2())
+	);
 
-	//matrix<double> m_diff(m_2 - m_1);
 	return m_2 - m_1;
 }
 
