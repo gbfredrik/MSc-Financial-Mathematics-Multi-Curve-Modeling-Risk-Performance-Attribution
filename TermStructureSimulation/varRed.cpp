@@ -15,7 +15,7 @@
 #include "../MathLibrary/statisticsOperations.h"
 
 using namespace boost::numeric::ublas;
-
+//boost::numeric::ublas::matrix<double> test(3, 2000);
 matrix<double> varRed::redVariance(matrix<double> const& U, std::string varRedType) {
 	
 	size_t k = U.size1(); // Number of risk factors
@@ -24,12 +24,15 @@ matrix<double> varRed::redVariance(matrix<double> const& U, std::string varRedTy
 
 	if (varRedType == "lhsd") {
 		V = lhsd_gen(U);
+		
 	}
 	else if (varRedType == "none") {
 		V = U;
+		
 	}
 
 	return V;
+
 }
 
 
@@ -51,7 +54,8 @@ matrix<double> varRed::lhsd_gen(matrix<double> const& U) {
 		for (size_t j = 0; j < N; j++) {
 
 			V(i, j) = (r(i, j) - (1.0 / 2.0)) / (N);
-
+			mexPrintf("%g", V(i, j));
+			mexPrintf(" ");
 		}
 	}
 

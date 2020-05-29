@@ -11,7 +11,6 @@
 
 using namespace boost::numeric::ublas;
 
-// TODO: Ersätt med den andra implementationen.
 // Calculates the covariance matrix
 matrix<double> statisticsOperations::covm(matrix<double> const& input) {
 
@@ -32,17 +31,22 @@ matrix<double> statisticsOperations::covm(matrix<double> const& input) {
 	cov = prod(trans(A), A) / (m - 1);
 
 	return cov;
+
 }
 
+// Takes a vector as input and return its mean
 double statisticsOperations::vectorMean(vector<double> const& input) {
+	
 	double sum = std::accumulate(input.begin(), input.end(), 0.0);
 	double mean = sum / input.size();
 
 	return mean;
+
 }
 
-// Calculate the Pearson correlation matrix, TODO: reduce the amount of calls to pearson_rho()
+// Calculate the Pearson correlation matrix
 matrix<double> statisticsOperations::corrm(matrix<double> const& input) {
+	
 	size_t m = input.size1();
 	size_t n = input.size2();
 	matrix<double> corr(n, n);
@@ -58,11 +62,14 @@ matrix<double> statisticsOperations::corrm(matrix<double> const& input) {
 			}
 		}
 	}
+
 	return corr;
+
 }
 
 // Calculate the Pearson correlation coefficient
 double statisticsOperations::pearson_rho(vector<double> const& X, vector<double> const& Y) {
+	
 	double rho = 0.0;
 	size_t m = X.size();
 	double numerator = 0;
@@ -80,6 +87,7 @@ double statisticsOperations::pearson_rho(vector<double> const& X, vector<double>
 	}
 
 	return numerator / (sqrt(denomenator_a) * sqrt(denomenator_b));
+
 }
 
 // Calculates the first garch volatility values with the full dataset
@@ -98,10 +106,7 @@ vector<double> statisticsOperations::GARCH(vector<double> const& omega, vector<d
 	dXi = prod(trans(E), trans(row(fHist, 1) - row(fHist, 0)));
 
 	for (size_t i = 0; i < k; ++i) {
-
-
 		sigmaPrevSq(i) = omega(i) + alpha(i) * pow(dXi(i), 2) + beta(i) * pow(dXi(i), 2);
-
 	}
 	
 	for (size_t i = 3; i < m; ++i) {
@@ -110,8 +115,6 @@ vector<double> statisticsOperations::GARCH(vector<double> const& omega, vector<d
 		for (size_t j = 0; j < k; ++j) {
 			sigmaSq(j) = omega(j) + alpha(j) * pow(dXi(j), 2) + beta(j) * sigmaPrevSq(j);
 			sigmaPrevSq(j) = sigmaSq(j);
-			//mexPrintf("%g", dXi(j));
-			//mexPrintf(" ");
 		}
 	}
 
@@ -120,6 +123,7 @@ vector<double> statisticsOperations::GARCH(vector<double> const& omega, vector<d
 	}
 
 	return sigma;
+
 }
 
 // Calculates the updated garch volatility
@@ -144,17 +148,21 @@ vector<double> statisticsOperations::GARCH(vector<double> omega, vector<double> 
 }
 
 double statisticsOperations::invCDFNorm(double u, double mu, double sigma) {
+	
 	double q = 0.0;
 	boost::math::normal norm(mu, sigma);
 	q = quantile(norm, u);
 
 	return q;
+
 }
 
 double statisticsOperations::invCDFT(double u, double df) {
+	
 	double q = 0.0;
 	boost::math::students_t t(df); 
 	q = quantile(t, u);
 
 	return q;
+
 }
