@@ -8,77 +8,63 @@
 #include <boost/numeric/ublas/matrix_proxy.hpp>
 #include <boost/numeric/ublas/io.hpp>
 #include <boost/range/counting_range.hpp>
+#include "../../CurveLibrary/sample_handler.h"
 
-using namespace boost::numeric::ublas;
+using namespace boost::numeric;
 //using namespace boost::range;
 
-void price_rawInterpol(double const spot_price, double const maturity_instrument, size_t const length, vector<double> maturity_input, vector<double> mid_price_input);
-void curve_rawInterpol(size_t length, vector<double> maturity_input, vector<double> mid_price_input);
-vector<double> basis_calc(size_t const length, vector<double> maturity_input, vector<double> mid_price_input);
-vector<double> delta_T_calc(size_t const length, vector<double> maturity_input);
+void price_rawInterpol(double const spot_price, int const maturity_instrument, ublas::vector<int> maturity_data, ublas::vector<double> mid_price_data);
+void curve_rawInterpol(ublas::vector<int> maturity_data, ublas::vector<double> mid_price_input);
+ublas::vector<double> basis_calc(size_t const length, ublas::vector<double> maturity_input, ublas::vector<double> mid_price_input);
+ublas::vector<double> delta_T_calc(size_t const length, ublas::vector<double> maturity_input);
 
 int main()
 {	
-	double spot_price = 9.8725;
-	size_t length = 10; //Calculate
-	double maturity_instrument = 10; //Calculate
-	vector<double> maturity_input(length + 1);
-	vector<double> mid_price_input(length + 1);
+	double spot_price = 1.1118; //Excel
+	int maturity_instrument = 642; //Excel
+	ublas::vector<int> maturity_data;
+	ublas::vector<double> mid_price_data;
 
-	maturity_input(0) = 0;
-	maturity_input(1) = 1;
-	maturity_input(2) = 5;
-	maturity_input(3) = 6;
-	maturity_input(4) = 12;
-	maturity_input(5) = 19;
-	maturity_input(6) = 27;
-	maturity_input(7) = 36;
-	maturity_input(8) = 68;
-	maturity_input(9) = 97;
-	maturity_input(10) = 128;
+	maturity_data = read_csv_vector<int>("deltaT_EUR.csv");
+	std::cout << "deltaTdata: " << maturity_data << std::endl;
+	mid_price_data = read_csv_vector<double>("basisFX_EUR.csv");
+	std::cout << "basis: " << mid_price_data << std::endl;
 
-	mid_price_input(0) = 0; 
-	mid_price_input(1) = -0.59;
-	mid_price_input(2) = -3.05;
-	mid_price_input(3) = -0.69;
-	mid_price_input(4) = -5.38;
-	mid_price_input(5) = -13.24;
-	mid_price_input(6) = -21.665;
-	mid_price_input(7) = -31.76;
-	mid_price_input(8) = -59.95;
-	mid_price_input(9) = -91.98;
-	mid_price_input(10) = -116.765;
-	mid_price_input = mid_price_input / 1000;
+	price_rawInterpol(spot_price, maturity_instrument, maturity_data, mid_price_data);
+	
+	std::cout << "Curve" << std::endl;
+	std::cout << "-----" << std::endl;
+	curve_rawInterpol(maturity_data, mid_price_data);
 
-	price_rawInterpol(spot_price, maturity_instrument, length, maturity_input, mid_price_input);
-	curve_rawInterpol(length, maturity_input, mid_price_input);
 }
 
 
 //Calculates forward price
-void price_rawInterpol(double const spot_price, double const maturity_instrument, size_t const length, vector<double> maturity_input, vector<double> mid_price_input) {
+void price_rawInterpol(double const spot_price, int const maturity_instrument, ublas::vector<int> maturity_data, ublas::vector<double> mid_price_data) {
 	double basis_m = 0;
 	double forward_price = 0;
 	size_t maturity_pos = 0;
-	vector<double> basis(length);
-	vector<double> delta_T(length);
+	size_t length = mid_price_data.size();
+	ublas::vector<double> basis(length);
+	ublas::vector<double> delta_T(length);
 
-	for (size_t i = 0; i < length; i++) {
-		if (maturity_instrument < maturity_input(i)){
-			double T = maturity_input(i) - maturity_input(i - 1) - (maturity_input(i) - maturity_instrument);
-			basis_m = (mid_price_input(i) - mid_price_input(i - 1)) / (maturity_input(i) - maturity_input(i - 1))*T;
+	for (size_t i = 0; i < length; ++i) {
+
+		if (maturity_instrument < maturity_data(i)) {
+			double T = maturity_data(i) - maturity_data(i - 1) - (maturity_data(i) - maturity_instrument);
+			basis_m = (mid_price_data(i) - mid_price_data(i - 1)) / ((maturity_data(i) - maturity_data(i - 1)) / 365.0) * T / 365.0; //Hardcoded
 			maturity_pos--;
 			break;
-		}
-		else if (maturity_instrument <= maturity_input(i)) {
+		}else if (maturity_instrument <= maturity_data(i)) {
 			basis_m = 0;
 			break;
+		}else if (maturity_instrument > maturity_data(length-1)) {
+			std::cout << "Cannot price contract. Maturity of instrument is larger than the curve. " << std::endl;
 		}
 		maturity_pos++;
 	}
-
-	basis = basis_calc(maturity_pos, maturity_input, mid_price_input);
-	delta_T = delta_T_calc(maturity_pos, maturity_input);
+	basis = basis_calc(maturity_pos + 1, maturity_data/365.0, mid_price_data);
+	delta_T = delta_T_calc(maturity_pos + 1, maturity_data/365.0);
 
 	forward_price = spot_price+inner_prod(basis, delta_T)+basis_m;
 
@@ -89,32 +75,34 @@ void price_rawInterpol(double const spot_price, double const maturity_instrument
 }
 
 //Calculates raw interpolation curve. 
-void curve_rawInterpol(size_t length, vector<double> maturity_input, vector<double> mid_price_input) {
-	vector<double> delta_T(length);
-	delta_T = delta_T_calc(length, maturity_input);
+void curve_rawInterpol(ublas::vector<int> maturity_data, ublas::vector<double> mid_price_data) {
+	size_t length = mid_price_data.size();
+	ublas::vector<double> delta_T(length);
+	delta_T = delta_T_calc(length, maturity_data);
 	size_t curve_length = sum(delta_T);
-	vector<double> curve(curve_length); 
-	vector<double> basis(length);
+	ublas::vector<double> curve(curve_length);
+	ublas::vector<double> basis(length);
 	size_t pos = 0;
 
-	basis = basis_calc(length, maturity_input, mid_price_input);
+	basis = basis_calc(length, maturity_data/365.0, mid_price_data); //Hardcoded
 
-	for (size_t j = 0; j < length; j++) { //# of maturities
-		for (size_t k = 1; k <= delta_T(j); k++) { //# of days between every maturity
+	for (size_t j = 0; j < length-1; ++j) { //# of maturities
+		for (size_t k = 0; k < delta_T(j); ++k) { //# of days between every maturity
 			curve(pos) = basis(j);
 			pos++;
 		}
 	}
 	std::cout << "curve: " << curve << std::endl;
+	//write_csv_vector(curve, "RawInterpol.csv");
 }
 
 //Calculates basis point vector.
-vector<double> basis_calc(size_t length, vector<double> maturity_input, vector<double> mid_price_input) {
-	vector<double> basis(length);
-	vector<double> delta_T(length);
-	delta_T = delta_T_calc(length, maturity_input);
-	vector_range<vector<double>> mid_price0(mid_price_input, range(0, length));
-	vector_range<vector<double>> mid_price1(mid_price_input, range(1, length + 1));
+ublas::vector<double> basis_calc(size_t length, ublas::vector<double> maturity_data, ublas::vector<double> mid_price_data) {
+	ublas::vector<double> basis(length);
+	ublas::vector<double> delta_T(length);
+	delta_T = delta_T_calc(length, maturity_data);
+	ublas::vector_range<ublas::vector<double>> mid_price0(mid_price_data, ublas::range(0, length-1));
+	ublas::vector_range<ublas::vector<double>> mid_price1(mid_price_data, ublas::range(1, length));
 
 	basis = element_div((mid_price1 - mid_price0), delta_T);
 
@@ -122,13 +110,11 @@ vector<double> basis_calc(size_t length, vector<double> maturity_input, vector<d
 }
 
 //Calculates difference in maturity, delta_T
-vector<double> delta_T_calc(size_t length, vector<double> maturity_input) {
-	vector<double> delta_T(length);
-	vector_range<vector<double>> maturity0(maturity_input, range(0, length));
-	vector_range<vector<double>> maturity1(maturity_input, range(1, length + 1));
-
-	delta_T = maturity1 - maturity0;
-
+ublas::vector<double> delta_T_calc(size_t length, ublas::vector<double> maturity_input) {
+	ublas::vector<double> delta_T(length);
+	ublas::vector_range<ublas::vector<double>> maturity0(maturity_input, ublas::range(0, length-1));
+	ublas::vector_range<ublas::vector<double>> maturity1(maturity_input, ublas::range(1, length));
+	delta_T = (maturity1 - maturity0);
 	return delta_T;
 }
 

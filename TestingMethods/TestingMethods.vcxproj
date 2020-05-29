@@ -75,6 +75,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>X:\Dependencies\spectra-0.8.1\include;X:\Dependencies\eigen-3.3.7;X:\Dependencies\boost_1_72_0;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -90,7 +91,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\local\boost_1_71_0\; E:\eigen-eigen-323c052e1731; E:\spectra-0.8.1\include\Spectra;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>\\ad.liu.se\home\oliwe188\Dependencies\eigen-3.3.7;\\ad.liu.se\home\oliwe188\Dependencies\boost_1_72_0</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

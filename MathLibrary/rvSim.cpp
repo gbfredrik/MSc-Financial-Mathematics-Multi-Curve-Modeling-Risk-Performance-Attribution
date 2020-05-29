@@ -3,7 +3,7 @@
 
 #include "../MathLibrary/statisticsOperations.h"
 
-#include "mex.h"
+//#include "mex.h"
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/random/normal_distribution.hpp>
 #include <boost/math/distributions/normal.hpp>
