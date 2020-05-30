@@ -7,14 +7,13 @@
 #include "../MathLibrary/rvSim.h"
 #include "../MathLibrary/statisticsOperations.h"
 
-
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/matrix_proxy.hpp>
 #include <boost/optional/optional.hpp>
 #include <boost/none.hpp>
 #include <boost/none_t.hpp>
-using namespace boost::numeric::ublas;
 
+using namespace boost::numeric::ublas;
 
 void MultipleYieldSim::simMultipleFull(vector<matrix<double>> const& E, vector<matrix<double>> const& rho, vector<vector<double>> const& mu, 
 	vector<vector<double>> const& omega, vector<vector<double>> const& alpha, vector<vector<double>> const& beta,

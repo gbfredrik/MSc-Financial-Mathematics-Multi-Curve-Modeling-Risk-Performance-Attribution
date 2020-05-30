@@ -35,8 +35,8 @@ ublas::matrix<double> rvSim::gen_test(int const rows, int const cols) {
 }
 */
 
-// Generate k times n normal variables with mean 0.0 and standard deviation 1.0
-ublas::matrix<double> rvSim::gen_normal(double const m, double const s, size_t const k, size_t const N) {
+// Generate k times n normal variables with mean mu and standard deviation sigma
+ublas::matrix<double> rvSim::gen_normal(double const mu, double const sigma, size_t const k, size_t const N) {
 	//static std::random_device rd{};
 	//std::seed_seq seed{ rd(), rd(), rd(), rd(), rd(), rd(), rd(), rd() };
 	
@@ -49,7 +49,7 @@ ublas::matrix<double> rvSim::gen_normal(double const m, double const s, size_t c
 
 	for (size_t i{ 0 }; i < k; ++i) {
 		for (size_t j{ 0 }; j < N; ++j) {
-			rand(i, j) = distNorm(e2);
+			rand(i, j) = mu + sigma * distNorm(e2);
 			hehe(i, j) = rand(i, j);
 			//mexPrintf("%g",rand(i, j));
 			//mexPrintf(" ");
