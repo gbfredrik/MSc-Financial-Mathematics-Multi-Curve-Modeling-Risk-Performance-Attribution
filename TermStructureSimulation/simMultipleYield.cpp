@@ -1,27 +1,27 @@
 #include "pch.h"
-#include "mex.h"
+
 #include "MultipleYieldSim.h"
+
+#include "mex.h"
 #include <boost/numeric/ublas/matrix.hpp>
-#include <string>
 #include "../MathLibrary/rvSim.h"
 
-using namespace boost::numeric::ublas;
+#include <string>
 
+using namespace boost::numeric::ublas;
 
 /* The gateway function */
 void mexFunction(int nlhs, mxArray* plhs[],
 	int nrhs, const mxArray* prhs[]) {
 
 	// Get sizes
-	size_t n = mxGetM(mxGetField(prhs[0], 0, mxGetFieldNameByNumber(prhs[0], 0)));
-	size_t m = mxGetM(mxGetField(prhs[6], 0, mxGetFieldNameByNumber(prhs[6], 0)));
-	size_t M = 2;
-	vector<size_t> k(M);
+	size_t n = mxGetM(mxGetField(prhs[0], 0, mxGetFieldNameByNumber(prhs[0], 0))); // Number of disc points
+	size_t m = mxGetM(mxGetField(prhs[6], 0, mxGetFieldNameByNumber(prhs[6], 0))); // Number of historical dates
+	size_t M = nlhs; // Number of curves
+	vector<size_t> k(M); // Number of risk factors for each curve
 	for (size_t i = 0; i < M; i++) {
 		k(i) = mxGetN(mxGetField(prhs[0], 0, mxGetFieldNameByNumber(prhs[0], i)));
 	}
-
-
 
 	// Get E, rho
 	vector<double*> EMex(M);
@@ -50,8 +50,7 @@ void mexFunction(int nlhs, mxArray* plhs[],
 			}
 		}
 	}
-
-
+	   
 	// Get mu, omega, alpha, beta, gamma
 	vector<double*> muMex(M);
 	vector<double*> omegaMex(M);
@@ -100,7 +99,6 @@ void mexFunction(int nlhs, mxArray* plhs[],
 		}
 	}
 
-
 	// Get hist
 	vector<double*> histMex(M);
 	vector<matrix<double>> hist(M);
@@ -116,7 +114,6 @@ void mexFunction(int nlhs, mxArray* plhs[],
 		}
 	}
 
-
 	// Get marginal, copula, varRedType, kappa
 	vector<std::string> marginal(M);
 	vector<std::string> copula(M);
@@ -130,15 +127,13 @@ void mexFunction(int nlhs, mxArray* plhs[],
 		varRedType(i) = mxArrayToString(mxGetField(prhs[9], 0, mxGetFieldNameByNumber(prhs[9], i)));
 		kappa(i) = kappaMex[i];
 	}
-
-
-	// Get d, N
+	
+	// Get d, N, problemType
 	size_t N;
 	size_t d;
 	d = mxGetScalar(prhs[10]);
 	N = mxGetScalar(prhs[11]);
-
-
+	
 	// Get fRes (create the output matrix and pointer)
 	vector<double*> fResMex(M);
 	vector<matrix<double>> fRes(M, matrix<double>(n, N));
@@ -146,23 +141,19 @@ void mexFunction(int nlhs, mxArray* plhs[],
 		plhs[i] = mxCreateDoubleMatrix(n, N, mxREAL);
 		fResMex(i) = mxGetPr(plhs[i]);
 	}
-
-	mexPrintf("%d", nlhs);
-
-
+	
+	/*
 	double* randomMex;
-	plhs[2] = mxCreateDoubleMatrix(3, 2000, mxREAL);
+	plhs[2] = mxCreateDoubleMatrix(6, 2000, mxREAL);
 	randomMex = mxGetPr(plhs[2]);
+	*/
 
-
-	/* call the computational routine */
+	// Call the computational routine
 	MultipleYieldSim::simMultipleFull(E, rho, mu, omega, alpha, beta, hist,
-		marginal, copula, varRedType, d, N, fRes, gamma, kappa,
-		xiHat, dfC, dfM);
-
-	mexPrintf(" efter simcall ");
-
-	/*Convert result*/
+			marginal, copula, varRedType, d, N, fRes, gamma, kappa,
+			xiHat, dfC, dfM);
+	
+	// Convert result
 	for (size_t i = 0; i < M; i++) {
 		for (size_t j = 0; j < n; j++) {
 			for (size_t k = 0; k < N; k++) {
@@ -171,19 +162,10 @@ void mexFunction(int nlhs, mxArray* plhs[],
 		}
 	}
 	/*
-	mexPrintf("%g", hehe(0, 0));
-	mexPrintf(" ");
-	mexPrintf("%g", hehe(2, 1999));
-	mexPrintf(" ");
-	*/
-
-	for (size_t i = 0; i < 3; i++) {
-		for (size_t j = 0; j < 2000; j++) {
-			randomMex[i + j * 3] = hehe(i, j);
+	for (size_t i = 0; i < k(0); i++) {
+		for (size_t j = 0; j < N; j++) {
+			randomMex[i + j * k(0)] = test(i, j);
 		}
 	}
-
-
-
-
+	*/
 }

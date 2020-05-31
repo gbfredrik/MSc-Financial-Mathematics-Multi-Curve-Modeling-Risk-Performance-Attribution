@@ -2,7 +2,7 @@
 
 #include "mex.h"
 #include <boost/numeric/ublas/matrix.hpp>
-
+//extern boost::numeric::ublas::matrix<double> hehe;
 class varRed {
 private:
 	static boost::numeric::ublas::matrix<double> lhsd_gen(boost::numeric::ublas::matrix<double> const& U);

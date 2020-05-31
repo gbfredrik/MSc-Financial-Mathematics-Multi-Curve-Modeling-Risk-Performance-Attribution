@@ -112,3 +112,23 @@ ublas::matrix<double> matrixOperations::center_matrix(ublas::matrix<double> cons
 double matrixOperations::vector_average(ublas::vector<double> const& vec) {
 	return sum(vec) / vec.size();
 }
+//Logarithm of a matrix
+ublas::matrix<double> matrixOperations::matrixLog(ublas::matrix<double> const& input) {
+	size_t rows{ input.size1() };
+	size_t columns{} input.size2() };
+
+	ublas::matrix<double> logMatrix(rows, columns);
+
+	//std::cout << "rows: " << rows << std::endl;
+	//std::cout << "columns: " << columns << std::endl;
+
+	for (size_t i{ 0 }; i < rows; ++i) {
+		for (size_t j{ 0 }; j < columns; ++j) {
+			logMatrix(i, j) = log(input(i, j));
+			//std::cout << "logMatrix loop: " << logMatrix(i,j) << std::endl;
+		}
+	}
+	//std::cout << "logMatrix: " << logMatrix(1,1) << std::endl;
+
+	return logMatrix;
+}

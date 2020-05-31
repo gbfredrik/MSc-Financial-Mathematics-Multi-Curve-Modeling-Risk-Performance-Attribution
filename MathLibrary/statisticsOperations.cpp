@@ -63,6 +63,7 @@ ublas::matrix<double> statisticsOperations::corrm(ublas::matrix<double> const& i
 	}
 
 	return corr;
+
 }
 
 // Calculate the Pearson correlation coefficient
@@ -119,8 +120,6 @@ ublas::vector<double> statisticsOperations::GARCH(
 		for (size_t j{ 0 }; j < k; ++j) {
 			sigmaSq(j) = omega(j) + alpha(j) * pow(dXi(j), 2) + beta(j) * sigmaPrevSq(j);
 			sigmaPrevSq(j) = sigmaSq(j);
-			//mexPrintf("%g", dXi(j));
-			//mexPrintf(" ");
 		}
 	}
 

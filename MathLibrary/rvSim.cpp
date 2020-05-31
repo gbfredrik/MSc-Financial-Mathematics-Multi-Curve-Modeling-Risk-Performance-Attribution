@@ -8,52 +8,27 @@
 #include <boost/numeric/ublas/matrix_proxy.hpp>
 #include <boost/random/normal_distribution.hpp>
 #include <boost/math/distributions/normal.hpp>
+#include <boost/random.hpp>
+#include <boost/random/random_device.hpp>
+#include <boost/random/normal_distribution.hpp>
 
 #include <random>
 
 using namespace boost::numeric;
 
-ublas::matrix<double> hehe(3, 2000);
-//static std::seed_seq seed{ 1, 2, 3, 4, 5 };
-//static std::default_random_engine e2;
-static std::normal_distribution<double> distNorm(0.0, 1.0);
-static std::uniform_real_distribution<double> distU(0.0, 1.0);
-static std::mt19937 e2(0);
+// boost::random_device dev;
+// boost::mt19937 gener(dev);
+static boost::mt19937 gener(2);
+static boost::normal_distribution<> normal(0, 1);
+static boost::variate_generator<boost::mt19937&, boost::normal_distribution<>> rng(gener, normal);
 
-/*
-ublas::matrix<double> rvSim::gen_test(int const rows, int const cols) {
-	std::random_device rd;
-	std::mt19937 mt(rd());
-	std::uniform_real_distribution<double> dist(1.0, 10.0);
-	ublas::matrix<double> test(rows, cols);
-	for (size_t i{ 0 }, rows{ test.size1() }; i < rows; ++i) {
-		for (size_t j = 0, cols{ test.size2() }; j < cols; ++j) {
-			test(i, j) = dist(mt);
-		}
-	}
-
-	return test;
-}
-*/
-
-// Generate k times n normal variables with mean mu and standard deviation sigma
-ublas::matrix<double> rvSim::gen_normal(double const mu, double const sigma, size_t const k, size_t const N) {
-	//static std::random_device rd{};
-	//std::seed_seq seed{ rd(), rd(), rd(), rd(), rd(), rd(), rd(), rd() };
-	
-	//std::seed_seq seed{ 1, 2, 3, 4, 5 };
-	//static std::mt19937 e2(seed);
-
-	//static std::default_random_engine dre;
-	//std::normal_distribution<double> dist(0.0, 1.0);
+// Generate k times n normal variables
+ublas::matrix<double> rvSim::gen_normal(size_t const k, size_t const N) {
 	ublas::matrix<double> rand(k, N);
 
 	for (size_t i{ 0 }; i < k; ++i) {
 		for (size_t j{ 0 }; j < N; ++j) {
-			rand(i, j) = mu + sigma * distNorm(e2);
-			hehe(i, j) = rand(i, j);
-			//mexPrintf("%g",rand(i, j));
-			//mexPrintf(" ");
+			rand(i, j) = rng();
 		}
 	}
 	
@@ -76,7 +51,7 @@ ublas::matrix<double> rvSim::genEps(
 
 	ublas::matrix<double> eps(k, N);
 	
-	// Todo: Kolla om nedan kan ersättas av:
+	// Todo: Kolla om nedan kan ersï¿½ttas av:
 	// for (size_t i{ 0 }; i < k; ++i) {
 	//	   row(eps, i) = genEps(row(V, i), mu, sigma, type, dfM);
 	// }

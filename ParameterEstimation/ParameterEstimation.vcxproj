@@ -32,7 +32,7 @@
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -92,7 +92,6 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>\\ad.liu.se\home\corwe099\Documents\Dependencies\boost_1_71_0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -132,11 +131,18 @@
     <ClInclude Include="bfgs.h" />
     <ClInclude Include="Distribution.h" />
     <ClInclude Include="Gaussian.h" />
+    <ClInclude Include="Student_t.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="bfgs.cpp" />
     <ClCompile Include="Distribution.cpp" />
     <ClCompile Include="Gaussian.cpp" />
+    <ClCompile Include="Student_t.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\MathLibrary\MathLibrary.vcxproj">
+      <Project>{a18252bf-632c-435a-9887-422029fc1503}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

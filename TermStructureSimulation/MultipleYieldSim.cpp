@@ -1,5 +1,4 @@
 #include "pch.h"
-#include "mex.h"
 
 #include "MultipleYieldSim.h"
 #include "unfGen.h"
@@ -7,13 +6,14 @@
 #include "../MathLibrary/rvSim.h"
 #include "../MathLibrary/statisticsOperations.h"
 
+#include "mex.h"
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/matrix_proxy.hpp>
 #include <boost/optional/optional.hpp>
-#include <boost/none.hpp>
-#include <boost/none_t.hpp>
 
 using namespace boost::numeric::ublas;
+
+//boost::numeric::ublas::matrix<double> test(6, 2000);
 
 void MultipleYieldSim::simMultipleFull(vector<matrix<double>> const& E, vector<matrix<double>> const& rho, vector<vector<double>> const& mu, 
 	vector<vector<double>> const& omega, vector<vector<double>> const& alpha, vector<vector<double>> const& beta,
@@ -22,8 +22,6 @@ void MultipleYieldSim::simMultipleFull(vector<matrix<double>> const& E, vector<m
 	boost::optional<vector<vector<double>>> const& gamma, boost::optional<vector<double>> const& kappa,
 	boost::optional<vector<vector<double>>> const& xiHat, boost::optional<vector<vector<double>>> const& dfC,
 	boost::optional<vector<vector<double>>> const& dfM){
-
-
 	/*
 		E: vector, eigenvector matrices
 		rho: vector, matrices describing risk factor dependencies
@@ -48,16 +46,12 @@ void MultipleYieldSim::simMultipleFull(vector<matrix<double>> const& E, vector<m
 		kappa: vector, mean reversion speed parameter of each tau
 		xiHat: matrix, long term averages of each tau and risk factor
 
-		muC: matrix, mean value parameter for gaussian copulas
-		muM: matrix, mean value parameter for gaussian marginals
 
 		dfC: matrix, degrees of freedom for student's t-copulas
 		dfM: matrix, degrees of freedom for student's t-marginals
 
 	*/
 	
-	
-
 	size_t M = E.size(); // Risk-free curve + number of tenor curves
 	vector<size_t> k(M); // Number of risk factors of each tenor
 	for (size_t i = 0; i < M; i++) {
@@ -71,6 +65,7 @@ void MultipleYieldSim::simMultipleFull(vector<matrix<double>> const& E, vector<m
 	vector<double> fZero(n); // Starting vector in the simulation
 	matrix<double> pi(n, M - 1); // Starting vector in the simulation
 	vector<vector<double>> sigma(M);  
+
 	/*
 		Set number the number of columns in the individual matrices
 		to the number of risk factors of that tenor
@@ -82,6 +77,7 @@ void MultipleYieldSim::simMultipleFull(vector<matrix<double>> const& E, vector<m
 		sigma(i) = vector<double>(k(i));
 	}
 	
+
 	/* 
 		histPrevSim and histPrevPrevSim keeps track of the 
 		last and second to last simulated curves and is used to calculate the garch volatility.
@@ -104,11 +100,11 @@ void MultipleYieldSim::simMultipleFull(vector<matrix<double>> const& E, vector<m
 		if (i == 0) { // Simulate N curves the first day
 			for (size_t j = 0; j < M; j++) {
 				U(j) = unfGen::genU(rho(j), N, copula(j), boost::get(dfC)(j)); // Generate uniformly correlated random variables with desired copula
-				V(j) = varRed::redVariance(U(j), varRedType(j)); // Apply desired variance reduction			
-			
+				V(j) = varRed::redVariance(U(j), varRedType(j)); // Apply desired variance reduction technique		
+				//test = U(0);
 				sigma(j) = statisticsOperations::GARCH(omega(j), alpha(j),
 					beta(j), boost::get(gamma)(j), E(j), hist(j)); // Calculate scaling factor
-				eps(j) = rvSim::genEps(U(j), mu(j), sigma(j), marginal(j), boost::get(dfM)(j));
+				eps(j) = rvSim::genEps(V(j), mu(j), sigma(j), marginal(j), boost::get(dfM)(j));
 			}
 			simMultipleDaily(E, fZero, pi, eps, M, N, fRes, histPrevSim);
 		}
@@ -120,12 +116,13 @@ void MultipleYieldSim::simMultipleFull(vector<matrix<double>> const& E, vector<m
 				for (size_t l = 0; l < N; l++) {
 					sigma(j) = statisticsOperations::GARCH(omega(j), alpha(j),
 						beta(j), boost::get(gamma)(j), E(j), column(histPrevSim(j), l), column(histPrevPrevSim(j), l), sigma(j)); // Calculate scaling factor
-					column(eps(j), l) = rvSim::genEps(column(U(j), l), mu(j), sigma(j), marginal(j), boost::get(dfM)(j));
+					column(eps(j), l) = rvSim::genEps(column(V(j), l), mu(j), sigma(j), marginal(j), boost::get(dfM)(j));
 				}
 			}
 			simSingleMultipleDaily(E, eps, M, N, fRes, histPrevSim, histPrevPrevSim);
 		}
 	}
+	
 }
 
 
@@ -154,13 +151,11 @@ void MultipleYieldSim::simMultipleDaily(vector<matrix<double>> const& E, vector<
 	Function to simulate d days ahead 1 time each.
 */
 void MultipleYieldSim::simSingleMultipleDaily(vector<matrix<double>> const& E, vector<matrix<double>> const& eps, int M, int N,
-	vector<matrix<double>>& fRes, vector<matrix<double>>& histPrevSim, vector<matrix<double>>& histPrevPrevSim) {
 	
+	vector<matrix<double>>& fRes, vector<matrix<double>>& histPrevSim, vector<matrix<double>>& histPrevPrevSim) {
 	size_t n = E(0).size1();
 	matrix<double> pi(n, M - 1);
 
-
-	
 	for (int i = 0; i < N; i++) { // Simulate N times
 		for (int k = 0; k < M; k++) { // Iterate over each tenor curve
 			if (k != M - 1) {
