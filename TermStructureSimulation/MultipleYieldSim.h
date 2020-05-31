@@ -1,5 +1,5 @@
-#ifndef MULTIPLEYIELDSIM
-#define MULTIPLEYIELDSIM
+#pragma once
+
 #include "mex.h"
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/optional/optional.hpp>
@@ -30,5 +30,3 @@ public:
 
 
 };
-
-#endif

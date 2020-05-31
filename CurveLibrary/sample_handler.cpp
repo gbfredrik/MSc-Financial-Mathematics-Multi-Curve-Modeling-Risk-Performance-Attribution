@@ -131,8 +131,10 @@ bool write_csv_vector(ublas::vector<double> const& m, std::string const& file_na
 
 
 
-bool placeholder_ir_measurement_multi(ublas::matrix<double>& m_rf, 
-									  ublas::matrix<double>& m_tenor) {
+bool placeholder_ir_measurement_multi(
+	ublas::matrix<double>& m_rf, 
+	ublas::matrix<double>& m_tenor
+) {
 	m_rf = read_csv_matrix("fHist.csv");
 	m_tenor = read_csv_matrix("piHist.csv");
 

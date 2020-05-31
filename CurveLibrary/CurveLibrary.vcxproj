@@ -75,7 +75,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <TargetName>CURVELIBRARY</TargetName>
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\Program Files\Matlab\R2019a\extern\include;$(ProjectPath)\..\..\Dependencies\eigen-3.3.7;$(ProjectPath)\..\..\Dependencies\boost_1_72_0;$(ProjectPath);$(ProjectPath)\..\..\Dependencies\spectra-0.8.1\spectra-0.8.1\include;$(IncludePath)</IncludePath>
+    <IncludePath>C:\Program Files\Matlab\R2019a\extern\include;$(ProjectPath)\..\..\Dependencies\eigen-3.3.7;$(ProjectPath)\..\..\Dependencies\boost_1_72_0;$(ProjectPath);$(ProjectPath)\..\..\Dependencies\spectra-0.8.1\spectra-0.8.1\include;$(IncludePath);$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <TargetName>CURVELIBRARY</TargetName>

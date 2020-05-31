@@ -1,5 +1,4 @@
 #include "pch.h"
-#include "mex.h"
 
 #include "MultipleYieldSim.h"
 #include "unfGen.h"
@@ -7,6 +6,7 @@
 #include "../MathLibrary/rvSim.h"
 #include "../MathLibrary/statisticsOperations.h"
 
+#include "mex.h"
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/matrix_proxy.hpp>
 #include <boost/optional/optional.hpp>
