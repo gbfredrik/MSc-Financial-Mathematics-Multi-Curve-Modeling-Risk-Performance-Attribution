@@ -110,5 +110,5 @@ ublas::matrix<double> FactorCalculation::compute_risk_factors(
 	ublas::matrix<double> const& m_E_k, 
 	ublas::matrix<double> const& m_delta_f
 ) {
-	return ublas::prod(ublas::trans(m_E_k), ublas::trans(m_delta_f));
+	return prod(trans(m_E_k), trans(m_delta_f));
 }

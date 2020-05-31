@@ -5,6 +5,7 @@
 
 //#include "mex.h"
 #include <boost/numeric/ublas/matrix.hpp>
+#include <boost/numeric/ublas/matrix_proxy.hpp>
 #include <boost/random/normal_distribution.hpp>
 #include <boost/math/distributions/normal.hpp>
 
@@ -75,6 +76,11 @@ ublas::matrix<double> rvSim::genEps(
 
 	ublas::matrix<double> eps(k, N);
 	
+	// Todo: Kolla om nedan kan ersättas av:
+	// for (size_t i{ 0 }; i < k; ++i) {
+	//	   row(eps, i) = genEps(row(V, i), mu, sigma, type, dfM);
+	// }
+
 	if (type == "normal") {
 		for (size_t i{ 0 }; i < k; ++i) {
 			for (size_t j{ 0 }; j < N; ++j) {

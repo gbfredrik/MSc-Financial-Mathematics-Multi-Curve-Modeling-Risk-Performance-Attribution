@@ -16,7 +16,7 @@
 
 using namespace boost::numeric;
 
-LONG __stdcall squareXL(int x, int &y) {
+LONG __stdcall squareXL(int x, int& y) {
 #pragma EXPORT
 
 	y += 100;
@@ -69,7 +69,9 @@ BOOL __stdcall run_all_multiXL(BOOL const compute_curves/*, ...*/) {
 		ublas::matrix<double> m_diff{ matrixOperations::diff_matrix(m_forward_curves_rf) };
 		// Todo: Clean data here and process:
 		ublas::matrix_range<ublas::matrix<double>> m_diff_clean(
-			m_diff, ublas::range(0, min(1500, m_diff.size1())), ublas::range(0, m_diff.size2())
+			m_diff, 
+			ublas::range(0, min(1500, m_diff.size1())), 
+			ublas::range(0, m_diff.size2())
 		);
 		ublas::matrix<double> m_rf_centered{ matrixOperations::center_matrix(m_diff_clean) };
 
@@ -80,9 +82,9 @@ BOOL __stdcall run_all_multiXL(BOOL const compute_curves/*, ...*/) {
 		enum class PCA_Algo {IRAM, BDCSVD};
 		PCA_Algo pca_algo{ PCA_Algo::IRAM };
 		if (pca_algo == PCA_Algo::IRAM) {
-			status = status && FactorCalculation::iram(m_rf_centered / std::sqrt(m_rf_centered.size1() - 1), k, m_rf_E, v_rf_Lambda);
+			status = status && FactorCalculation::iram(m_rf_centered / sqrt(m_rf_centered.size1() - 1), k, m_rf_E, v_rf_Lambda);
 		} else if (pca_algo == PCA_Algo::BDCSVD) {
-			status = status && FactorCalculation::eigen_bdcsvd(m_rf_centered / std::sqrt(m_rf_centered.size1() - 1), k, m_rf_E, v_rf_Lambda);
+			status = status && FactorCalculation::eigen_bdcsvd(m_rf_centered / sqrt(m_rf_centered.size1() - 1), k, m_rf_E, v_rf_Lambda);
 		}
 		
 		status = status && write_csv_matrix(m_rf_E, "rf_vec.csv");

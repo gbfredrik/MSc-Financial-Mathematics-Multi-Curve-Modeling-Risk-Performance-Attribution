@@ -52,8 +52,8 @@ ublas::matrix<double> statisticsOperations::corrm(ublas::matrix<double> const& i
 	ublas::vector<double> X(m);
 	ublas::vector<double> Y(m);
 
-	for (size_t i = 0; i < n; ++i) {
-		for (size_t j = 0; j < n; ++j) {
+	for (size_t i{ 0 }; i < n; ++i) {
+		for (size_t j{ 0 }; j < n; ++j) {
 			if (i == j) {
 				corr(i, j) = 1;
 			} else {

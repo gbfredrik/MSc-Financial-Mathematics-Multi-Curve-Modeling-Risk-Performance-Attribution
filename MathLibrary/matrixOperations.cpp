@@ -99,16 +99,16 @@ ublas::matrix<double> matrixOperations::center_matrix(ublas::matrix<double> cons
 	ublas::vector<double> column_averages(diff_matrix.size2());
 
 	for (size_t i{ 0 }, cols{ diff_matrix.size2() }; i < cols; ++i) {
-		column_averages(i) = vector_average(ublas::column(diff_matrix, i));
+		column_averages(i) = vector_average(column(diff_matrix, i));
 	}
 
 	for (size_t i{ 0 }, rows{ diff_matrix.size1() }; i < rows; ++i) {
-		ublas::row(centered_matrix, i) = ublas::row(diff_matrix, i) - column_averages;
+		row(centered_matrix, i) = row(diff_matrix, i) - column_averages;
 	}
 
 	return centered_matrix;
 }
 
 double matrixOperations::vector_average(ublas::vector<double> const& vec) {
-	return ublas::sum(vec) / vec.size();
+	return sum(vec) / vec.size();
 }
