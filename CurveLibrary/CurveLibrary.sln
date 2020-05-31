@@ -19,8 +19,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestingMethods", "..\Testin
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TermStructureSimulation", "..\TermStructureSimulation\TermStructureSimulationNew.vcxproj", "{9C77745F-86F1-450E-AE01-ACFCBF298666}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ParseTester", "..\TestArea\ParseTester\ParseTester.vcxproj", "{621D3FDC-1DE3-4352-9F5A-C56EC32F30A0}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RawInterpolTest", "..\TestArea\RawInterpolTest\RawInterpolTest.vcxproj", "{AE913A5C-809F-4960-AC07-C1AA212DAB56}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Backtesting", "..\Backtesting\Backtesting.vcxproj", "{61306C73-EDC9-401B-9F84-0542CDD2E2A4}"
@@ -103,14 +101,6 @@ Global
 		{9C77745F-86F1-450E-AE01-ACFCBF298666}.Release|x64.Build.0 = Release|x64
 		{9C77745F-86F1-450E-AE01-ACFCBF298666}.Release|x86.ActiveCfg = Debug|Win32
 		{9C77745F-86F1-450E-AE01-ACFCBF298666}.Release|x86.Build.0 = Debug|Win32
-		{621D3FDC-1DE3-4352-9F5A-C56EC32F30A0}.Debug|x64.ActiveCfg = Debug|x64
-		{621D3FDC-1DE3-4352-9F5A-C56EC32F30A0}.Debug|x64.Build.0 = Debug|x64
-		{621D3FDC-1DE3-4352-9F5A-C56EC32F30A0}.Debug|x86.ActiveCfg = Debug|Win32
-		{621D3FDC-1DE3-4352-9F5A-C56EC32F30A0}.Debug|x86.Build.0 = Debug|Win32
-		{621D3FDC-1DE3-4352-9F5A-C56EC32F30A0}.Release|x64.ActiveCfg = Release|x64
-		{621D3FDC-1DE3-4352-9F5A-C56EC32F30A0}.Release|x64.Build.0 = Release|x64
-		{621D3FDC-1DE3-4352-9F5A-C56EC32F30A0}.Release|x86.ActiveCfg = Debug|Win32
-		{621D3FDC-1DE3-4352-9F5A-C56EC32F30A0}.Release|x86.Build.0 = Debug|Win32
 		{AE913A5C-809F-4960-AC07-C1AA212DAB56}.Debug|x64.ActiveCfg = Debug|x64
 		{AE913A5C-809F-4960-AC07-C1AA212DAB56}.Debug|x64.Build.0 = Debug|x64
 		{AE913A5C-809F-4960-AC07-C1AA212DAB56}.Debug|x86.ActiveCfg = Debug|Win32
@@ -130,7 +120,6 @@ Global
 		{577B0FA7-4D5C-47E1-B33B-6BDA35C727FB}.Debug|x64.ActiveCfg = Debug|x64
 		{577B0FA7-4D5C-47E1-B33B-6BDA35C727FB}.Debug|x64.Build.0 = Debug|x64
 		{577B0FA7-4D5C-47E1-B33B-6BDA35C727FB}.Debug|x86.ActiveCfg = Debug|Win32
-		{577B0FA7-4D5C-47E1-B33B-6BDA35C727FB}.Debug|x86.Build.0 = Debug|Win32
 		{577B0FA7-4D5C-47E1-B33B-6BDA35C727FB}.Release|x64.ActiveCfg = Release|x64
 		{577B0FA7-4D5C-47E1-B33B-6BDA35C727FB}.Release|x64.Build.0 = Release|x64
 		{577B0FA7-4D5C-47E1-B33B-6BDA35C727FB}.Release|x86.ActiveCfg = Debug|Win32

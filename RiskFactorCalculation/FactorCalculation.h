@@ -5,8 +5,6 @@
 
 
 class FactorCalculation {
-private:
-
 public:
 	static bool iram(
 		boost::numeric::ublas::matrix<double> const& input, 
