@@ -115,7 +115,7 @@ double matrixOperations::vector_average(ublas::vector<double> const& vec) {
 //Logarithm of a matrix
 ublas::matrix<double> matrixOperations::matrixLog(ublas::matrix<double> const& input) {
 	size_t rows{ input.size1() };
-	size_t columns{} input.size2() };
+	size_t columns{ input.size2() };
 
 	ublas::matrix<double> logMatrix(rows, columns);
 
