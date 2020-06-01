@@ -1,0 +1,30 @@
+function [P] = irsPrice(N, y, floatCashFlows, fixCashFlows, deltaTj, r)
+
+numCashFix = length(fixCashFlows);
+numCashFloat = length(floatCashFlows);
+
+rZero = r.rZero;
+rTau = r.rTau;
+
+% Fix leg
+fix = 0;
+for i = 1:numCashFix
+   
+    fix = fix + deltaTj(i) * exp(floatCashFlows)/365 * rZero(3) - fixCashFlows(i)/365 * rZero(fixCashFlows(i) + 1));
+    
+end
+fix = N * y * fix
+
+% Float leg
+float = 0;
+for i = 1:numCashFloat - 1
+    float = float + exp(floatCashFlows(i + 1)/365 * rTau(floatCashFlows(i + 1) + 1) - floatCashFlows(i)/365 * rTau(floatCashFlows(i) + 1) ...
+        + 2/365 * rZero(3) - floatCashFlows(i + 1)/365 * rZero(floatCashFlows(i + 1) + 1)) ...
+        - exp(2/365 * rZero(3) - floatCashFlows(i + 1)/365 * rZero(floatCashFlows(i + 1) + 1));
+end
+
+float = N * float
+
+P = float - fix;
+
+end

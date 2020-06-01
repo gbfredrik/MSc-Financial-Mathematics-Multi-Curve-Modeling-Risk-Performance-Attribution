@@ -1,0 +1,27 @@
+function [P] = irsYield(N, y, floatCashFlows, fixCashFlows, deltaTj, r)
+
+numCashFix = length(fixCashFlows);
+numCashFloat = length(floatCashFlows);
+
+rZero = r.rZero;
+rTau = r.rTau;
+
+% Fix leg
+fix = 0;
+for i = 2:numCashFix
+   
+    fix = fix + deltaTj(i - 1) * exp(fixCashFlows(1)/365 * rZero(fixCashFlows(1)) - fixCashFlows(i)/365 * rZero(fixCashFlows(i)));
+    
+end
+
+% Float leg
+float = 0;
+for i = 2:numCashFloat - 1
+    float = float + exp(floatCashFlows(i + 1)/365 * rTau(floatCashFlows(i + 1)) - floatCashFlows(i)/365 * rTau(floatCashFlows(i)) ...
+        + floatCashFlows(1)/365 * rZero(floatCashFlows(1)) - floatCashFlows(i + 1)/365 * rZero(floatCashFlows(i + 1))) ...
+        - exp(floatCashFlows(1)/365 * rZero(floatCashFlows(1)) - floatCashFlows(i + 1)/365 * rZero(floatCashFlows(i + 1)));
+end
+
+y = float - fix;
+
+end

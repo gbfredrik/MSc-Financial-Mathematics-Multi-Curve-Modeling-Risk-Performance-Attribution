@@ -1,0 +1,40 @@
+function [P] = irsPriceRiskFactor(N, y, floatCashFlows, fixCashFlows, A, E, deltaTj, r, Xi)
+
+numCashFix = length(fixCashFlows);
+numCashFloat = length(floatCashFlows);
+
+n = size(E.Zero, 1);
+k = size(E.Zero, 2);
+aZero = [A*E.Zero, zeros(n, k)]; 
+aTau = [zeros(n, k), A*E.Tau];
+
+XiZero = [Xi(1:k); zeros(k, 1)];
+XiTau = [zeros(k, 1); Xi(k + 1:2*k)];
+
+rZero = r.rZero;
+rTau = r.rTau;
+
+fix = 0;
+% Calc fix leg
+for i = 1:numCashFix
+    fix = fix + deltaTj(i) * exp(floatCashFlows(1)/365 * aZero(floatCashFlows(1) + 1,:) * XiZero ...
+        - fixCashFlows(i)/365 * aZero(fixCashFlows(i) + 1,:) * XiZero)';
+end
+fix = N * y * fix;
+
+% Calc float leg
+float = 0;
+for i = 1:numCashFloat - 1
+    float = float + exp(floatCashFlows(i + 1)/365 * (aTau(floatCashFlows(i + 1) + 1,:) * XiTau) ...
+        - floatCashFlows(i)/365 * (aTau(floatCashFlows(i) + 1,:) * XiTau ...
+        + floatCashFlows(1)/365 * aZero(floatCashFlows(1) + 1,:) * XiZero ...
+        - floatCashFlows(i + 1)/365 * aZero(floatCashFlows(i + 1) + 1,:) * XiZero)' ...
+        - exp(floatCashFlows(1)/365 * aZero(floatCashFlows(1) + 1,:) * XiZero ...
+        - floatCashFlows(i + 1)/365 * aZero(floatCashFlows(i + 1) + 1,:) * XiZero)';
+end
+
+float = N * float;
+
+P = float - fix;
+
+end
