@@ -26,7 +26,6 @@ ublas::matrix<double> read_txt_matrix(std::string const& file_name) {
 	return m;
 }
 
-
 bool write_txt_matrix(ublas::matrix<double> const& m, std::string const& file_name) {
 	std::ofstream outf;
 	outf.open("./MSc Git/MScCurveModeling/Data/m_" + file_name); // Appending "m_" to prevent accidental overwriting of important files
@@ -65,11 +64,11 @@ ublas::matrix<double> read_csv_matrix(std::string const& file_name) {
 	
 	std::string line;
 	std::string val;
-	for (int i = 0; i < rows; ++i) {
+	for (int i{ 0 }; i < rows; ++i) {
 		getline(inf, line);
 		std::stringstream s(line);
 
-		for (int j = 0; j < cols; ++j) {
+		for (int j{ 0 }; j < cols; ++j) {
 			getline(s, val, ';');
 			m(i, j) = std::stod(val);
 			//inf >> m(i, j);
@@ -90,7 +89,7 @@ ublas::vector<double> read_csv_vector(std::string const& file_name) {
 	inf >> length;
 	ublas::vector<double> v(length);
 
-	for (int i = 0; i < length; ++i) {
+	for (int i{ 0 }; i < length; ++i) {
 		inf >> v(i);
 		inf >> delim;
 	}
@@ -105,8 +104,8 @@ bool write_csv_matrix(ublas::matrix<double> const& m, std::string const& file_na
 
 	outf << m.size1() << ";" << m.size2() << std::endl;
 
-	for (size_t r = 0, rows = m.size1(); r < rows; ++r) {
-		for (size_t c = 0, cols = m.size2(); c < cols; ++c) {
+	for (size_t r{ 0 }, rows = m.size1(); r < rows; ++r) {
+		for (size_t c{ 0 }, cols = m.size2(); c < cols; ++c) {
 			outf << m(r, c) << ((c != cols - 1) ? ";" : "");
 		}
 		outf << std::endl;
@@ -121,15 +120,13 @@ bool write_csv_vector(ublas::vector<double> const& m, std::string const& file_na
 
 	outf << m.size() << std::endl;
 
-	for (size_t i = 0, length = m.size(); i < length; ++i) {
+	for (size_t i{ 0 }, length = m.size(); i < length; ++i) {
 		outf << m(i) << ((i != length - 1) ? ";" : "");
 	}
 	outf << std::endl;
 
 	return true;
 }
-
-
 
 bool placeholder_ir_measurement_multi(
 	ublas::matrix<double>& m_rf, 

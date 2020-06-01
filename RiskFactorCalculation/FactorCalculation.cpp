@@ -112,3 +112,11 @@ ublas::matrix<double> FactorCalculation::compute_risk_factors(
 ) {
 	return prod(trans(m_E_k), trans(m_delta_f));
 }
+
+double FactorCalculation::eig_norm_error(
+	boost::numeric::ublas::matrix<double> const& m_A, 
+	boost::numeric::ublas::vector<double> const& v_x, 
+	double const lambda
+) {
+	return norm_2(prod(m_A, v_x) - lambda * v_x);
+}

@@ -23,4 +23,10 @@ public:
 		boost::numeric::ublas::matrix<double> const& m_E_k, 
 		boost::numeric::ublas::matrix<double> const& m_delta_f
 	);
+
+	static double eig_norm_error(
+		boost::numeric::ublas::matrix<double> const& m_A,
+		boost::numeric::ublas::vector<double> const& v_x,
+		double const lambda
+	);
 };

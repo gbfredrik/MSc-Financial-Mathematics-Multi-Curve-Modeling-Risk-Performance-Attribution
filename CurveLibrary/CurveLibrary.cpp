@@ -46,10 +46,11 @@ BOOL __stdcall ir_measurement_multiXL(BOOL const save_curves) {
 	return status;
 }
 
-BOOL __stdcall run_all_multiXL(BOOL const compute_curves/*, ...*/) {
+BOOL __stdcall run_all_multiXL(BOOL const compute_curves, double& norm_test) {
 #pragma EXPORT
 
 	bool status{ 1 };
+	norm_test = 123.0;
 
 	try {
 		ublas::matrix<double> m_forward_curves_rf{};
@@ -93,6 +94,8 @@ BOOL __stdcall run_all_multiXL(BOOL const compute_curves/*, ...*/) {
 		ublas::matrix<double> m_rf_delta_xi{ FactorCalculation::compute_risk_factors(m_rf_E, m_diff) };
 		status = status && write_csv_matrix(m_rf_delta_xi, "rf_delta_xi.csv");
 
+		// Evaluate eigendecomposition precision
+		norm_test = FactorCalculation::eig_norm_error(m_diff_clean, column(m_rf_E, 0), v_rf_Lambda(0));
 		//...
 	} catch (std::exception const&) {
 		return 0;

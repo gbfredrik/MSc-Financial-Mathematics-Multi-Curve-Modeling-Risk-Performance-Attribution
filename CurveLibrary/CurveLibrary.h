@@ -5,4 +5,4 @@
 LONG __stdcall squareXL(int x, int& y);
 
 BOOL __stdcall ir_measurement_multiXL(BOOL const save_curves);
-BOOL __stdcall run_all_multiXL(BOOL const compute_curves);
+BOOL __stdcall run_all_multiXL(BOOL const compute_curves, double& norm_test);
