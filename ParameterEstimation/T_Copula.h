@@ -27,7 +27,7 @@ using namespace boost::numeric::ublas;
 class T_Copula : public Distribution {
 public:
 	T_Copula(matrix<double> series);
-	double function_value(vector<double> const& x);
+	double function_value(matrix<double> const& x);
 	vector<double> calcGradients(vector<double> const& x);
 	vector<double> calcNumGradients(vector<double> const& x);
 	void getSeries();

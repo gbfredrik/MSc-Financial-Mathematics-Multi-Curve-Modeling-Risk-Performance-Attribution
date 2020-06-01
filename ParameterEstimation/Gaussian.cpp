@@ -159,7 +159,6 @@ matrix<double> Gaussian::calcNumHessian(vector<double> const& x) {
 
 //Calculate gradients, x = [omega alpha beta mu]
 vector<double> Gaussian::calcGradients(vector<double> const&  x) {
-	std::cout << "In Gaussian calcGrads \n\n";
 	update_GARCH_vec(x);
 	
 	double dw = 0;

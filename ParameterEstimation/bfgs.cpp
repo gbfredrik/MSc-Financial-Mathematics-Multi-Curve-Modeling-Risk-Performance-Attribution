@@ -61,7 +61,7 @@ vector<double> bfgs::minimize(boost::numeric::ublas::vector<double> x, matrix<do
 	std::cout << "Final k = " << k << " , Function value = " << dist->function_value(x) << " for parameters : " << x
 		<< " and norm of gradients = " << norm_2(dist->calcGradients(x)) << "\n \n \n\n";
 	
-	boost::numeric::ublas::vector<double> results(n+1);
+	vector<double> results(n+1);
 
 	
 	for (size_t i = 0; i < results.size() - 1; i++) {

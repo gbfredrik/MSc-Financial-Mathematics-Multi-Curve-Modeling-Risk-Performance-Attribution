@@ -92,7 +92,6 @@ vector<double> Student_t::derivative_b(vector<double> const& x) {
 
 
 vector<double> Student_t::calcGradients(vector<double> const& x) {
-	
 	update_GARCH_vec(x);
 
 	double dw = 0;
