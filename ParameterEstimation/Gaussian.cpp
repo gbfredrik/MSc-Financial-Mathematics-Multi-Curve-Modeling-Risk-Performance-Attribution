@@ -230,10 +230,32 @@ vector<double> Gaussian::derivative_b(vector<double> const& x) {
 
 
 double Gaussian::calcStepSize(vector<double> const& x, vector<double> const& d) {
-
+	
 	double a = 1;
 	double c1 = pow(10, -3);
 	double c2 = 0.9;
+
+	//update_GARCH_vec(x + a*d);
+	//bool acceptable = true;
+
+	//for (size_t i = 0; i < m_GARCH_vec.size(); ++i) {
+	//	if (m_GARCH_vec(i) < 0) {
+	//		acceptable = false;
+	//		break;
+	//	}
+	//}
+	//while (!acceptable) {
+	//	a = 0.5 * a;
+	//	update_GARCH_vec(x + a * d);
+	//	acceptable = true;
+	//	for (size_t i = 0; i < m_GARCH_vec.size(); ++i) {
+	//		if (m_GARCH_vec(i) < 0) {
+	//			acceptable = false;
+	//			break;
+	//		}
+	//	}
+	//}
+	//
 
 	while (x(0) + a * d(0) < 0 || x(1) + a * d(1) < 0 || x(2) + a * d(2) < 0 || x(1) + a * d(1) + x(2) + a * d(2) >= 1) {
 		a = a * 0.5;
@@ -242,6 +264,7 @@ double Gaussian::calcStepSize(vector<double> const& x, vector<double> const& d) 
 			break;
 		}
 	}
+
 	std::cout << "alpha efter bivillkorsuppfyllning = " << a << "\n\n";
 
 
