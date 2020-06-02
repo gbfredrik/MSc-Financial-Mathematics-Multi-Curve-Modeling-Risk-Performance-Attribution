@@ -1,12 +1,9 @@
 #include "pch.h"
-
-#include "MultipleYieldSim.h"
-
 #include "mex.h"
+#include "MultipleYieldSim.h"
 #include <boost/numeric/ublas/matrix.hpp>
-#include "../MathLibrary/rvSim.h"
-
 #include <string>
+#include "../MathLibrary/rvSim.h"
 
 using namespace boost::numeric::ublas;
 
@@ -29,7 +26,7 @@ void mexFunction(int nlhs, mxArray* plhs[],
 	vector<matrix<double>> E(M);
 	vector<matrix<double>> rho(M);
 	for (size_t i = 0; i < M; i++) {
-		EMex(i) = mxGetPr(mxGetField(prhs[0], 0, mxGetFieldNameByNumber(prhs[0], i)));
+		EMex(i) = mxGetPr(mxGetField(prhs[0], 0, mxGetFieldNameByNumber(prhs[0], i)));	
 		rhoMex(i) = mxGetPr(mxGetField(prhs[1], 0, mxGetFieldNameByNumber(prhs[1], i)));
 		E(i) = matrix<double>(n, k(i));
 		rho(i) = matrix<double>(k(i), k(i));
@@ -50,7 +47,7 @@ void mexFunction(int nlhs, mxArray* plhs[],
 			}
 		}
 	}
-	   
+
 	// Get mu, omega, alpha, beta, gamma
 	vector<double*> muMex(M);
 	vector<double*> omegaMex(M);
@@ -127,13 +124,13 @@ void mexFunction(int nlhs, mxArray* plhs[],
 		varRedType(i) = mxArrayToString(mxGetField(prhs[9], 0, mxGetFieldNameByNumber(prhs[9], i)));
 		kappa(i) = kappaMex[i];
 	}
-	
+
 	// Get d, N, problemType
 	size_t N;
 	size_t d;
 	d = mxGetScalar(prhs[10]);
 	N = mxGetScalar(prhs[11]);
-	
+
 	// Get fRes (create the output matrix and pointer)
 	vector<double*> fResMex(M);
 	vector<matrix<double>> fRes(M, matrix<double>(n, N));
@@ -141,19 +138,19 @@ void mexFunction(int nlhs, mxArray* plhs[],
 		plhs[i] = mxCreateDoubleMatrix(n, N, mxREAL);
 		fResMex(i) = mxGetPr(plhs[i]);
 	}
-	
+
 	/*
 	double* randomMex;
 	plhs[2] = mxCreateDoubleMatrix(6, 2000, mxREAL);
 	randomMex = mxGetPr(plhs[2]);
 	*/
 
-	// Call the computational routine
+	/* call the computational routine */
 	MultipleYieldSim::simMultipleFull(E, rho, mu, omega, alpha, beta, hist,
-			marginal, copula, varRedType, d, N, fRes, gamma, kappa,
-			xiHat, dfC, dfM);
-	
-	// Convert result
+		marginal, copula, varRedType, d, N, fRes, gamma, kappa,
+		xiHat, dfC, dfM);
+
+	/*Convert result*/
 	for (size_t i = 0; i < M; i++) {
 		for (size_t j = 0; j < n; j++) {
 			for (size_t k = 0; k < N; k++) {

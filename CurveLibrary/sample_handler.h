@@ -13,6 +13,7 @@ boost::numeric::ublas::vector<double> read_csv_vector(std::string const& file_na
 bool write_csv_matrix(boost::numeric::ublas::matrix<double> const& m, std::string const& file_name);
 bool write_csv_vector(boost::numeric::ublas::vector<double> const& m, std::string const& file_name);
 
-
-bool placeholder_ir_measurement_multi(boost::numeric::ublas::matrix<double>& m_rf,
-									  boost::numeric::ublas::matrix<double>& m_tenor);
+bool placeholder_ir_measurement_multi(
+	boost::numeric::ublas::matrix<double>& m_rf,
+	boost::numeric::ublas::matrix<double>& m_tenor
+);
