@@ -137,3 +137,9 @@ ublas::vector<double> FactorCalculation::eig_all_norm_errors(
 
 	return v_errors;
 }
+
+ublas::matrix<double> FactorCalculation::clean_data(ublas::matrix<double> const& m) {
+	// TODO: Implement
+
+	return ublas::matrix<double>();
+}

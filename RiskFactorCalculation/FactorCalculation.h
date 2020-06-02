@@ -35,4 +35,7 @@ public:
 		boost::numeric::ublas::vector<double> const& v_lambda
 	);
 
+	static boost::numeric::ublas::matrix<double> clean_data(
+		boost::numeric::ublas::matrix<double> const& m
+	);
 };
