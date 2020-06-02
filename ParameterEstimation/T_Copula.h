@@ -1,5 +1,8 @@
 #pragma once
 #include "Distribution.h"
+#include "../MathLibrary/matrixOperations.h"
+
+#include <Eigen/Dense>
 
 #include <iostream>
 #include <numeric>
@@ -15,7 +18,7 @@
 #include <boost/math/distributions/normal.hpp>
 
 #include <boost/math/constants/constants.hpp>
-
+#include <boost/qvm/mat_operations.hpp>
 
 #include <boost/accumulators/accumulators.hpp>
 #include <boost/accumulators/statistics/stats.hpp>
@@ -27,17 +30,13 @@ using namespace boost::numeric::ublas;
 class T_Copula : public Distribution {
 public:
 	T_Copula(matrix<double> series);
-	double function_value(matrix<double> const& x);
+	double function_value(vector<double> const& x);
 	vector<double> calcGradients(vector<double> const& x);
 	vector<double> calcNumGradients(vector<double> const& x);
 	void getSeries();
 	double calcStepSize(vector<double> const& x, vector<double> const& d);
 
 private:
-	vector<double> m_GARCH_vec;
 	matrix<double> time_series;
-	vector<double> derivative_w(vector<double> const& x);
-	vector<double> derivative_a(vector<double> const& x);
-	vector<double> derivative_b(vector<double> const& x);
 
 };

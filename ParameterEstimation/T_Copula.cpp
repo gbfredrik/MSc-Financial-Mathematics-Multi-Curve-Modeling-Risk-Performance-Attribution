@@ -11,9 +11,55 @@ void T_Copula::getSeries() {
 }
 
 
-double T_Copula::function_value(matrix<double> const& x) {
+double T_Copula::function_value(vector<double> const& x) {
 	std::cout << "in FN copula" << "\n\n";
+	double nu= x(x.size()-1);
 	double sum = 0;
+	int n = time_series.size2(); //Number of riskfaktors
+
+	matrix<double> rho(n, n);
+	int counter = 0;	//keep track of fetched elements
+
+	for (size_t i = 0; i < n; ++i) {
+		for (size_t j = 0; j < i+1; ++j) {
+			if (i == j) {
+				rho(i, j) = 1;
+			}
+			else {
+				rho(i, j) = x(counter);
+				rho(j, i) = x(counter);
+				counter = counter + 1;
+			}
+		}
+	}
+
+	double det_rho = matrixOperations::ublasToMatrixXd(rho).determinant();
+
+	for (size_t i = 0; i < time_series.size1(); ++i) {
+	
+		matrix_row<matrix<double> > U_row(time_series, i);
+
+		//Get N_inv(U)
+		vector<double> N_row(n);
+			for (size_t i = 0; i < N_row.size(); ++i) {
+				boost::math::normal norm = boost::math::normal::normal_distribution(0, 1);
+				N_row(i) = quantile(norm, U_row(i));
+			}
+
+
+			vector<double> help_vec = prod(N_row, rho);
+		double prod = inner_prod(help_vec, N_row);
+
+		double inner_sum;
+
+		for (size_t i = 0; i < n; ++i) {
+			inner_sum = inner_sum + log(1 + N_row(i) * 0.5);
+		}
+
+		sum = sum + (n - 1) * std::lgamma(nu * 0.5) + std::lgamma((nu + n) * 0.5) 
+				- (nu + n) * 0.5 * log(1 + prod / nu) - n * std::lgamma((nu + 1) * 0.5) 
+				- 0.5 * log(det_rho) + (nu + 1) * 0.5 * inner_sum;
+	}
 
 	return -sum;
 }
@@ -21,6 +67,8 @@ double T_Copula::function_value(matrix<double> const& x) {
 
 vector<double> T_Copula::calcGradients(vector<double> const& x) {
 	vector<double> gradients(x.size());
+
+
 
 	return gradients;
 }
@@ -57,8 +105,9 @@ vector<double> T_Copula::calcNumGradients(vector<double> const& x) {
 double T_Copula::calcStepSize(vector<double> const& x, vector<double> const& d) {
 
 	double a = 1;
-	double c1 = pow(10, -4);
-	double c2 = 0.9;
+	
+	//Kontrollera att rho är positiv definit, dvs minsta egenvärdet är positivt, annars halvera steglängden.
+
 	/*
 	while (x(0) + a * d(0) < 0 || x(1) + a * d(1) < 0 || x(2) + a * d(2) < 0 || x(1) + a * d(1) + x(2) + a * d(2) >= 1 || x(4) + a * d(4) <= 2) {
 		//std::cout <<"I bilvillkor, x_nytt = " <<  x + a * d << "\n\n";

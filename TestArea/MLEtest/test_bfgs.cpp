@@ -103,6 +103,9 @@ int main() {
 	std::cout << "OptParams first eigenvector = " << OptParamsAll[0] << "\n\n";
 	std::cout << "OptParams second eigenvector = " << OptParamsAll[1] << "\n\n";
 	std::cout << "OptParams third eigenvector = " << OptParamsAll[2] << "\n\n";
+
+
+
 }
 
 
