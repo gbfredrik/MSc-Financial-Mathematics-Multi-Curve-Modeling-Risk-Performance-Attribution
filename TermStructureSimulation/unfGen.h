@@ -1,5 +1,5 @@
-#ifndef UNFGEN
-#define UNFGEN
+#pragma once
+
 #include "mex.h"
 #include <boost/numeric/ublas/matrix.hpp>
 
@@ -13,6 +13,3 @@ public:
 	static boost::numeric::ublas::matrix<double> genU(boost::numeric::ublas::matrix<double> const& rho, size_t N, 
 		std::string copula, boost::numeric::ublas::vector<double> const& df);
 };
-
-#endif
-

@@ -1,7 +1,9 @@
 #include "pch.h"
 #include "statisticsOperations.h"
 
-#include "mex.h"
+#include "matrixOperations.h"
+
+//#include "mex.h"
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/matrix_proxy.hpp>
 #include <boost/math/distributions/normal.hpp>
@@ -9,52 +11,49 @@
 
 #include <numeric>
 
-using namespace boost::numeric::ublas;
+using namespace boost::numeric;
 
 // Calculates the covariance matrix
-matrix<double> statisticsOperations::covm(matrix<double> const& input) {
+ublas::matrix<double> statisticsOperations::covm(ublas::matrix<double> const& input) {
+	//size_t m{ input.size1() };
+	//size_t n{ input.size2() };
+	//ublas::matrix<double> cov(n, n);
+	//ublas::matrix<double> A(m, n);
+	//double mean{ 0.0 };
 
-	size_t m = input.size1();
-	size_t n = input.size2();
+	//for (size_t j{ 0 }; j < n; ++j) {
+	//	mean = vectorMean(column(input, j));
+	//	for (size_t i{ 0 }; i < m; ++i) {
+	//		A(i, j) = input(i, j) - mean;
+	//	}
+	//}
 
-	matrix<double> cov(n, n);
-	matrix<double> A(m, n);
-	double mean = 0.0;
+	//cov = prod(trans(A), A) / (m - 1);
 
-	for (size_t j = 0; j < n; ++j) {
-		mean = vectorMean(column(input, j));
-		for (size_t i = 0; i < m; ++i) {
-			A(i, j) = input(i, j) - mean;
-		}
-	}
+	//return cov;
+	ublas::matrix<double> m_centered{ matrixOperations::center_matrix(input) };
 
-	cov = prod(trans(A), A) / (m - 1);
-
-	return cov;
-
+	return prod(trans(m_centered), m_centered) / (m_centered.size1() - 1);
 }
 
-// Takes a vector as input and return its mean
-double statisticsOperations::vectorMean(vector<double> const& input) {
-	
-	double sum = std::accumulate(input.begin(), input.end(), 0.0);
-	double mean = sum / input.size();
+// Todo: Remove
+//double statisticsOperations::vectorMean(ublas::vector<double> const& input) {
+//	double sum{ std::accumulate(input.begin(), input.end(), 0.0) };
+//	double mean{ sum / input.size() };
+//
+//	return mean;
+//}
 
-	return mean;
+// Calculate the Pearson correlation matrix, TODO: reduce the amount of calls to pearson_rho()
+ublas::matrix<double> statisticsOperations::corrm(ublas::matrix<double> const& input) {
+	size_t m{ input.size1() };
+	size_t n{ input.size2() };
+	ublas::matrix<double> corr(n, n);
+	ublas::vector<double> X(m);
+	ublas::vector<double> Y(m);
 
-}
-
-// Calculate the Pearson correlation matrix
-matrix<double> statisticsOperations::corrm(matrix<double> const& input) {
-	
-	size_t m = input.size1();
-	size_t n = input.size2();
-	matrix<double> corr(n, n);
-	vector<double> X(m);
-	vector<double> Y(m);
-
-	for (size_t i = 0; i < n; ++i) {
-		for (size_t j = 0; j < n; ++j) {
+	for (size_t i{ 0 }; i < n; ++i) {
+		for (size_t j{ 0 }; j < n; ++j) {
 			if (i == j) {
 				corr(i, j) = 1;
 			} else {
@@ -68,78 +67,90 @@ matrix<double> statisticsOperations::corrm(matrix<double> const& input) {
 }
 
 // Calculate the Pearson correlation coefficient
-double statisticsOperations::pearson_rho(vector<double> const& X, vector<double> const& Y) {
-	
-	double rho = 0.0;
-	size_t m = X.size();
-	double numerator = 0;
-	double denomenator_a = 0;
-	double denomenator_b = 0;
+double statisticsOperations::pearson_rho(
+	ublas::vector<double> const& X, 
+	ublas::vector<double> const& Y
+) {
+	double rho{ 0 };
+	size_t m{ X.size() };
+	double numerator{ 0 };
+	double denomenator_a{ 0 };
+	double denomenator_b{ 0 };
 
 	//Calculate mean of input vectors
-	double X_hat = vectorMean(X);
-	double Y_hat = vectorMean(Y);
+	double X_hat{ matrixOperations::vector_average(X) }; // Changed from vectorMean
+	double Y_hat{ matrixOperations::vector_average(Y) }; // Changed from vectorMean
 
-	for (size_t i = 0; i < m; ++i) {
-		numerator = numerator + (X(i) - X_hat) * (Y(i) - Y_hat);
-		denomenator_a = denomenator_a + pow(X(i) - X_hat, 2);
-		denomenator_b = denomenator_b + pow(Y(i) - Y_hat, 2);
+	for (size_t i{ 0 }; i < m; ++i) {
+		numerator += (X(i) - X_hat) * (Y(i) - Y_hat);
+		denomenator_a += pow(X(i) - X_hat, 2);
+		denomenator_b += pow(Y(i) - Y_hat, 2);
 	}
 
-	return numerator / (sqrt(denomenator_a) * sqrt(denomenator_b));
-
+	return numerator / (sqrt(denomenator_a * denomenator_b));
 }
 
 // Calculates the first garch volatility values with the full dataset
 // Check if the GJR-term is needed
-vector<double> statisticsOperations::GARCH(vector<double> const& omega, vector<double> const& alpha, vector<double> const& beta,
-	vector<double> const& gamma, matrix<double> const& E, matrix<double> const& fHist) {
+ublas::vector<double> statisticsOperations::GARCH(
+	ublas::vector<double> const& omega,
+	ublas::vector<double> const& alpha,
+	ublas::vector<double> const& beta,
+	ublas::vector<double> const& gamma,
+	ublas::matrix<double> const& E,
+	ublas::matrix<double> const& fHist
+) {
+	size_t m{ fHist.size1() }; // Number of days in fHist
+	size_t k{ E.size2() }; // Number of risk factors
 
-	size_t m = fHist.size1(); // Number of days in fHist
-	size_t k = E.size2(); // Number of risk factors
-
-	vector<double> dXi(k);
-	vector<double> sigmaPrevSq(k);
-	vector<double> sigmaSq(k);
-	vector<double> sigma(k);
+	ublas::vector<double> dXi(k);
+	ublas::vector<double> sigmaPrevSq(k);
+	ublas::vector<double> sigmaSq(k);
+	ublas::vector<double> sigma(k);
 
 	dXi = prod(trans(E), trans(row(fHist, 1) - row(fHist, 0)));
 
-	for (size_t i = 0; i < k; ++i) {
+	for (size_t i{ 0 }; i < k; ++i) {
 		sigmaPrevSq(i) = omega(i) + alpha(i) * pow(dXi(i), 2) + beta(i) * pow(dXi(i), 2);
 	}
 	
-	for (size_t i = 3; i < m; ++i) {
+	for (size_t i{ 3 }; i < m; ++i) {
 		dXi = prod(trans(E), trans(row(fHist, i - 1) - row(fHist, i - 2)));
 		
-		for (size_t j = 0; j < k; ++j) {
+		for (size_t j{ 0 }; j < k; ++j) {
 			sigmaSq(j) = omega(j) + alpha(j) * pow(dXi(j), 2) + beta(j) * sigmaPrevSq(j);
 			sigmaPrevSq(j) = sigmaSq(j);
 		}
 	}
 
-	for (size_t i = 0; i < k; ++i) {
+	for (size_t i{ 0 }; i < k; ++i) {
 		sigma(i) = sqrt(sigmaSq(i));
 	}
 
 	return sigma;
-
 }
 
 // Calculates the updated garch volatility
 // Check if the GJR-term is needed
-vector<double> statisticsOperations::GARCH(vector<double> omega, vector<double> alpha, vector<double> beta, 
-	vector<double> gamma, matrix<double> E, vector<double> fPrev, vector<double> fPrevPrev, vector<double> sigmaPrev) {
-	
-	size_t k = E.size2(); // Number of risk factors
+ublas::vector<double> statisticsOperations::GARCH(
+	ublas::vector<double> const& omega,
+	ublas::vector<double> const& alpha,
+	ublas::vector<double> const& beta,
+	ublas::vector<double> const& gamma,
+	ublas::matrix<double> const& E,
+	ublas::vector<double> const& fPrev,
+	ublas::vector<double> const& fPrevPrev,
+	ublas::vector<double> const& sigmaPrev
+) {
+	size_t k{ E.size2() }; // Number of risk factors
 
-	vector<double> dXi(k);
-	vector<double> sigmaSq(k);
-	vector<double> sigma(k);
+	ublas::vector<double> dXi(k);
+	ublas::vector<double> sigmaSq(k);
+	ublas::vector<double> sigma(k);
 
 	dXi = prod(trans(E), trans(fPrev - fPrevPrev));
 
-	for (size_t i = 0; i < k; ++i) {
+	for (size_t i{ 0 }; i < k; ++i) {
 		sigmaSq(i) = omega(i) + alpha(i) * pow(dXi(i), 2) + beta(i) * pow(sigmaPrev(i), 2);
 		sigma(i) = sqrt(sigmaSq(i));
 	}
@@ -147,22 +158,14 @@ vector<double> statisticsOperations::GARCH(vector<double> omega, vector<double> 
 	return sigma;
 }
 
-double statisticsOperations::invCDFNorm(double u, double mu, double sigma) {
-	
-	double q = 0.0;
+double statisticsOperations::invCDFNorm(double const u, double const mu, double const sigma) {
 	boost::math::normal norm(mu, sigma);
-	q = quantile(norm, u);
 
-	return q;
-
+	return quantile(norm, u);
 }
 
-double statisticsOperations::invCDFT(double u, double df) {
-	
-	double q = 0.0;
-	boost::math::students_t t(df); 
-	q = quantile(t, u);
+double statisticsOperations::invCDFT(double const u, double const df) {
+	boost::math::students_t t(df);
 
-	return q;
-
+	return quantile(t, u);
 }

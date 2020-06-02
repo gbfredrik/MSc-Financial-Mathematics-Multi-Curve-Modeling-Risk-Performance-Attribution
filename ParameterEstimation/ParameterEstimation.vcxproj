@@ -32,7 +32,7 @@
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -69,7 +69,12 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <IncludePath>C:\Program Files\Matlab\R2019a\extern\include;$(ProjectPath)\..\..\Dependencies\eigen-3.3.7;$(ProjectPath)\..\..\Dependencies\boost_1_72_0;$(ProjectPath);$(ProjectPath)\..\..\Dependencies\spectra-0.8.1\spectra-0.8.1\include;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IncludePath>C:\Program Files\Matlab\R2019a\extern\include;$(ProjectPath)\..\..\Dependencies\eigen-3.3.7;$(ProjectPath)\..\..\Dependencies\boost_1_72_0;$(ProjectPath);$(ProjectPath)\..\..\Dependencies\spectra-0.8.1\spectra-0.8.1\include;$(IncludePath);$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -87,7 +92,6 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>\\ad.liu.se\home\corwe099\Documents\Dependencies\boost_1_71_0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -127,11 +131,18 @@
     <ClInclude Include="bfgs.h" />
     <ClInclude Include="Distribution.h" />
     <ClInclude Include="Gaussian.h" />
+    <ClInclude Include="Student_t.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="bfgs.cpp" />
     <ClCompile Include="Distribution.cpp" />
     <ClCompile Include="Gaussian.cpp" />
+    <ClCompile Include="Student_t.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\MathLibrary\MathLibrary.vcxproj">
+      <Project>{a18252bf-632c-435a-9887-422029fc1503}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

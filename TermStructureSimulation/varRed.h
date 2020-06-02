@@ -1,5 +1,5 @@
-#ifndef VARRED
-#define VARRED
+#pragma once
+
 #include "mex.h"
 #include <boost/numeric/ublas/matrix.hpp>
 //extern boost::numeric::ublas::matrix<double> hehe;
@@ -12,5 +12,3 @@ private:
 public:
 	static boost::numeric::ublas::matrix<double> redVariance(boost::numeric::ublas::matrix<double> const& U, std::string varRedType);
 };
-
-#endif

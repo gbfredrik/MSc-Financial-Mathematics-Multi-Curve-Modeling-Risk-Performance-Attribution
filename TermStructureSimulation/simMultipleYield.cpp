@@ -1,9 +1,12 @@
 #include "pch.h"
-#include "mex.h"
+
 #include "MultipleYieldSim.h"
+
+#include "mex.h"
 #include <boost/numeric/ublas/matrix.hpp>
-#include <string>
 #include "../MathLibrary/rvSim.h"
+
+#include <string>
 
 using namespace boost::numeric::ublas;
 
@@ -31,7 +34,7 @@ void mexFunction(int nlhs, mxArray* plhs[],
 		E(i) = matrix<double>(n, k(i));
 		rho(i) = matrix<double>(k(i), k(i));
 	}
-	
+
 	for (size_t i = 0; i < M; i++) {
 		for (size_t j = 0; j < n; j++) {
 			for (size_t l = 0; l < k(i); l++) {
@@ -39,7 +42,7 @@ void mexFunction(int nlhs, mxArray* plhs[],
 			}
 		}
 	}
-	
+
 	for (size_t i = 0; i < M; i++) {
 		for (size_t j = 0; j < k(i); j++) {
 			for (size_t l = 0; l < k(i); l++) {
@@ -145,12 +148,12 @@ void mexFunction(int nlhs, mxArray* plhs[],
 	randomMex = mxGetPr(plhs[2]);
 	*/
 
-	/* call the computational routine */
+	// Call the computational routine
 	MultipleYieldSim::simMultipleFull(E, rho, mu, omega, alpha, beta, hist,
 			marginal, copula, varRedType, d, N, fRes, gamma, kappa,
 			xiHat, dfC, dfM);
 	
-	/*Convert result*/
+	// Convert result
 	for (size_t i = 0; i < M; i++) {
 		for (size_t j = 0; j < n; j++) {
 			for (size_t k = 0; k < N; k++) {
@@ -166,4 +169,3 @@ void mexFunction(int nlhs, mxArray* plhs[],
 	}
 	*/
 }
-
