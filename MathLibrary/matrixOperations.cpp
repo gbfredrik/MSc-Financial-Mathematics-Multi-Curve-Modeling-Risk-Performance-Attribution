@@ -112,6 +112,7 @@ ublas::matrix<double> matrixOperations::center_matrix(ublas::matrix<double> cons
 double matrixOperations::vector_average(ublas::vector<double> const& vec) {
 	return sum(vec) / vec.size();
 }
+
 //Logarithm of a matrix
 ublas::matrix<double> matrixOperations::matrixLog(ublas::matrix<double> const& input) {
 	size_t rows{ input.size1() };
