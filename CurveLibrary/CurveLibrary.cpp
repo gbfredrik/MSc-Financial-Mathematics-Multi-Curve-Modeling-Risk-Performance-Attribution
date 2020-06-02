@@ -7,6 +7,7 @@
 
 #include "sample_handler.h"
 #include "../MathLibrary/matrixOperations.h"
+#include "../MathLibrary/statisticsOperations.h"
 #include "../RiskFactorCalculation/FactorCalculation.h"
 
 #include <boost/numeric/ublas/matrix.hpp>
@@ -46,11 +47,15 @@ BOOL __stdcall ir_measurement_multiXL(BOOL const save_curves) {
 	return status;
 }
 
-BOOL __stdcall run_all_multiXL(BOOL const compute_curves, double& norm_test) {
+BOOL __stdcall run_all_multiXL(
+	bool const compute_curves,
+	int const eigen_algorithm,
+	bool const eval_eigen,
+	double* return_norm_errors
+) {
 #pragma EXPORT
 
 	bool status{ 1 };
-	norm_test = 123.0;
 
 	try {
 		ublas::matrix<double> m_forward_curves_rf{};
@@ -66,7 +71,7 @@ BOOL __stdcall run_all_multiXL(BOOL const compute_curves, double& norm_test) {
 			m_forward_curves_rf = read_csv_matrix("fHist.csv");
 			m_forward_curves_tenor = read_csv_matrix("piHist.csv");
 		}
-
+		
 		ublas::matrix<double> m_diff{ matrixOperations::diff_matrix(m_forward_curves_rf) };
 		// Todo: Clean data here and process:
 		ublas::matrix_range<ublas::matrix<double>> m_diff_clean(
@@ -80,26 +85,38 @@ BOOL __stdcall run_all_multiXL(BOOL const compute_curves, double& norm_test) {
 		ublas::matrix<double> m_rf_E(m_rf_centered.size2(), k);
 		ublas::vector<double> v_rf_Lambda(k);
 
-		enum class PCA_Algo {IRAM, BDCSVD};
-		PCA_Algo pca_algo{ PCA_Algo::IRAM };
-		if (pca_algo == PCA_Algo::IRAM) {
+		enum class PCA_Algo { IRAM, BDCSVD };
+		//PCA_Algo pca_algo{ PCA_Algo::IRAM };
+
+		if (PCA_Algo(eigen_algorithm) == PCA_Algo::IRAM) {
 			status = status && FactorCalculation::iram(m_rf_centered / sqrt(m_rf_centered.size1() - 1), k, m_rf_E, v_rf_Lambda);
-		} else if (pca_algo == PCA_Algo::BDCSVD) {
+		} else if (PCA_Algo(eigen_algorithm) == PCA_Algo::BDCSVD) {
 			status = status && FactorCalculation::eigen_bdcsvd(m_rf_centered / sqrt(m_rf_centered.size1() - 1), k, m_rf_E, v_rf_Lambda);
 		}
 		
-		status = status && write_csv_matrix(m_rf_E, "rf_vec.csv");
-		status = status && write_csv_vector(v_rf_Lambda, "rf_val.csv");
+		//status = status && write_csv_matrix(m_rf_E, "rf_vec.csv");
+		//status = status && write_csv_vector(v_rf_Lambda, "rf_val.csv");
 
 		ublas::matrix<double> m_rf_delta_xi{ FactorCalculation::compute_risk_factors(m_rf_E, m_diff) };
-		status = status && write_csv_matrix(m_rf_delta_xi, "rf_delta_xi.csv");
-
-		// Evaluate eigendecomposition precision
-		norm_test = FactorCalculation::eig_norm_error(m_diff_clean, column(m_rf_E, 0), v_rf_Lambda(0));
+		//status = status && write_csv_matrix(m_rf_delta_xi, "rf_delta_xi.csv");
+		
+		if (eval_eigen) { // Evaluate eigendecomposition
+			ublas::vector<double> v_errors(
+				FactorCalculation::eig_all_norm_errors(
+					statisticsOperations::covm(m_diff_clean), 
+					m_rf_E, 
+					v_rf_Lambda
+				)
+			);
+			for (int i{ 0 }; i < k; ++i) {
+				return_norm_errors[i] = v_errors(i);
+			}
+		}
+		
 		//...
 	} catch (std::exception const&) {
 		return 0;
 	}
-
+	
 	return status;
 }
