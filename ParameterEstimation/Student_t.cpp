@@ -178,7 +178,7 @@ double Student_t::calcStepSize(vector<double> const& x, vector<double> const& d)
 		}
 	}
 
-	std::cout << "steglängd efter bivillkor = " << a << "\n";
+	std::cout << "steglängd efter bivillkor student = " << a << "\n";
 
 
 
@@ -191,7 +191,7 @@ double Student_t::calcStepSize(vector<double> const& x, vector<double> const& d)
 		}
 	}
 	
-	std::cout << "steglängd efter funktionsvärdeskoll = " << a << "\n \n";
+	std::cout << "steglängd efter funktionsvärdeskoll student= " << a << "\n \n";
 
 	return a;
 }

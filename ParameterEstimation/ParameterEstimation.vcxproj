@@ -92,10 +92,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-
-      <AdditionalIncludeDirectories>\\ad.liu.se\home\corwe099\Documents\Dependencies\boost_1_71_0;C:\Program Files\Matlab\R2019a\extern\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-
-	5f946f62013073dbd144fbd265e3ee9600ed3055
+      <AdditionalIncludeDirectories>\\ad.liu.se\home\corwe099\Documents\Dependencies\boost_1_71_0;\\ad.liu.se\home\corwe099\Documents\Dependencies\eigen-3.3.7;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

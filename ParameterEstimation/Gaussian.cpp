@@ -265,7 +265,7 @@ double Gaussian::calcStepSize(vector<double> const& x, vector<double> const& d) 
 		}
 	}
 
-	std::cout << "alpha efter bivillkorsuppfyllning = " << a << "\n\n";
+	std::cout << "alpha efter bivillkorsuppfyllning gauss = " << a << "\n\n";
 
 
 
@@ -277,7 +277,7 @@ double Gaussian::calcStepSize(vector<double> const& x, vector<double> const& d) 
 
 	}
 
-	std::cout << "alpha efter funktionsvärdestest = " << a << "\n\n";
+	std::cout << "alpha efter funktionsvärdestest gaussian = " << a << "\n\n";
 
 	return a;
 }
