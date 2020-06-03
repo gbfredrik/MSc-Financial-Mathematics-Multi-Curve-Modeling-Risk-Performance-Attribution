@@ -3,6 +3,7 @@
 #include "../../ParameterEstimation/Gaussian.h"
 #include "../../ParameterEstimation/Student_t.h"
 #include "../../ParameterEstimation/T_Copula.h"
+#include "../../ParameterEstimation/Gaussian_Copula.h"
 
 #include <boost/math/distributions/normal.hpp>
 #include <boost/math/distributions/students_t.hpp>
@@ -116,18 +117,22 @@ int main() {
 	U_row = testU;
 
 	T_Copula dist(Umat);
-	T_Copula* T = &dist;
+	T_Copula* TC = &dist;
+
+	Gaussian_Copula distG(Umat);
+	Gaussian_Copula* gaussianC = &distG;
 
 	vector<double> P_e(4);
 	P_e(0) = 0.2;
 	P_e(1) = 0.3;
 	P_e(2) = 0.4;
-	P_e(3) = 5;
+	//P_e(3) = 5;
 
 	//double FV = T->function_value(P_e);
 
-	vector<double> gradients = T->calcGradients(P_e);
-	std::cout << "gradients = " << gradients << "\n\n";
+	vector<double> gradients = gaussianC->calcGradients(P_e);
+	//double FVgaussian = gaussianC->function_value(P_e);
+	std::cout << "FV gaussian = " << gradients << "\n\n";
 
 }
 

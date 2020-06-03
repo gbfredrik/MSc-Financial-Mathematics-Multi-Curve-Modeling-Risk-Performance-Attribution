@@ -132,6 +132,7 @@
     <ClInclude Include="bfgs.h" />
     <ClInclude Include="Distribution.h" />
     <ClInclude Include="Gaussian.h" />
+    <ClInclude Include="Gaussian_Copula.h" />
     <ClInclude Include="Student_t.h" />
     <ClInclude Include="T_Copula.h" />
   </ItemGroup>
@@ -139,6 +140,7 @@
     <ClCompile Include="bfgs.cpp" />
     <ClCompile Include="Distribution.cpp" />
     <ClCompile Include="Gaussian.cpp" />
+    <ClCompile Include="Gaussian_Copula.cpp" />
     <ClCompile Include="Student_t.cpp" />
     <ClCompile Include="T_Copula.cpp" />
   </ItemGroup>
