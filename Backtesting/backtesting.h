@@ -1,5 +1,4 @@
-#ifndef BACKTESTING
-#define BACKTESTING
+#pragma once
 
 #include <boost/numeric/ublas/matrix.hpp>
 
@@ -19,7 +18,7 @@ public:
 class KernelDensity {
 	//private:
 public:
-	static boost::numeric::ublas::vector<double> kde_multi(boost::numeric::ublas::matrix<double> x_simulated, boost::numeric::ublas::vector<double> x_realized);
+	//static boost::numeric::ublas::vector<double> kde_multi(boost::numeric::ublas::matrix<double> x_simulated, boost::numeric::ublas::vector<double> x_realized);
+	static boost::numeric::ublas::vector<double> kde_multi(boost::numeric::ublas::vector<double> x_simulated, boost::numeric::ublas::vector<double> x_realized);
 	static double kde(boost::numeric::ublas::vector<double> const& x_simulated, double x_realized);
 };
-#endif

@@ -109,6 +109,7 @@ ublas::matrix<double> matrixOperations::center_matrix(ublas::matrix<double> cons
 	return centered_matrix;
 }
 
+
 //Logarithm of a matrix
 ublas::matrix<double> matrixOperations::matrixLog(ublas::matrix<double> const& input) {
 	size_t rows{ input.size1() };
@@ -151,8 +152,9 @@ double matrixOperations::vector_variance(ublas::vector<double> const& vec) {
 	mean = matrixOperations::vector_average(vec);
 
 	for (int i = 0; i < length; ++i) {
+		double var = pow(vec(i) - mean, 2);
 		variance += pow(vec(i) - mean, 2);
 	}
-	return variance /= length;
+	return variance /= (length-1);
 }
 

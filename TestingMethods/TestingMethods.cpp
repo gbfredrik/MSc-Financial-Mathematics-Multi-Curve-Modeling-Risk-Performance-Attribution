@@ -14,7 +14,7 @@
 #include <boost/numeric/ublas/matrix_proxy.hpp>
 #include <boost/numeric/ublas/io.hpp>
 #include <boost/range/counting_range.hpp>
-
+#include "../../CurveLibrary/sample_handler.h"
 
 using namespace boost::numeric::ublas;
 using namespace boost::range;
@@ -137,7 +137,7 @@ void test_likelihood() {
 	prices1(0) = 7.1;
 	prices1(1) = 11.8;
 
-	int N = 3;
+	int N = 2;
 	double confidence_level = 0.95;
 	//confidence_level(1) = 0.95;
 
@@ -150,11 +150,11 @@ void test_likelihood() {
 	sigma = Likelihood::sigma(d,d_i, N);
 	std::cout << "sigma: " << sigma << std::endl;
 	s = Likelihood::s(sigma, N);
-	std::cout << "s: " << s << std::endl;
+	std::cout << "s: " << sigma / sqrt(N) << std::endl;
 	dR_i = Likelihood::dResidual_i(functions1, functions2, prices1, prices2);
 	std::cout << "dR_i: " << dR_i << std::endl;
 	p = Likelihood::isBetter(d, s, confidence_level);
-	std::cout << "p: " << p << std::endl;
+	std::cout << "isBetter: " << p << std::endl;
 }
 
 void test_likelihood2() {
@@ -168,9 +168,9 @@ void test_likelihood2() {
 	functions1(1) = 5;
 
 	prices2(0) = 1.1;
-	prices2(1) = 2.1;
-	prices2(0) = 4.1;
-	prices2(1) = 5.1;
+	prices2(1) = 2.5;
+	prices1(0) = 4.1;
+	prices1(1) = 5.3;
 
 	int isBetter;
 	int isBetter2;
@@ -178,10 +178,10 @@ void test_likelihood2() {
 	double confidence_level = 0.95;
 	std::cout << "------------------ " << std::endl;
 	isBetter = Likelihood::likelihoodRatioTest(functions1, functions2, confidence_level);
-	std::cout << "isBetter: " << isBetter << std::endl;
+	std::cout << "isBetter2: " << isBetter << std::endl;
 	std::cout << "------------------ " << std::endl;
 	isBetter2 = Likelihood::likelihoodRatioTestResidual(functions1, functions2, prices1, prices2, confidence_level);
-	std::cout << "isBetter2: " << isBetter2 << std::endl;
+	std::cout << "isBetter3: " << isBetter2 << std::endl;
 
 	vector<double> x_sim(3);
 	matrix<double> x_simM(3,3);
@@ -190,12 +190,12 @@ void test_likelihood2() {
 	double f;
 	double x_realized = 0.011;
 	x_sim(0) = 0.01;
-	x_sim(1) = 0.02;
-	x_sim(2) = 0.03;
+	x_sim(1) = 0.012;
+	x_sim(2) = 0.009;
 
 	x_simM(0,0) = 0.01;
 	x_simM(1,0) = 0.012;
-	x_simM(2,0) = 0.09;
+	x_simM(2,0) = 0.009;
 	x_simM(0, 1) = 0.023;
 	x_simM(1, 1) = 0.022;
 	x_simM(2, 1) = 0.021;
@@ -206,12 +206,17 @@ void test_likelihood2() {
 	x_realizedV(0) = 0.011;
 	x_realizedV(1) = 0.019;
 	x_realizedV(2) = 0.031;
+	std::cout << "------------------ " << std::endl;
 	f = KernelDensity::kde(x_sim, x_realized);
 	std::cout << "f: " << f << std::endl;
 
-	fV = KernelDensity::kde_multi(x_simM, x_realizedV);
-	std::cout << "fV: " << fV << std::endl;
+	//fV = KernelDensity::kde_multi(x_simM, x_realizedV);
+	//std::cout << "fV: " << fV << std::endl;
 
+	vector<double> x_simMultiTest = read_csv_vector<double>("KernelRnd.csv");
+	vector<double> x = read_csv_vector<double>("KernelX.csv");
+	vector<double> fMultiTest = KernelDensity::kde_multi(x_simMultiTest, x);
+	std::cout << "fMultiTest: " << fMultiTest << std::endl;
 }
 
 /*

@@ -1,14 +1,14 @@
 
-clearvars -except fAll piAll EZero6 ETau6
+clearvars -except fAll piAll EZero6 ETau6 fHist EZero
 
 %%
 dt = 1;
 
 
 %curves = table2array(fAll);
-E = table2array(ETau6);
+E = table2array(EZero);
 
-delta_curves(1:3450,:) = piAll(2:3451,:) - piAll(1:3450,:);
+delta_curves(1:3450,:) = fHist(2:3451,:) - fHist(1:3450,:);
 
 % Get historic risk factors
 RiskFactors = E'*delta_curves';
@@ -16,9 +16,9 @@ RiskFactors = E'*delta_curves';
 R1 = RiskFactors(1,:)';
 R2 = RiskFactors(2,:)';
 R3 = RiskFactors(3,:)';
-R4 = RiskFactors(4,:)';
-R5 = RiskFactors(5,:)';
-R6 = RiskFactors(6,:)';
+%R4 = RiskFactors(4,:)';
+%R5 = RiskFactors(5,:)';
+%R6 = RiskFactors(6,:)';
 %%
 v(1)=(std(R1))^2/dt;
 

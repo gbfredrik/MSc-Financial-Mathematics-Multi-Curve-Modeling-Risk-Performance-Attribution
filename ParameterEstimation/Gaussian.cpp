@@ -5,8 +5,10 @@
 
 using namespace boost::numeric::ublas;
 
-Gaussian::Gaussian(vector<double> series) : Distribution(series) {
-	time_series = series;
+Gaussian::Gaussian(matrix<double> series) : Distribution(series) {
+	matrix_column<matrix<double> > x(series, 0);
+	time_series = x;
+
 	vector<double> garch_vec(time_series.size() + 1);
 	m_GARCH_vec = garch_vec;
 
@@ -26,7 +28,7 @@ void Gaussian::getSeries() {
 }
 
 //Update garch vector with new parameters
-void Gaussian::update_GARCH_vec(vector<double> x) {  // datum växer med index
+void Gaussian::update_GARCH_vec(vector<double> const& x) {  // datum växer med index
 
 	for (size_t i = 0; i < time_series.size(); i++) {
 		m_GARCH_vec(i + 1) = x(0) + x(1) * pow(time_series(i), 2) + x(2) * m_GARCH_vec(i);
@@ -34,7 +36,7 @@ void Gaussian::update_GARCH_vec(vector<double> x) {  // datum växer med index
 }
 
 //Calculate function value given parameters x
-double Gaussian::function_value(vector<double> x) {
+double Gaussian::function_value(vector<double> const& x) {
 
 	update_GARCH_vec(x);
 
@@ -49,7 +51,7 @@ double Gaussian::function_value(vector<double> x) {
 	return sum;
 }
 
-vector<double> Gaussian::calcNumGradients(vector<double> x) {
+vector<double> Gaussian::calcNumGradients(vector<double> const& x) {
 
 	double epsilon = 2.2*pow(10, -16);
 	vector<double> increment(sqrt(epsilon) * x);
@@ -77,7 +79,7 @@ vector<double> Gaussian::calcNumGradients(vector<double> x) {
 
 // Hessian: https://v8doc.sas.com/sashtml/ormp/chap5/sect28.htm
 //
-matrix<double> Gaussian::calcNumHessian(vector<double> x) {
+matrix<double> Gaussian::calcNumHessian(vector<double> const& x) {
 	
 	//double epsilon = 2.2 * pow(10, -16);
 	//vector<double> increment(0.00001);
@@ -156,8 +158,7 @@ matrix<double> Gaussian::calcNumHessian(vector<double> x) {
 
 
 //Calculate gradients, x = [omega alpha beta mu]
-vector<double> Gaussian::calcGradients(vector<double> x) {
-
+vector<double> Gaussian::calcGradients(vector<double> const&  x) {
 	update_GARCH_vec(x);
 	
 	double dw = 0;
@@ -190,7 +191,7 @@ vector<double> Gaussian::calcGradients(vector<double> x) {
 }
 
 //Calculate vector with derivatives of garch with respect to omega. dv/dw.
-vector<double> Gaussian::derivative_w(vector<double> x) {
+vector<double> Gaussian::derivative_w(vector<double> const& x) {
 	vector<double> inner_dw(time_series.size());
 
 	inner_dw(0) = 0;
@@ -203,7 +204,7 @@ vector<double> Gaussian::derivative_w(vector<double> x) {
 }
 
 //Calculate vector with derivatives of garch with respect to alpha. dv/da.
-vector<double> Gaussian::derivative_a(vector<double> x) {
+vector<double> Gaussian::derivative_a(vector<double> const& x) {
 	vector<double> inner_da(time_series.size());
 
 	inner_da(0) = 0;
@@ -215,7 +216,7 @@ vector<double> Gaussian::derivative_a(vector<double> x) {
 	return inner_da;
 }
 //Calculate vector with derivatives of garch with respect to beta. dv/db
-vector<double> Gaussian::derivative_b(vector<double> x) {
+vector<double> Gaussian::derivative_b(vector<double> const& x) {
 	vector<double> inner_db(time_series.size());
 
 	inner_db(0) = 0;
@@ -228,11 +229,33 @@ vector<double> Gaussian::derivative_b(vector<double> x) {
 }
 
 
-double Gaussian::calcStepSize(vector<double> x, vector<double> d) {
-
+double Gaussian::calcStepSize(vector<double> const& x, vector<double> const& d) {
+	
 	double a = 1;
 	double c1 = pow(10, -3);
 	double c2 = 0.9;
+
+	//update_GARCH_vec(x + a*d);
+	//bool acceptable = true;
+
+	//for (size_t i = 0; i < m_GARCH_vec.size(); ++i) {
+	//	if (m_GARCH_vec(i) < 0) {
+	//		acceptable = false;
+	//		break;
+	//	}
+	//}
+	//while (!acceptable) {
+	//	a = 0.5 * a;
+	//	update_GARCH_vec(x + a * d);
+	//	acceptable = true;
+	//	for (size_t i = 0; i < m_GARCH_vec.size(); ++i) {
+	//		if (m_GARCH_vec(i) < 0) {
+	//			acceptable = false;
+	//			break;
+	//		}
+	//	}
+	//}
+	//
 
 	while (x(0) + a * d(0) < 0 || x(1) + a * d(1) < 0 || x(2) + a * d(2) < 0 || x(1) + a * d(1) + x(2) + a * d(2) >= 1) {
 		a = a * 0.5;
@@ -241,7 +264,8 @@ double Gaussian::calcStepSize(vector<double> x, vector<double> d) {
 			break;
 		}
 	}
-	std::cout << "alpha efter bivillkorsuppfyllning = " << a << "\n\n";
+
+	std::cout << "alpha efter bivillkorsuppfyllning gauss = " << a << "\n\n";
 
 
 
@@ -253,7 +277,7 @@ double Gaussian::calcStepSize(vector<double> x, vector<double> d) {
 
 	}
 
-	std::cout << "alpha efter funktionsvärdestest = " << a << "\n\n";
+	std::cout << "alpha efter funktionsvärdestest gaussian = " << a << "\n\n";
 
 	return a;
 }
