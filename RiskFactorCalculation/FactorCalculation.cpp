@@ -22,7 +22,7 @@ bool FactorCalculation::iram(
 ) {
 	// Utilizes the SymEigsSolver (IRAM) from the Spectra library
 	using namespace Spectra;
-	
+
 	// Transform ublas matrix into Eigen::matrix
 	Eigen::MatrixXd D{ matrixOperations::ublasToMatrixXd(input) };
 	
@@ -39,7 +39,7 @@ bool FactorCalculation::iram(
 
 		// Construct eigen solver object, requesting the largest k eigenvalues in magnitude
 		SymEigsSolver<double, LARGEST_ALGE, DenseSymMatProd<double>> eigs(&op, k, 2 * k + 1);
-
+		
 		// Initialize and compute
 		eigs.init();
 		int nconv{ eigs.compute() };
@@ -113,6 +113,60 @@ ublas::matrix<double> FactorCalculation::compute_risk_factors(
 	ublas::matrix<double> const& m_delta_f
 ) {
 	return prod(trans(m_E_k), trans(m_delta_f));
+}
+
+double FactorCalculation::smallest_eigval(
+	ublas::matrix<double> const& input
+) {
+	// Utilizes the SymEigsSolver (IRAM) from the Spectra library
+	using namespace Spectra;
+	int k{ 1 };
+	// Transform ublas matrix into Eigen::matrix
+	Eigen::MatrixXd D{ matrixOperations::ublasToMatrixXd(input) };
+
+	if (D.rows() < D.cols()) {
+		Eigen::HouseholderQR<Eigen::MatrixXd> qr(D.transpose());
+
+		// Define the positive definite RTR matrix
+		Eigen::MatrixXd RTR{ qr.matrixQR().transpose() * qr.matrixQR() };
+		Eigen::MatrixXd thinQ(Eigen::MatrixXd::Identity(D.cols(), D.rows()));
+		thinQ = qr.householderQ() * thinQ;
+
+		// Construct matrix operation objects
+		DenseSymMatProd<double> op(RTR);
+
+		// Construct eigen solver object, requesting the smallest eigenvalue in magnitude
+		SymEigsSolver<double, SMALLEST_ALGE, DenseSymMatProd<double>> eigs(&op, k, 2 * k + 1);
+
+		// Initialize and compute
+		eigs.init();
+		int nconv{ eigs.compute() };
+
+		// Retrieve results
+		if (eigs.info() == SUCCESSFUL) {
+			// Return smallest eigenvalue
+			return eigs.eigenvalues()[0];
+		}
+	} else {
+		// Define the positive definite C matrix
+		Eigen::MatrixXd C{ D.transpose() * D };
+
+		// Construct matrix operation objects
+		DenseSymMatProd<double> op(C);
+
+		// Construct eigen solver object, requesting the largest k eigenvalues in magnitude
+		SymEigsSolver<double, SMALLEST_ALGE, DenseSymMatProd<double>> eigs(&op, k, 2 * k + 1);
+
+		eigs.init();
+		int nconv{ eigs.compute() };
+
+		// Retrieve results
+		if (eigs.info() == SUCCESSFUL) {
+			// Return smallest eigenvalue
+			return eigs.eigenvalues()[0];
+		}
+	}
+	return -1.0;
 }
 
 double FactorCalculation::eig_norm_error(

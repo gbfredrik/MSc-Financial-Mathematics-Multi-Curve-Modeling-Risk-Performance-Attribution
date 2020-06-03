@@ -2,6 +2,7 @@
 
 #include <boost/numeric/ublas/matrix.hpp>
 #include <Eigen/Core>
+#include <Spectra/Util/SelectionRule.h>
 
 
 class FactorCalculation {
@@ -22,6 +23,10 @@ public:
 	static boost::numeric::ublas::matrix<double> compute_risk_factors(
 		boost::numeric::ublas::matrix<double> const& m_E_k, 
 		boost::numeric::ublas::matrix<double> const& m_delta_f
+	);
+
+	double smallest_eigval(
+		boost::numeric::ublas::matrix<double> const& input
 	);
 
 	static double eig_norm_error(
