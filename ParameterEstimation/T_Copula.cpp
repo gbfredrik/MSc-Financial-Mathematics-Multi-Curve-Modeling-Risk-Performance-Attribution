@@ -11,54 +11,39 @@ void T_Copula::getSeries() {
 }
 
 
+
 double T_Copula::function_value(vector<double> const& x) {
-	std::cout << "in FN copula" << "\n\n";
+	std::cout << "in FN T copula" << "\n\n";
 	double nu= x(x.size()-1);
 	double sum = 0;
 	int n = time_series.size2(); //Number of riskfaktors
-
-	matrix<double> rho(n, n);
-	int counter = 0;	//keep track of fetched elements
-
-	for (size_t i = 0; i < n; ++i) {
-		for (size_t j = 0; j < i+1; ++j) {
-			if (i == j) {
-				rho(i, j) = 1;
-			}
-			else {
-				rho(i, j) = x(counter);
-				rho(j, i) = x(counter);
-				counter = counter + 1;
-			}
-		}
-	}
-
-	double det_rho = matrixOperations::ublasToMatrixXd(rho).determinant();
+	matrix<double> P = buildP(x);
+	std::cout << "P = " << P << "\n\n";
+	double det_P = matrixOperations::ublasToMatrixXd(P).determinant();
+	matrix<double> P_inv = matrixOperations::matrixXdToUblas(matrixOperations::ublasToMatrixXd(P).inverse());
 
 	for (size_t i = 0; i < time_series.size1(); ++i) {
 	
 		matrix_row<matrix<double> > U_row(time_series, i);
 
 		//Get N_inv(U)
-		vector<double> N_row(n);
-			for (size_t i = 0; i < N_row.size(); ++i) {
-				boost::math::normal norm = boost::math::normal::normal_distribution(0, 1);
-				N_row(i) = quantile(norm, U_row(i));
+		vector<double> T_inv(n);
+			for (size_t j = 0; j < T_inv.size(); ++j) {
+				boost::math::students_t T = boost::math::students_t::students_t_distribution(nu);
+				T_inv(j) = quantile(T, U_row(j));
 			}
 
-
-			vector<double> help_vec = prod(N_row, rho);
-		double prod = inner_prod(help_vec, N_row);
-
-		double inner_sum;
-
-		for (size_t i = 0; i < n; ++i) {
-			inner_sum = inner_sum + log(1 + N_row(i) * 0.5);
+		vector<double> tP = prod(T_inv, P_inv);
+		double tPt = inner_prod(tP, T_inv);
+	
+		double inner_sum = 0;
+		for (size_t k= 0; k < n; ++k) {
+			inner_sum = inner_sum + log(1 + pow(T_inv(k),2)/nu);
 		}
 
 		sum = sum + (n - 1) * std::lgamma(nu * 0.5) + std::lgamma((nu + n) * 0.5) 
-				- (nu + n) * 0.5 * log(1 + prod / nu) - n * std::lgamma((nu + 1) * 0.5) 
-				- 0.5 * log(det_rho) + (nu + 1) * 0.5 * inner_sum;
+				- (nu + n) * 0.5 * log(1 + tPt / nu) - n * std::lgamma((nu + 1) * 0.5) 
+				- 0.5 * log(det_P) + (nu + 1) * 0.5 * inner_sum;
 	}
 
 	return -sum;
@@ -67,10 +52,159 @@ double T_Copula::function_value(vector<double> const& x) {
 
 vector<double> T_Copula::calcGradients(vector<double> const& x) {
 	vector<double> gradients(x.size());
+	double nu = x(x.size() - 1);
+	int n = time_series.size2(); //Number of riskfaktors
+	double sum = 0;
+	zero_vector<double> zeroVec(n * n);
+	vector<double> dFdP = zeroVec;
+	double dFdnu = 0;
+
+	//Get rho gradients as a vector
+	for (size_t i = 0; i < time_series.size1(); ++i) {
+
+		//Get T_inv(U)
+		matrix_row<matrix<double> > U_row(time_series, i);
+		//std::cout << "U_row = " << U_row << "\n\n";
+		vector<double> T_inv(n);
+		for (size_t j = 0; j < T_inv.size(); ++j) {
+			boost::math::students_t T = boost::math::students_t::students_t_distribution(nu);
+			T_inv(j) = quantile(T, U_row(j));
+		}
+		//std::cout << "T_inv = " << T_inv << "\n\n";
+
+		matrix<double> P = buildP(x);
+		//std::cout << "P = " << P << "\n\n";
+		matrix<double> P_inv = matrixOperations::matrixXdToUblas(matrixOperations::ublasToMatrixXd(P).inverse());
+
+		//Get P_inv as a vector of the columns
+		vector<double> vec_Pinv = matrixToVector(P_inv);
+
+		//Kroneckers product of two vectors
+		vector<double> vKron = kronOfVectors(prod(T_inv, P_inv), prod(T_inv, P_inv));
+
+		//Help products and summations
+		vector<double> tP = prod(T_inv, P_inv);
+		double tPt = inner_prod(tP, T_inv);
+		double inner_sum = 0;
+		double inner_sum2 = 0;
+
+		for (size_t k = 0; k < n; ++k) {
+			inner_sum = inner_sum + log(1 + pow(T_inv(k), 2) / nu);
+			inner_sum2 = inner_sum2 + pow(T_inv(k), 2) / pow(nu, 2) / (1 + pow(T_inv(k), 2) / nu);
+		}
 
 
+		//Get gradients for time_series(i)
+		vector<double> dFdP_temp = 0.5 * (nu + n) / (nu + tPt) * vKron - 0.5 * matrixToVector(P_inv);
+		dFdP = dFdP + dFdP_temp;
 
-	return gradients;
+		dFdnu = dFdnu + (n - 1) / (2 * tgamma(nu * 0.5)) * dGamma(nu *0.5) + 1 / (2 * tgamma((nu + n) * 0.5)) * dGamma((nu + n) * 0.5) - 0.5 * log(1 + tPt / nu)
+			+ (nu + n) * 0.5 * 1 / (1 + tPt / nu) * tPt / pow(nu,2) - n / (2 * tgamma((nu + 1) * 0.5)) * dGamma((nu + 1) * 0.5)
+			+ 0.5 * inner_sum - (nu + 1) * 0.5 * inner_sum2;
+	}
+
+	//Get rho gradients as matrix
+	matrix<double> dFdP_mat = vectorToMatrix(dFdP);
+
+	//Get optimization parameters from rho matrix
+	vector<double> dfdParams = getElements(dFdP_mat);
+
+	for (size_t d = 0; d < gradients.size(); ++d) {
+		if (d == gradients.size() - 1) {
+			gradients(d) = dFdnu;
+		}
+		else {
+			gradients(d) = dfdParams(d);
+		}
+	}
+	//std::cout << "gradients = " << gradients<< "\n\n";
+	return -gradients;
+}
+
+
+double T_Copula::dGamma(double t) {
+	double dG = tgamma(t) * boost::math::digamma(t);
+
+	return dG;
+}
+
+matrix<double> T_Copula::vectorToMatrix(vector<double> const& vec) {
+	int n = time_series.size2();
+	matrix<double> resMatrix(n,n);
+	int counter = 0;
+
+	for (size_t j = 0; j < n; ++j) {
+		for (size_t i = 0; i < n; ++i) {
+			 resMatrix(i, j) = vec(counter);
+			counter = counter + 1;
+		}
+	}
+
+	return resMatrix;
+}
+
+matrix<double> T_Copula::buildP(vector<double> const& x) {
+	int n = time_series.size2();
+	matrix<double> P(n, n);
+	int counter = 0;	//keep track of fetched elements
+
+	for (size_t i = 0; i < n; ++i) {
+		for (size_t j = 0; j < i + 1; ++j) {
+			if (i == j) {
+				P(i, j) = 1;
+			}
+			else {
+				P(i, j) = x(counter);
+				P(j, i) = x(counter);
+				counter = counter + 1;
+			}
+		}
+	}
+	return P;
+}
+
+
+vector<double> T_Copula::getElements(matrix<double> const& P) {
+	int n = time_series.size2();
+	vector<double> resVec((n-1)*n*0.5); // Vector with optimization parameters in P
+	int counter = 0;	//keep track of fetched elements
+
+	for (size_t i = 0; i < n; ++i) {
+		for (size_t j = 0; j < i; ++j) {
+			resVec(counter) = P(i, j);
+			counter = counter + 1;
+		}
+	}
+	return resVec;
+}
+
+vector<double> T_Copula::kronOfVectors(vector<double> const& v1, vector<double> const& v2) {
+	vector<double> vKron(v1.size() * v2.size());
+
+	int counter = 0;
+
+	for (size_t i = 0; i < v1.size(); ++i) {
+		for (size_t j = 0; j < v2.size(); ++j) {
+				vKron(counter) = v1(i)*v2(j);
+				counter = counter + 1;
+		}
+	}
+
+	return vKron;
+}
+
+vector<double> T_Copula::matrixToVector(matrix<double> const& matrix) {
+	int n = matrix.size1();
+	vector<double> resVec(n*n);
+	int counter = 0;
+
+	for (size_t j = 0; j < n; ++j) {
+		for (size_t i = 0; i < n; ++i) {
+			resVec(counter) = matrix(i, j);
+			counter = counter + 1;
+		}
+	}
+	return resVec;
 }
 
 vector<double> T_Copula::calcNumGradients(vector<double> const& x) {
@@ -105,34 +239,31 @@ vector<double> T_Copula::calcNumGradients(vector<double> const& x) {
 double T_Copula::calcStepSize(vector<double> const& x, vector<double> const& d) {
 
 	double a = 1;
-	
+	bool accepted = false;
 	//Kontrollera att rho är positiv definit, dvs minsta egenvärdet är positivt, annars halvera steglängden.
+	
+	while (!accepted) {
+		accepted = true;
+		
+		for (size_t i = 0; i < x.size() - 1; ++i) {
+			if (x(i) + a * d(i) < 0 || x(i) + a * d(i) > 1) {
+				accepted = false;
+				a = 0.5 * a;
+				break;
+			}
+		}
 
-	/*
-	while (x(0) + a * d(0) < 0 || x(1) + a * d(1) < 0 || x(2) + a * d(2) < 0 || x(1) + a * d(1) + x(2) + a * d(2) >= 1 || x(4) + a * d(4) <= 2) {
-		//std::cout <<"I bilvillkor, x_nytt = " <<  x + a * d << "\n\n";
-		a = a * 0.5;
+		if (x(x.size() - 1) + a * d(d.size() - 1) <= 2) {
+			accepted = false;
+			a = 0.5 * a;
+		}
 
-		if (a == 0) {
-			break;
+		matrix<double> Pnext = buildP(x + a * d);
+		double minEigenvalue = ();
+
+		if (minEigenvalue <= 0) {
+			accepted = false;
 		}
 	}
-
-	std::cout << "steglängd efter bivillkor = " << a << "\n";
-
-
-
-	while (function_value(x + a * d) > function_value(x) + c1 * a * inner_prod(calcGradients(x), d))
-		//while (function_value(x + a * d) > function_value(x))
-	{
-		a = a * 0.5;
-		if (a == 0) {
-			break;
-		}
-	}
-
-	std::cout << "steglängd efter funktionsvärdeskoll = " << a << "\n \n";
-
-	*/
 	return a;
 }

@@ -2,6 +2,7 @@
 #include "../../ParameterEstimation/Distribution.h"
 #include "../../ParameterEstimation/Gaussian.h"
 #include "../../ParameterEstimation/Student_t.h"
+#include "../../ParameterEstimation/T_Copula.h"
 
 #include <boost/math/distributions/normal.hpp>
 #include <boost/math/distributions/students_t.hpp>
@@ -33,7 +34,7 @@ vector<double> getUniformTimeseries(vector<double> series, vector<double> params
 vector<double> GARCH_vec(vector<double> time_series, vector<double> x);
 
 int main() {
-	
+	/*
 	vector<double> time_series;
 	matrix<double> hist_rf;
 	matrix<double> E_rf;
@@ -103,8 +104,30 @@ int main() {
 	std::cout << "OptParams first eigenvector = " << OptParamsAll[0] << "\n\n";
 	std::cout << "OptParams second eigenvector = " << OptParamsAll[1] << "\n\n";
 	std::cout << "OptParams third eigenvector = " << OptParamsAll[2] << "\n\n";
+	*/
 
+	vector<double> testU(3);
+	testU(0) = 0.8;
+	testU(1) = 0.24;
+	testU(2) = 0.92;
 
+	matrix<double> Umat(1, 3);
+	matrix_row<matrix<double> > U_row(Umat, 0);
+	U_row = testU;
+
+	T_Copula dist(Umat);
+	T_Copula* T = &dist;
+
+	vector<double> P_e(4);
+	P_e(0) = 0.2;
+	P_e(1) = 0.3;
+	P_e(2) = 0.4;
+	P_e(3) = 5;
+
+	//double FV = T->function_value(P_e);
+
+	vector<double> gradients = T->calcGradients(P_e);
+	std::cout << "gradients = " << gradients << "\n\n";
 
 }
 

@@ -1,6 +1,7 @@
 #pragma once
 #include "Distribution.h"
 #include "../MathLibrary/matrixOperations.h"
+#include <boost/math/distributions/students_t.hpp>
 
 #include <Eigen/Dense>
 
@@ -25,6 +26,8 @@
 #include <boost/accumulators/statistics/variance.hpp>
 #include <boost/bind.hpp>
 
+#include <boost/math/special_functions/digamma.hpp>
+
 using namespace boost::numeric::ublas;
 
 class T_Copula : public Distribution {
@@ -38,5 +41,11 @@ public:
 
 private:
 	matrix<double> time_series;
+	matrix<double> buildP(vector<double> const& x);
+	vector<double> matrixToVector(matrix<double> const& matrix);
+	matrix<double> vectorToMatrix(vector<double> const& vec);
+	vector<double> getElements(matrix<double> const& matrix);
+	vector<double> kronOfVectors(vector<double> const& v1, vector<double> const& v2);
+	double dGamma(double t);
 
 };
