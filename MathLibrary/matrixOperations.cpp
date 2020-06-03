@@ -109,9 +109,6 @@ ublas::matrix<double> matrixOperations::center_matrix(ublas::matrix<double> cons
 	return centered_matrix;
 }
 
-double matrixOperations::vector_average(ublas::vector<double> const& vec) {
-	return sum(vec) / vec.size();
-}
 //Logarithm of a matrix
 ublas::matrix<double> matrixOperations::matrixLog(ublas::matrix<double> const& input) {
 	size_t rows{ input.size1() };
@@ -119,16 +116,43 @@ ublas::matrix<double> matrixOperations::matrixLog(ublas::matrix<double> const& i
 
 	ublas::matrix<double> logMatrix(rows, columns);
 
-	//std::cout << "rows: " << rows << std::endl;
-	//std::cout << "columns: " << columns << std::endl;
-
 	for (size_t i{ 0 }; i < rows; ++i) {
 		for (size_t j{ 0 }; j < columns; ++j) {
 			logMatrix(i, j) = log(input(i, j));
-			//std::cout << "logMatrix loop: " << logMatrix(i,j) << std::endl;
 		}
 	}
-	//std::cout << "logMatrix: " << logMatrix(1,1) << std::endl;
-
 	return logMatrix;
 }
+
+//Logarithm of a vector
+ublas::vector<double> matrixOperations::vectorLog(ublas::vector<double> const& input) {
+	size_t rows{ input.size() };
+
+	ublas::vector<double> logVector(rows);
+
+	for (size_t i{ 0 }; i < rows; ++i) {
+		logVector(i) = log(input(i));
+		}
+
+	return logVector;
+}
+
+//Average of vector
+double matrixOperations::vector_average(ublas::vector<double> const& vec) {
+	return sum(vec) / vec.size();
+}
+
+//Variance of vector
+double matrixOperations::vector_variance(ublas::vector<double> const& vec) {
+	double variance = 0;
+	double mean = 0;
+	int length = vec.size();
+
+	mean = matrixOperations::vector_average(vec);
+
+	for (int i = 0; i < length; ++i) {
+		variance += pow(vec(i) - mean, 2);
+	}
+	return variance /= length;
+}
+
