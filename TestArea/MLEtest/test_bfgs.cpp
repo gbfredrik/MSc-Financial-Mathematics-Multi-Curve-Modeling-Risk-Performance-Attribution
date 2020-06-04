@@ -107,32 +107,66 @@ int main() {
 	std::cout << "OptParams third eigenvector = " << OptParamsAll[2] << "\n\n";
 	*/
 
-	vector<double> testU(3);
-	testU(0) = 0.8;
-	testU(1) = 0.24;
-	testU(2) = 0.92;
+	//Läs in riskfria kurvan
+	try {
+		//Senaste kurvan sist
+		U = read_matrix("U.csv", 3450, 3);
+	}
+	catch (std::exception& ex) {
+		std::cout << "Error:" << ex.what() << "\n";
+		return 1;
+	}
 
-	matrix<double> Umat(1, 3);
-	matrix_row<matrix<double> > U_row(Umat, 0);
-	U_row = testU;
+	//vector<double> testU(3);
+	//testU(0) = 0.8;
+	//testU(1) = 0.24;
+	//testU(2) = 0.92;
 
-	T_Copula dist(Umat);
-	T_Copula* TC = &dist;
-
-	Gaussian_Copula distG(Umat);
-	Gaussian_Copula* gaussianC = &distG;
-
-	vector<double> P_e(4);
-	P_e(0) = 0.2;
-	P_e(1) = 0.3;
-	P_e(2) = 0.4;
-	//P_e(3) = 5;
+//	matrix<double> Umat(1, 3);
+	//matrix_row<matrix<double> > U_row(Umat, 0);
+	//U_row = testU;
 
 	//double FV = T->function_value(P_e);
 
-	vector<double> gradients = gaussianC->calcGradients(P_e);
+	//vector<double> gradients = gaussianC->calcGradients(P_e);
 	//double FVgaussian = gaussianC->function_value(P_e);
-	std::cout << "FV gaussian = " << gradients << "\n\n";
+	//std::cout << "FV gaussian = " << gradients << "\n\n";
+	
+	T_Copula dist(U);
+	T_Copula* TC = &dist;
+
+	Gaussian_Copula distG(U);
+	Gaussian_Copula* gaussianC = &distG;
+
+	vector<double> t_params(4);
+	P_e(0) = 0.2;
+	P_e(1) = 0.3;
+	P_e(2) = 0.4;
+	P_e(3) = 5;
+
+
+	vector<double> norm_params(4);
+	P_e(0) = 0.2;
+	P_e(1) = 0.3;
+	P_e(2) = 0.4;
+	
+	identity_matrix<double> I(4);
+	int max_iter = 100;
+	double epsilon = pow(10, -7);
+
+	vector<double> t_copula_results = bfgs::minimize(t_params, I, max_iter, epsilon, TD);
+	vector<double> norm_copula_results = bfgs::minimize(norm_params, I, max_iter, epsilon, gaussianC);
+
+	matrix<double> P_t = TC->buildP(t_copula_results);
+	std::cout << "P Students t = " << P_t << "\n\n";
+	std::cout << "FV Students t copula = " << t_copula_results(4) << "\n\n";
+
+	matrix<double> P_norm = gaussianC->buildP(norm_copula_results);
+	std::cout << "P Students t = " << P_norm << "\n\n";
+	std::cout << "FV Students t copula = " << norm_copula_results(4) << "\n\n";
+
+
+
 
 }
 
