@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "sample_handler.h"
+//#include "sample_handler.h"
 
 #include <boost/numeric/ublas/io.hpp>
 #include <boost/numeric/ublas/matrix.hpp>
@@ -95,9 +95,15 @@ ublas::vector<T> read_csv_vector(std::string const& file_name) {
 	std::ifstream inf;
 	inf.open("X:/Examensarbete/Data/" + file_name);
 
-	int length{ 0 };
-	char delim;
+	if (!inf)
+		std::cout << "Cannot open file.\n\n";
+
+	int length{};
+	char delim{};
 	inf >> length;
+	if (typeid(T) == typeid(double)) {
+		inf >> delim;
+	}
 	ublas::vector<T> v(length);
 
 	for (int i = 0; i < length; ++i) {

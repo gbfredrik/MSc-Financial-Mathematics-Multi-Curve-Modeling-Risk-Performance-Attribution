@@ -145,16 +145,16 @@ int Likelihood::isBetter(double d, double s, double confidence_level)
 	return isBetter;
 }
 
-//ublas::vector<double> KernelDensity::kde_multi(ublas::matrix<double> x_simulated, ublas::vector<double> x_realized) {
-ublas::vector<double> KernelDensity::kde_multi(ublas::vector<double> x_simulated, ublas::vector<double> x_realized) {
+ublas::vector<double> KernelDensity::kde_multi(ublas::matrix<double> x_simulated, ublas::vector<double> x_realized) {
+//ublas::vector<double> KernelDensity::kde_multi(ublas::vector<double> x_simulated, ublas::vector<double> x_realized) {
 	size_t m{ x_realized.size() };
 	ublas::vector<double> f(m);
 
 	for (size_t j = 0; j < m; ++j) {
-		//ublas::matrix_column<ublas::matrix<double>> x_simulated_col(x_simulated, j); //Row or column?
+		ublas::matrix_column<ublas::matrix<double>> x_simulated_col(x_simulated, j); //Row or column?
 		double x_realized_m = x_realized(j);
-		//f(j) = KernelDensity::kde(x_simulated_col, x_realized_m);
-		f(j) = KernelDensity::kde(x_simulated, x_realized_m);
+		f(j) = KernelDensity::kde(x_simulated_col, x_realized_m);
+		//f(j) = KernelDensity::kde(x_simulated, x_realized_m);
 	}
 	return f;
 }

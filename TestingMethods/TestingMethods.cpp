@@ -213,8 +213,10 @@ void test_likelihood2() {
 	//fV = KernelDensity::kde_multi(x_simM, x_realizedV);
 	//std::cout << "fV: " << fV << std::endl;
 
-	vector<double> x_simMultiTest = read_csv_vector<double>("KernelRnd.csv");
+	vector<double> x_simMultiTest = read_csv_vector<double>("KernelRnd1.csv");
+	//std::cout << "x_simMultiTest: " << x_simMultiTest << std::endl;
 	vector<double> x = read_csv_vector<double>("KernelX.csv");
+	//std::cout << "x: " << x << std::endl;
 	vector<double> fMultiTest = KernelDensity::kde_multi(x_simMultiTest, x);
 	std::cout << "fMultiTest: " << fMultiTest << std::endl;
 }
