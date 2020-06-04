@@ -82,7 +82,7 @@ ublas::matrix<double> read_csv_matrix(std::string const& file_name) {
 
 ublas::vector<double> read_csv_vector(std::string const& file_name) {
 	std::ifstream inf;
-	inf.open("./MSc Git/MScCurveModeling/Data/" + file_name);
+	inf.open(/*"./MSc Git/MScCurveModeling/Data/" +*/ file_name);
 
 	int length{ 0 };
 	char delim;
@@ -114,14 +114,16 @@ bool write_csv_matrix(ublas::matrix<double> const& m, std::string const& file_na
 	return true;
 }
 
-bool write_csv_vector(ublas::vector<double> const& m, std::string const& file_name) {
+bool write_csv_vector(ublas::vector<double> const& v, std::string const& file_name) {
 	std::ofstream outf;
-	outf.open("./MSc Git/MScCurveModeling/Data/v_" + file_name); // Appending "m_" to prevent accidental overwriting of important files
+	outf.open(/*"./MSc Git/MScCurveModeling/Data/m_" +*/ "v_" + file_name); // Appending "m_" to prevent accidental overwriting of important files
 
-	outf << m.size() << std::endl;
+	if (!outf) { std::cout << "failed\n\n"; }
 
-	for (size_t i{ 0 }, length = m.size(); i < length; ++i) {
-		outf << m(i) << ((i != length - 1) ? ";" : "");
+	outf << v.size() << std::endl;
+
+	for (size_t i{ 0 }, length = v.size(); i < length; ++i) {
+		outf << v(i) << ((i != length - 1) ? ";" : "");
 	}
 	outf << std::endl;
 

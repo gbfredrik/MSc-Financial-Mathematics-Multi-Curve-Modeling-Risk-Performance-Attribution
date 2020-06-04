@@ -132,10 +132,14 @@
     <ClInclude Include="RiskMeasures.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\CurveLibrary\sample_handler.cpp" />
     <ClCompile Include="RiskMeasures.cpp" />
     <ClCompile Include="riskMeasureTester.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\CurveLibrary\CurveLibrary.vcxproj">
+      <Project>{d4fd8df2-ea38-4091-b96e-9fcc6786822e}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\MathLibrary\MathLibrary.vcxproj">
       <Project>{a18252bf-632c-435a-9887-422029fc1503}</Project>
     </ProjectReference>
