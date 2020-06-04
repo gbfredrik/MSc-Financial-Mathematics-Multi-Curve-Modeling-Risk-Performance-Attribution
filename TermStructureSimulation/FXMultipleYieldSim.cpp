@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "mex.h"
 
-#include "MultipleYieldSim.h"
+#include "FXMultipleYieldSim.h"
 #include "unfGen.h"
 #include "varRed.h"
 #include "../MathLibrary/rvSim.h"
@@ -15,7 +15,7 @@ using namespace boost::numeric::ublas;
 
 //boost::numeric::ublas::matrix<double> test(6, 2000);
 
-void MultipleYieldSim::simMultipleFull(vector<matrix<double>> const& E, vector<matrix<double>> const& rho, vector<vector<double>> const& mu,
+void FXMultipleYieldSim::simMultipleFull(vector<matrix<double>> const& E, vector<matrix<double>> const& rho, vector<vector<double>> const& mu,
 	vector<vector<double>> const& omega, vector<vector<double>> const& alpha, vector<vector<double>> const& beta,
 	vector<matrix<double>> const& hist, vector<std::string> marginal, vector<std::string> copula,
 	vector<std::string> varRedType, size_t d, size_t N, vector<matrix<double>>& fRes,
@@ -62,7 +62,7 @@ void MultipleYieldSim::simMultipleFull(vector<matrix<double>> const& E, vector<m
 	vector<matrix<double>> U(M); // Uniform r.v.s
 	vector<matrix<double>> V(M); // Variance reduced r.v.s
 	vector<matrix<double>> eps(M); // R.v.s used in the simulation
-	vector<double> fZero(n); // Starting vector in the simulation
+	vector<vector<double>> fStart(n); // Starting vector in the simulation
 	matrix<double> pi(n, M - 1); // Starting vector in the simulation
 	vector<vector<double>> sigma(M);
 
@@ -83,99 +83,35 @@ void MultipleYieldSim::simMultipleFull(vector<matrix<double>> const& E, vector<m
 		last and second to last simulated curves and is used to calculate the garch volatility.
 		Contains fZero and basis spreads (pi).
 	*/
-	vector<matrix<double>> histPrevSim(M, matrix<double>(n, N));
-	vector<matrix<double>> histPrevPrevSim(M, matrix<double>(n, N));
-	fZero = row(hist(0), m - 1);
-	for (size_t k = 0; k < N; k++) {
-		column(histPrevPrevSim(0), k) = fZero;
-	}
-	for (size_t k = 1; k < M; k++) {
-		column(pi, k - 1) = row(hist(k), m - 1);
-		for (size_t l = 0; l < N; l++) {
-			column(histPrevPrevSim(k), l) = column(pi, k - 1);
-		}
-	}
 
-	for (size_t i = 0; i < d; i++) {
-		if (i == 0) { // Simulate N curves the first day
-			for (size_t j = 0; j < M; j++) {
-				U(j) = unfGen::genU(rho(j), N, copula(j), boost::get(dfC)(j)); // Generate uniformly correlated random variables with desired copula
-				V(j) = varRed::redVariance(U(j), varRedType(j)); // Apply desired variance reduction technique		
-				//test = U(0);
-				sigma(j) = statisticsOperations::GARCH(omega(j), alpha(j),
-					beta(j), boost::get(gamma)(j), E(j), hist(j)); // Calculate scaling factor
-				eps(j) = rvSim::genEps(V(j), mu(j), sigma(j), marginal(j), boost::get(dfM)(j));
-			}
-			simMultipleDaily(E, fZero, pi, eps, M, N, fRes, histPrevSim);
-		}
-		if (i != 0) { // Simulate 1 curve for each following day
-			for (size_t j = 0; j < M; j++) {
-				U(j) = unfGen::genU(rho(j), N, copula(j), boost::get(dfC)(j)); // Generate uniformly correlated random variables with desired copula
-				V(j) = varRed::redVariance(U(j), varRedType(j)); // Apply desired variance reduction			
+	fStart(0) = row(hist(0), m - 1); //Domestic
+	fStart(1) = row(hist(1), m - 1); //Foreign
+	fStart(2) = row(hist(2), m - 1); //Demand
 
-				for (size_t l = 0; l < N; l++) {
-					sigma(j) = statisticsOperations::GARCH(omega(j), alpha(j),
-						beta(j), boost::get(gamma)(j), E(j), column(histPrevSim(j), l), column(histPrevPrevSim(j), l), sigma(j)); // Calculate scaling factor
-					column(eps(j), l) = rvSim::genEps(column(V(j), l), mu(j), sigma(j), marginal(j), boost::get(dfM)(j));
-				}
-			}
-			simSingleMultipleDaily(E, eps, M, N, fRes, histPrevSim, histPrevPrevSim);
-		}
+
+	// Simulate N curves the first day
+	for (size_t j = 0; j < M; j++) {
+		U(j) = unfGen::genU(rho(j), N, copula(j), boost::get(dfC)(j)); // Generate uniformly correlated random variables with desired copula
+		V(j) = varRed::redVariance(U(j), varRedType(j)); // Apply desired variance reduction technique		
+		//test = U(0);
+		sigma(j) = statisticsOperations::GARCH(omega(j), alpha(j),
+			beta(j), boost::get(gamma)(j), E(j), hist(j)); // Calculate scaling factor
+		eps(j) = rvSim::genEps(V(j), mu(j), sigma(j), marginal(j), boost::get(dfM)(j));
 	}
-
+	simMultipleDaily(E, fStart, pi, eps, M, N, fRes);
 }
 
 
 /*
 	Function to simulate one day ahead N times.
 */
-void MultipleYieldSim::simMultipleDaily(vector<matrix<double>> const& E, vector<double> const& fZero,
-	matrix<double> const& pi, vector<matrix<double>> const& eps, int M, int N, vector<matrix<double>>& fRes,
-	vector<matrix<double>>& histPrevSim) {
+void FXMultipleYieldSim::simMultipleDaily(vector<matrix<double>> const& E, vector<vector<double>> const& fStart,
+	matrix<double> const& pi, vector<matrix<double>> const& eps, int M, int N, vector<matrix<double>>& fRes) {
 
 	for (int i = 0; i < N; i++) { // Simulate N times
-		for (int k = 0; k < M; k++) { // Iterate over each tenor curve
-			if (k == 0) {
-				column(fRes(k), i) = fZero + prod(E(k), column(eps(k), i)); // +prod(E(k)(), (kappa(k) * (xiHat(k) - ) + eps(k)(i, j)); // Simulate risk-free curve
-				column(histPrevSim(k), i) = column(fRes(k), i);
-			}
-			else {
-				column(fRes(k), i) = column(fRes(k - 1), i) + column(pi, k - 1) + prod(E(k), column(eps(k), i)); //+ kappa(k) * (xiHat(k) - ) + eps(k)(i, j); // Simulate tenor curves
-				column(histPrevSim(k), i) = column(fRes(k), i) - column(fRes(0), i);
-			}
+		for (int k = 0; k < M; k++) { // Iterate over each curve
+				column(fRes(k), i) = fStart(k) + prod(E(k), column(eps(k), i)); // +prod(E(k)(), (kappa(k) * (xiHat(k) - ) + eps(k)(i, j)); // Simulate risk-free curve
 		}
 	}
 }
-
-/*
-	Function to simulate d days ahead 1 time each.
-*/
-void MultipleYieldSim::simSingleMultipleDaily(vector<matrix<double>> const& E, vector<matrix<double>> const& eps, int M, int N,
-
-	vector<matrix<double>>& fRes, vector<matrix<double>>& histPrevSim, vector<matrix<double>>& histPrevPrevSim) {
-	size_t n = E(0).size1();
-	matrix<double> pi(n, M - 1);
-
-	for (int i = 0; i < N; i++) { // Simulate N times
-		for (int k = 0; k < M; k++) { // Iterate over each tenor curve
-			if (k != M - 1) {
-				column(pi, k) = column(fRes(k + 1), i) - column(fRes(0), i);
-			}
-
-			if (k == 0) {
-				column(histPrevPrevSim(k), i) = column(fRes(k), i);
-				column(fRes(k), i) = column(fRes(k), i) + prod(E(k), column(eps(k), i)); // +prod(E(k)(), (kappa(k) * (xiHat(k) - ) + eps(k)(i, j)); // Simulate risk-free curve
-				column(histPrevSim(k), i) = column(fRes(k), i);
-			}
-			else {
-				column(histPrevPrevSim(k), i) = column(fRes(k), i) - column(fRes(0), k);
-				column(fRes(k), i) = column(fRes(k - 1), i) + column(pi, k - 1) + prod(E(k), column(eps(k), i)); //+ kappa(k) * (xiHat(k) - ) + eps(k)(i, j); // Simulate tenor curves
-				column(histPrevSim(k), i) = column(fRes(k), i) - column(fRes(0), k);
-			}
-		}
-	}
-}
-
-
-
 

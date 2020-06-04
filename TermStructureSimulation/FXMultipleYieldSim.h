@@ -7,13 +7,12 @@
 
 //extern boost::numeric::ublas::matrix<double> test;
 
-class MultipleYieldSim {
+class FXMultipleYieldSim {
 private:
 	static void simMultipleDaily(boost::numeric::ublas::vector<boost::numeric::ublas::matrix<double>> const& E,
-		boost::numeric::ublas::vector<double> const& fZero, boost::numeric::ublas::matrix<double> const& pi,
+		vector<vector<double>> const& fStart, boost::numeric::ublas::matrix<double> const& pi,
 		boost::numeric::ublas::vector<boost::numeric::ublas::matrix<double>> const& eps,
-		int M, int N, boost::numeric::ublas::vector<boost::numeric::ublas::matrix<double>>& fRes,
-		boost::numeric::ublas::vector<boost::numeric::ublas::matrix<double>>& histPrevSim);
+		int M, int N, boost::numeric::ublas::vector<boost::numeric::ublas::matrix<double>>& fRes);
 	static void simSingleMultipleDaily(boost::numeric::ublas::vector<boost::numeric::ublas::matrix<double>> const& E,
 		boost::numeric::ublas::vector<boost::numeric::ublas::matrix<double>> const& eps,
 		int M, int N, boost::numeric::ublas::vector<boost::numeric::ublas::matrix<double>>& fRes,

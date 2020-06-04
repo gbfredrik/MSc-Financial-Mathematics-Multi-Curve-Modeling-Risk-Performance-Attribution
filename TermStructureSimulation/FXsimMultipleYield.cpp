@@ -101,7 +101,7 @@ void mexFunction(int nlhs, mxArray* plhs[],
 	vector<matrix<double>> hist(M);
 	for (size_t i = 0; i < M; i++) {
 		histMex(i) = mxGetPr(mxGetField(prhs[6], 0, mxGetFieldNameByNumber(prhs[6], i)));
-		hist(i) = matrix<double>(m, n);
+		hist(i) = matrix<double>(m, n); // m = historical dates, n = disc points
 	}
 	for (size_t i = 0; i < M; i++) {
 		for (size_t j = 0; j < m; j++) {
