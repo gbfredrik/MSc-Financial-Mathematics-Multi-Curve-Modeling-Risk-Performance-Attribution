@@ -5,6 +5,7 @@
 
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/vector_proxy.hpp>
+#include <boost/numeric/ublas/operation.hpp>
 #include <boost/math/distributions/inverse_chi_squared.hpp>
 
 using namespace boost::numeric;
@@ -178,11 +179,52 @@ double RiskMeasures::ES(
     return matrixOperations::vector_average(exceedances);
 }
 
+ublas::vector<double> RiskMeasures::ES_series(
+    ublas::vector<double>& outcomes,
+    double const c,
+    int const window
+) {
+    size_t n{ outcomes.size() };
+    ublas::vector<double> ES_measures(n - window);
+
+    for (size_t i{ 0 }; i < n - window; ++i) {
+        ES_measures(i) = ES(
+            ublas::vector_range<ublas::vector<double>>(
+                outcomes,
+                ublas::range(i, i + window)
+            ),
+            c
+        );
+    }
+
+    return ES_measures;
+}
+
 // --- ES Backtesting ---
 // Test 1: Acerbi and Szekely
 
+bool RiskMeasures::ES_Acerbi_Szekely(
+    ublas::vector<double> const& VaR, 
+    ublas::vector<double> const& ES, 
+    ublas::vector<double> const& PnL, 
+    double const c
+) {
+    size_t T{ VaR.size() };
+    ublas::vector<int> indicator(T);
+    
+    for (size_t t{ 0 }; t < T; ++t) {
+        indicator(t) = -VaR(t) > PnL(t);
+    }
+
+    int N_T{ sum(indicator) };
+    double Z_X{ sum(element_div(element_prod(PnL, indicator), ES)) / N_T + 1.0 };
+    std::cout << "N_T: " << N_T << std::endl;
+    std::cout << "Z_X: " << Z_X << std::endl;
+    return Z_X < 0;
+}
 
 // Kernel Density Estimator
+// Todo: Include
 
 // --- Helper functions ---
 int RiskMeasures::VaR_index(double const c, size_t const n) {

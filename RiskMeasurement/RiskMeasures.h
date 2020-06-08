@@ -24,8 +24,18 @@ public:
     );
 
     static double ES(boost::numeric::ublas::vector<double> const& outcomes, double const c);
+    static boost::numeric::ublas::vector<double> ES_series(
+        boost::numeric::ublas::vector<double>& outcomes, 
+        double const c,
+        int const window
+    );
 
-    //static bool ES_Acerbi_test();
+    static bool ES_Acerbi_Szekely(
+        boost::numeric::ublas::vector<double> const& VaR,
+        boost::numeric::ublas::vector<double> const& ES,
+        boost::numeric::ublas::vector<double> const& PnL,
+        double const c
+    );
     // Kernel density estimator - include
 
 //private:
