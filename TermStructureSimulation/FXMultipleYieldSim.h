@@ -9,17 +9,12 @@
 
 class FXMultipleYieldSim {
 private:
-	static void simMultipleDaily(boost::numeric::ublas::vector<boost::numeric::ublas::matrix<double>> const& E,
-		vector<vector<double>> const& fStart, boost::numeric::ublas::matrix<double> const& pi,
+	static void FXsimMultipleDaily(boost::numeric::ublas::vector<boost::numeric::ublas::matrix<double>> const& E,
+		boost::numeric::ublas::vector<boost::numeric::ublas::vector<double>> const& fStart, boost::numeric::ublas::matrix<double> const& pi,
 		boost::numeric::ublas::vector<boost::numeric::ublas::matrix<double>> const& eps,
 		int M, int N, boost::numeric::ublas::vector<boost::numeric::ublas::matrix<double>>& fRes);
-	static void simSingleMultipleDaily(boost::numeric::ublas::vector<boost::numeric::ublas::matrix<double>> const& E,
-		boost::numeric::ublas::vector<boost::numeric::ublas::matrix<double>> const& eps,
-		int M, int N, boost::numeric::ublas::vector<boost::numeric::ublas::matrix<double>>& fRes,
-		boost::numeric::ublas::vector<boost::numeric::ublas::matrix<double>>& histPrevSim,
-		boost::numeric::ublas::vector<boost::numeric::ublas::matrix<double>>& histPrevPrevSim);
 public:
-	static void simMultipleFull(boost::numeric::ublas::vector<boost::numeric::ublas::matrix<double>> const& E,
+	static void FXsimMultipleFull(boost::numeric::ublas::vector<boost::numeric::ublas::matrix<double>> const& E,
 		boost::numeric::ublas::vector<boost::numeric::ublas::matrix<double>> const& rho, boost::numeric::ublas::vector<boost::numeric::ublas::vector<double>> const& mu,
 		boost::numeric::ublas::vector<boost::numeric::ublas::vector<double>> const& omega, boost::numeric::ublas::vector<boost::numeric::ublas::vector<double>> const& alpha,
 		boost::numeric::ublas::vector<boost::numeric::ublas::vector<double>> const& beta, boost::numeric::ublas::vector<boost::numeric::ublas::matrix<double>> const& hist,

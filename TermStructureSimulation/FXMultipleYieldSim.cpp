@@ -15,7 +15,7 @@ using namespace boost::numeric::ublas;
 
 //boost::numeric::ublas::matrix<double> test(6, 2000);
 
-void FXMultipleYieldSim::simMultipleFull(vector<matrix<double>> const& E, vector<matrix<double>> const& rho, vector<vector<double>> const& mu,
+void FXMultipleYieldSim::FXsimMultipleFull(vector<matrix<double>> const& E, vector<matrix<double>> const& rho, vector<vector<double>> const& mu,
 	vector<vector<double>> const& omega, vector<vector<double>> const& alpha, vector<vector<double>> const& beta,
 	vector<matrix<double>> const& hist, vector<std::string> marginal, vector<std::string> copula,
 	vector<std::string> varRedType, size_t d, size_t N, vector<matrix<double>>& fRes,
@@ -98,14 +98,14 @@ void FXMultipleYieldSim::simMultipleFull(vector<matrix<double>> const& E, vector
 			beta(j), boost::get(gamma)(j), E(j), hist(j)); // Calculate scaling factor
 		eps(j) = rvSim::genEps(V(j), mu(j), sigma(j), marginal(j), boost::get(dfM)(j));
 	}
-	simMultipleDaily(E, fStart, pi, eps, M, N, fRes);
+	FXsimMultipleDaily(E, fStart, pi, eps, M, N, fRes);
 }
 
 
 /*
 	Function to simulate one day ahead N times.
 */
-void FXMultipleYieldSim::simMultipleDaily(vector<matrix<double>> const& E, vector<vector<double>> const& fStart,
+void FXMultipleYieldSim::FXsimMultipleDaily(vector<matrix<double>> const& E, vector<vector<double>> const& fStart,
 	matrix<double> const& pi, vector<matrix<double>> const& eps, int M, int N, vector<matrix<double>>& fRes) {
 
 	for (int i = 0; i < N; i++) { // Simulate N times

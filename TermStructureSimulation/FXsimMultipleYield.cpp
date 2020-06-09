@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "mex.h"
-#include "MultipleYieldSim.h"
+#include "FXMultipleYieldSim.h"
 #include <boost/numeric/ublas/matrix.hpp>
 #include <string>
 #include "../MathLibrary/rvSim.h"
@@ -146,7 +146,7 @@ void mexFunction(int nlhs, mxArray* plhs[],
 	*/
 
 	/* call the computational routine */
-	MultipleYieldSim::simMultipleFull(E, rho, mu, omega, alpha, beta, hist,
+	FXMultipleYieldSim::FXsimMultipleFull(E, rho, mu, omega, alpha, beta, hist,
 		marginal, copula, varRedType, d, N, fRes, gamma, kappa,
 		xiHat, dfC, dfM);
 
