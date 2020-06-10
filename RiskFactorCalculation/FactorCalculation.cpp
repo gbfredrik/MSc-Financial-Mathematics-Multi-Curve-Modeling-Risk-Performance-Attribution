@@ -122,51 +122,23 @@ double FactorCalculation::smallest_eigval(ublas::matrix<double> const& input) {
 	using namespace Spectra;
 	int k{ 1 };
 	// Transform ublas matrix into Eigen::matrix
-	Eigen::MatrixXd D{ matrixOperations::ublasToMatrixXd(input) };
+	Eigen::MatrixXd C{ matrixOperations::ublasToMatrixXd(input) };
 
-	if (D.rows() < D.cols()) {
-		Eigen::HouseholderQR<Eigen::MatrixXd> qr(D.transpose());
+	// Construct matrix operation objects
+	DenseSymMatProd<double> op(C);
 
-		// Define the positive definite RTR matrix
-		Eigen::MatrixXd RTR{ qr.matrixQR().transpose() * qr.matrixQR() };
-		Eigen::MatrixXd thinQ(Eigen::MatrixXd::Identity(D.cols(), D.rows()));
-		thinQ = qr.householderQ() * thinQ;
+	// Construct eigen solver object, requesting the largest k eigenvalues in magnitude
+	SymEigsSolver<double, SMALLEST_ALGE, DenseSymMatProd<double>> eigs(&op, k, 2 * k + 1);
 
-		// Construct matrix operation objects
-		DenseSymMatProd<double> op(RTR);
+	eigs.init();
+	int nconv{ eigs.compute() };
 
-		// Construct eigen solver object, requesting the smallest eigenvalue in magnitude
-		SymEigsSolver<double, SMALLEST_ALGE, DenseSymMatProd<double>> eigs(&op, k, 2 * k + 1);
-
-		// Initialize and compute
-		eigs.init();
-		int nconv{ eigs.compute() };
-
-		// Retrieve results
-		if (eigs.info() == SUCCESSFUL) {
-			// Return smallest eigenvalue
-			return eigs.eigenvalues()[0];
-		}
-
-	} else {
-		// Define the positive definite C matrix
-		Eigen::MatrixXd C{ D.transpose() * D };
-
-		// Construct matrix operation objects
-		DenseSymMatProd<double> op(C);
-
-		// Construct eigen solver object, requesting the largest k eigenvalues in magnitude
-		SymEigsSolver<double, SMALLEST_ALGE, DenseSymMatProd<double>> eigs(&op, k, 2 * k + 1);
-
-		eigs.init();
-		int nconv{ eigs.compute() };
-
-		// Retrieve results
-		if (eigs.info() == SUCCESSFUL) {
-			// Return smallest eigenvalue
-			return eigs.eigenvalues()[0];
-		}
+	// Retrieve results
+	if (eigs.info() == SUCCESSFUL) {
+		// Return smallest eigenvalue
+		return eigs.eigenvalues()[0];
 	}
+	
     MessageBoxA(
         NULL,
         "Failed to find smallest eigenvalue.",
