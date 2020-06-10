@@ -9,6 +9,8 @@
 #include <boost/numeric/ublas/io.hpp>
 
 #include <iostream>
+#include <windows.h>
+#include <winuser.h>
 
 using namespace boost::numeric;
 
@@ -17,14 +19,14 @@ int main() {
     //test_losses = row(rvSim::gen_normal(1, 2000), 0);
     //write_csv_vector(test_losses, "test_losses.csv");
     double c{ 0.95 };
-    int window{ 1000 };
+    int window{ 252 };
 
     ublas::vector<double> returns( read_csv_vector("returns.csv") );
 
     //std::cout << test_losses << "\n";
 
-    std::cout << RiskMeasures::VaR(returns, c) << std::endl;
-    //std::cout << RiskMeasures::ES(returns, c) << std::endl;
+    std::cout << "VaR full: " << RiskMeasures::VaR(returns, c) << std::endl;
+    std::cout << "ES full: " << RiskMeasures::ES(returns, c) << std::endl;
 
     ublas::vector<double> VaRs(RiskMeasures::VaR_series(returns, c, window));
     ublas::vector<double> ESs(RiskMeasures::ES_series(returns, c, window));
@@ -40,12 +42,13 @@ int main() {
     std::cout << "PnLs: " << PnLs.size() << std::endl << std::endl;
     
     std::cout << "VaR Backtest:" << std::endl;
-    std::cout << "Reject H_0 for H_1: " << RiskMeasures::VaR_hypothesis_test(
+    bool VaR_hyp{ RiskMeasures::VaR_hypothesis_test(
         VaRs,
         PnLs,
         c,
         0.05
-    ) << std::endl << std::endl;
+    ) };
+    std::cout << "Reject H_0 for H_1: " << VaR_hyp << std::endl << std::endl;
     
     std::cout << "Christoffersen: " << RiskMeasures::VaR_Christoffersen_test(
         VaRs,
@@ -53,23 +56,20 @@ int main() {
             returns,
             ublas::range(window, returns.size())
             ),
-        0.05
-    ) << std::endl;
+        0.01
+    ) << std::endl << std::endl;
 
     std::cout << "ES Backtest:" << std::endl;
-    std::cout << "Acerbi & Szekely, Reject H_0 for H_1: " << RiskMeasures::ES_Acerbi_Szekely(VaRs, ESs, PnLs, 0.05) << std::endl;
+    std::cout << "Acerbi & Szekely, Reject H_0 for H_1: ";
+    if (VaR_hyp) {
+        std::cout << "Rejected due to VaR rejection." << std::endl;
+    } else {
+        std::cout << RiskMeasures::ES_Acerbi_Szekely(VaRs, ESs, PnLs, 0.01) << std::endl;
+    }
 
     write_csv_vector(VaRs, "VaRs.csv");
     write_csv_vector(ESs, "ESs.csv");
     write_csv_vector(PnLs, "PnLs.csv");
-}
 
- //std::cout << RiskMeasures::test_statistic_christoffersen(
-    //    0.037260825780463,
-    //    0.036610878661088,
-    //    0.054054054054054,
-    //    921,
-    //    35,
-    //    35,
-    //    2
-    //) << std::endl; // Correct!
+    //MessageBox(NULL, "Backtest finished.", "Status", MB_OK);
+}

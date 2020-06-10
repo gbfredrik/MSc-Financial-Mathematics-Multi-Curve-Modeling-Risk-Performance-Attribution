@@ -12,30 +12,29 @@ using namespace boost::numeric;
 
 // --- VaR ---
 double RiskMeasures::VaR(
-    ublas::vector<double> const& outcomes,
+    ublas::vector<double> const& PnL,
     double const c
 ) {
-    ublas::vector<double> sorted_losses(-outcomes);
-    std::sort(sorted_losses.begin(), sorted_losses.end());
+    ublas::vector<double> sorted_PnL(-PnL);
+    std::sort(sorted_PnL.begin(), sorted_PnL.end());
 
-    int index_VaR{ VaR_index(c, sorted_losses.size()) };
-    //std::cout << index_VaR << "\n";
+    int index_VaR{ VaR_index(c, sorted_PnL.size()) };
 
-    return sorted_losses(index_VaR);
+    return sorted_PnL(index_VaR);
 }
 
 ublas::vector<double> RiskMeasures::VaR_series(
-    ublas::vector<double>& outcomes, 
+    ublas::vector<double>& PnL,
     double const c,
     int const window
 ) {
-    size_t n{ outcomes.size() };
+    size_t n{ PnL.size() };
     ublas::vector<double> VaR_measures(n - window);
 
     for (size_t i{ 0 }; i < n - window; ++i) {
         VaR_measures(i) = VaR(
             ublas::vector_range<ublas::vector<double>> (
-                outcomes, 
+                PnL,
                 ublas::range(i, i + window)
             ), 
             c
@@ -59,9 +58,6 @@ bool RiskMeasures::VaR_hypothesis_test(
     double Z{ test_statistic_Z(X_T, T, p) };
     double tilde_m{ statisticsOperations::invCDFNorm(1 - alpha) }; // = invCDFNorm( 1 - alpha, 0.0, 1.0);
     
-    std::cout << "X_T: " << X_T << std::endl;
-    std::cout << "Z: " << Z << std::endl;
-    std::cout << "tilde_m: " << tilde_m << std::endl;
     return Z > tilde_m;
 }
 
@@ -69,14 +65,7 @@ int RiskMeasures::test_statistic_X_T(
     ublas::vector<double> const& VaR, 
     ublas::vector<double> const& PnL
 ) {
-    int X_T{ 0 };
-    for (size_t i{ 0 }, n{ VaR.size() }; i < n; ++i) {
-        if (-VaR(i) > PnL(i)) {
-            ++X_T;
-        }
-    }
-    
-    return X_T;
+    return sum(VaR_breaches(VaR, PnL));
 }
 
 double RiskMeasures::test_statistic_Z(int const X_T, int const T, double const p) {
@@ -112,11 +101,6 @@ bool RiskMeasures::VaR_Christoffersen_test(
     };
 
     double z{ statisticsOperations::invCDFchi2(1 - alpha) };
-    
-    std::cout << pi << ", " << pi_01 << ", " << pi_11 << 
-        ", " << u_00 << ", " << u_01 << ", " << u_01 << 
-        ", " << u_11 << std::endl;
-    std::cout << christoffersen_statistic << " > " << z << std::endl;
 
     return christoffersen_statistic > z;
 }
@@ -129,10 +113,11 @@ void RiskMeasures::number_of_periods(
     double& u_10,
     double& u_11
 ) {
-    //bool last{ VaR(0) > -PnL(0) };
+    ublas::vector<int> indicator(VaR_breaches(VaR, PnL));
+    
     for (size_t i{ 0 }, n{ VaR.size() - 1}; i < n; ++i) {
-        bool exceed_current{ -VaR(i) > PnL(i) };
-        bool exceed_next{ -VaR(i + 1) > PnL(i + 1) };
+        bool exceed_current{ indicator(i) == 1};
+        bool exceed_next{ indicator(i + 1) == 1};
 
         if (!exceed_current && !exceed_next) {
             ++u_00;
@@ -155,42 +140,40 @@ double RiskMeasures::test_statistic_christoffersen(
     double const u_10,
     double const u_11
 ) {
-    //std::cout << -2.0 * ((u_00 + u_10) * log(1.0 - pi) + (u_01 + u_11) * log(pi)) << std::endl <<
-      //  + 2.0 * ((u_00) * log(1.0 - pi_01) + (u_01) * log(pi_01) + (u_10) * log(1.0 - pi_11) + (u_11) * log(pi_11)) << std::endl;
     return -2.0 * ((u_00 + u_10) * log(1.0 - pi) + (u_01 + u_11) * log(pi))
         + 2.0 * (u_00 * log(1.0 - pi_01) + u_01 * log(pi_01) + u_10 * log(1.0 - pi_11) + u_11 * log(pi_11));
 }
 
 // --- ES ---
 double RiskMeasures::ES(
-    ublas::vector<double> const& outcomes,
+    ublas::vector<double> const& PnL,
     double const c
 ) {
-    ublas::vector<double> sorted_losses(-outcomes);
-    std::sort(sorted_losses.begin(), sorted_losses.end());
+    ublas::vector<double> sorted_PnL(-PnL);
+    std::sort(sorted_PnL.begin(), sorted_PnL.end());
 
-    int index_VaR{ VaR_index(c, sorted_losses.size()) };
+    int index_VaR{ VaR_index(c, sorted_PnL.size()) };
 
     ublas::vector_range<ublas::vector<double>> exceedances(
-        sorted_losses,
-        ublas::range(index_VaR, sorted_losses.size())
+        sorted_PnL,
+        ublas::range(index_VaR, sorted_PnL.size())
     );
 
     return matrixOperations::vector_average(exceedances);
 }
 
 ublas::vector<double> RiskMeasures::ES_series(
-    ublas::vector<double>& outcomes,
+    ublas::vector<double>& PnL,
     double const c,
     int const window
 ) {
-    size_t n{ outcomes.size() };
+    size_t n{ PnL.size() };
     ublas::vector<double> ES_measures(n - window);
 
     for (size_t i{ 0 }; i < n - window; ++i) {
         ES_measures(i) = ES(
             ublas::vector_range<ublas::vector<double>>(
-                outcomes,
+                PnL,
                 ublas::range(i, i + window)
             ),
             c
@@ -210,15 +193,14 @@ bool RiskMeasures::ES_Acerbi_Szekely(
     double const c
 ) {
     size_t T{ VaR.size() };
-    ublas::vector<int> indicator(T);
+    ublas::vector<int> indicator(VaR_breaches(VaR, PnL));
     
-    for (size_t t{ 0 }; t < T; ++t) {
-        indicator(t) = -VaR(t) > PnL(t);
+    int N_T{ sum(indicator) };
+    if (N_T == 0) { // Exit if no breaches to avoid div. by zero in Z_X.
+        return 0;
     }
 
-    int N_T{ sum(indicator) };
     double Z_X{ sum(element_div(element_prod(PnL, indicator), ES)) / N_T + 1.0 };
-    std::cout << "N_T: " << N_T << std::endl;
     std::cout << "Z_X: " << Z_X << std::endl;
     return Z_X < 0;
 }
@@ -229,4 +211,18 @@ bool RiskMeasures::ES_Acerbi_Szekely(
 // --- Helper functions ---
 int RiskMeasures::VaR_index(double const c, size_t const n) {
     return static_cast<int>(c * n);
+}
+
+ublas::vector<double> RiskMeasures::VaR_breaches(
+    ublas::vector<double> const& VaR, 
+    ublas::vector<double> const& PnL
+) {
+    size_t T{ VaR.size() };
+    ublas::vector<double> indicator(T);
+
+    for (size_t i{ 0 }; i < T; ++i) {
+        indicator(i) = -VaR(i) > PnL(i);
+    }
+    
+    return indicator;
 }

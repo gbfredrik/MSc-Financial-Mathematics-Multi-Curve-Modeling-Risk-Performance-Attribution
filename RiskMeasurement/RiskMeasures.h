@@ -38,8 +38,12 @@ public:
     );
     // Kernel density estimator - include
 
-//private:
+private:
     static int VaR_index(double const c, size_t const n);
+    static boost::numeric::ublas::vector<double> VaR_breaches(
+        boost::numeric::ublas::vector<double> const& VaR,
+        boost::numeric::ublas::vector<double> const& PnL
+    );
 
     // VaR hypothesis backtesting - Helper functions
     static int test_statistic_X_T(
