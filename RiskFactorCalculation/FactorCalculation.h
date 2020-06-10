@@ -25,7 +25,7 @@ public:
 		boost::numeric::ublas::matrix<double> const& m_delta_f
 	);
 
-	double smallest_eigval(
+    static double smallest_eigval(
 		boost::numeric::ublas::matrix<double> const& input
 	);
 

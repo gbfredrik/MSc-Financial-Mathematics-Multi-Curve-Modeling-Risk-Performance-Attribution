@@ -11,6 +11,8 @@
 #include <Spectra/SymEigsSolver.h>
 
 #include <iostream>
+#include <Windows.h>
+#include <WinUser.h>
 
 using namespace boost::numeric;
 
@@ -115,9 +117,7 @@ ublas::matrix<double> FactorCalculation::compute_risk_factors(
 	return prod(trans(m_E_k), trans(m_delta_f));
 }
 
-double FactorCalculation::smallest_eigval(
-	ublas::matrix<double> const& input
-) {
+double FactorCalculation::smallest_eigval(ublas::matrix<double> const& input) {
 	// Utilizes the SymEigsSolver (IRAM) from the Spectra library
 	using namespace Spectra;
 	int k{ 1 };
@@ -147,6 +147,7 @@ double FactorCalculation::smallest_eigval(
 			// Return smallest eigenvalue
 			return eigs.eigenvalues()[0];
 		}
+
 	} else {
 		// Define the positive definite C matrix
 		Eigen::MatrixXd C{ D.transpose() * D };
@@ -166,6 +167,11 @@ double FactorCalculation::smallest_eigval(
 			return eigs.eigenvalues()[0];
 		}
 	}
+    MessageBoxA(
+        NULL,
+        "Failed to find smallest eigenvalue.",
+        "Status",
+        MB_OK);
 	return -1.0;
 }
 

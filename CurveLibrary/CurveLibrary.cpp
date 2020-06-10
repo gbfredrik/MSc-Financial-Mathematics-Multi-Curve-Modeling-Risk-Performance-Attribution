@@ -16,36 +16,15 @@
 #include <algorithm>
 #include <vector>
 
+#include <WinUser.h>
+
 using namespace boost::numeric;
 
 LONG __stdcall testXL(int x, int& y) {
 #pragma EXPORT
 
 	y += 100;
-
-	return x * x;
-}
-
-BOOL __stdcall ir_measurement_multiXL(BOOL const save_curves) {
-#pragma EXPORT
-
-	bool status{ 0 };
-
-	try	{
-		ublas::matrix<double> m_forward_curves_rf;
-		ublas::matrix<double> m_forward_curves_tenor;
-		
-		status = placeholder_ir_measurement_multi(m_forward_curves_rf, m_forward_curves_tenor);
-
-		if (save_curves) { // If computation is successful and saving is toggled
-			status = status && write_txt_matrix(m_forward_curves_rf, "forward_curves_rf.txt");
-			status = status && write_txt_matrix(m_forward_curves_tenor, "forward_curves_tenor.txt");
-		}
-	} catch (const std::exception&) {
-		return 0;
-	}
-
-	return status;
+    return x * x;
 }
 
 BOOL __stdcall run_all_multiXL(
@@ -61,16 +40,16 @@ BOOL __stdcall run_all_multiXL(
 	CurveCollection rf;
 	std::vector<CurveCollection> tenors(count_tenor);
 
-	rf.filename = "fHist.csv";
+	rf.filename = "fHist3650";
 	for (CurveCollection& cc : tenors) {
-		cc.filename = "piHist.csv";
+		cc.filename = "piHist3650";
 	}
 
 	try {
 		// Read
-		rf.m_A = read_csv_matrix("fHist.csv");
+		rf.m_A = read_csv_matrix("fHist3650.csv");
 		for (CurveCollection& cc : tenors) {
-			cc.m_A = read_csv_matrix("piHist.csv");
+			cc.m_A = read_csv_matrix("piHist3650.csv");
 		}
 	} catch (std::exception const&) {
 		return -1;
@@ -88,7 +67,8 @@ void placeholder_eigen(
 	CurveCollection& curve_collection, 
 	int const eigen_algorithm, 
 	bool const eval_eigen,
-	int const k
+	int const k,
+    bool const save
 ) {
 	curve_collection.m_diff = matrixOperations::diff_matrix(curve_collection.m_A);
 
@@ -119,7 +99,7 @@ void placeholder_eigen(
 			curve_collection.v_Lambda
 		);
 	}
-
+    
 	curve_collection.m_delta_xi = FactorCalculation::compute_risk_factors(
 		curve_collection.m_E, 
 		curve_collection.m_diff
@@ -132,7 +112,9 @@ void placeholder_eigen(
 			curve_collection.v_Lambda
 		);
 	}
-
-	write_csv_matrix(curve_collection.m_E, "eigvec_" + curve_collection.filename);
-	write_csv_vector(curve_collection.v_Lambda, "eigval_" + curve_collection.filename);
+    
+    if (save) {
+        write_csv_matrix(curve_collection.m_E, "eigvec_" + curve_collection.filename + ".csv");
+        write_csv_vector(curve_collection.v_Lambda, "eigval_" + curve_collection.filename + ".csv");
+    }
 }

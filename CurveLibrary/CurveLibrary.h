@@ -6,7 +6,6 @@
 
 LONG __stdcall testXL(int x, int& y);
 
-BOOL __stdcall ir_measurement_multiXL(BOOL const save_curves);
 BOOL __stdcall run_all_multiXL(
 	int const eigen_algorithm,
 	bool const eval_eigen,
@@ -28,5 +27,6 @@ void placeholder_eigen(
 	CurveCollection& curve_collection,
 	int const eigen_algorithm,
 	bool const eval_eigen,
-	int const k
+	int const k,
+    bool const save = false
 );
