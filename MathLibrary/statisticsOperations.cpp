@@ -8,6 +8,7 @@
 #include <boost/numeric/ublas/matrix_proxy.hpp>
 #include <boost/math/distributions/normal.hpp>
 #include <boost/math/distributions/students_t.hpp>
+#include <boost/math/distributions/chi_squared.hpp>
 
 #include <numeric>
 
@@ -143,4 +144,10 @@ double statisticsOperations::invCDFT(double const u, double const df) {
 	boost::math::students_t t(df);
 
 	return quantile(t, u);
+}
+
+double statisticsOperations::invCDFchi2(double const u, double const df) {
+    boost::math::chi_squared chi(df);
+
+    return quantile(chi, u);
 }

@@ -59,7 +59,6 @@ BOOL __stdcall run_all_multiXL(
 	placeholder_eigen(rf, eigen_algorithm, eval_eigen, k);
 	placeholder_eigen(tenors.at(0), eigen_algorithm, eval_eigen, k);
 	
-	
 	return status;
 }
 

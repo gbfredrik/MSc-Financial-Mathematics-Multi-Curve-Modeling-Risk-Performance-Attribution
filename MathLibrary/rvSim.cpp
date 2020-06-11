@@ -1,7 +1,7 @@
 #include "pch.h"
-#include "RvSim.h"
+#include "rvSim.h"
 
-#include "../MathLibrary/statisticsOperations.h"
+#include "statisticsOperations.h"
 
 //#include "mex.h"
 #include <boost/numeric/ublas/matrix.hpp>
