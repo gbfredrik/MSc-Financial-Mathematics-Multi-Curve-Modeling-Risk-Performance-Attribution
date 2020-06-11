@@ -16,34 +16,10 @@ using namespace boost::numeric;
 
 // Calculates the covariance matrix
 ublas::matrix<double> statisticsOperations::covm(ublas::matrix<double> const& input) {
-	//size_t m{ input.size1() };
-	//size_t n{ input.size2() };
-	//ublas::matrix<double> cov(n, n);
-	//ublas::matrix<double> A(m, n);
-	//double mean{ 0.0 };
-
-	//for (size_t j{ 0 }; j < n; ++j) {
-	//	mean = vectorMean(column(input, j));
-	//	for (size_t i{ 0 }; i < m; ++i) {
-	//		A(i, j) = input(i, j) - mean;
-	//	}
-	//}
-
-	//cov = prod(trans(A), A) / (m - 1);
-
-	//return cov;
 	ublas::matrix<double> m_centered{ matrixOperations::center_matrix(input) };
 
 	return prod(trans(m_centered), m_centered) / (m_centered.size1() - 1);
 }
-
-// Todo: Remove
-//double statisticsOperations::vectorMean(ublas::vector<double> const& input) {
-//	double sum{ std::accumulate(input.begin(), input.end(), 0.0) };
-//	double mean{ sum / input.size() };
-//
-//	return mean;
-//}
 
 // Calculate the Pearson correlation matrix, TODO: reduce the amount of calls to pearson_rho()
 ublas::matrix<double> statisticsOperations::corrm(ublas::matrix<double> const& input) {
@@ -64,7 +40,6 @@ ublas::matrix<double> statisticsOperations::corrm(ublas::matrix<double> const& i
 	}
 
 	return corr;
-
 }
 
 // Calculate the Pearson correlation coefficient

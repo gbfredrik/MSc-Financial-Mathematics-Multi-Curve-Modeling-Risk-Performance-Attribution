@@ -2,6 +2,7 @@
 
 #include <boost/numeric/ublas/matrix.hpp>
 #include <Eigen/Core>
+#include <Spectra/Util/SelectionRule.h>
 
 
 class FactorCalculation {
@@ -24,6 +25,10 @@ public:
 		boost::numeric::ublas::matrix<double> const& m_delta_f
 	);
 
+    static double smallest_eigval(
+		boost::numeric::ublas::matrix<double> const& input
+	);
+
 	static double eig_norm_error(
 		boost::numeric::ublas::matrix<double> const& m_A,
 		boost::numeric::ublas::vector<double> const& v_x,
@@ -35,4 +40,7 @@ public:
 		boost::numeric::ublas::vector<double> const& v_lambda
 	);
 
+	static boost::numeric::ublas::matrix<double> clean_data(
+		boost::numeric::ublas::matrix<double> const& m
+	);
 };
