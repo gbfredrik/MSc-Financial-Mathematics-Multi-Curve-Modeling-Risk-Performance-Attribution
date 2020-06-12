@@ -28,7 +28,7 @@ vector<double> bfgs::minimize(boost::numeric::ublas::vector<double> x, matrix<do
 		std::cout << "    H_inv: " << H_inv << "\n\n";
 		//std::cout << "Num H_inv: " << dist->calcNumHessian(x) << "\n\n";
 		std::cout << "gradient_vec: " << gradient_vec << "\n \n";
-		std::cout << "Numerical gradient_vec: " << dist->calcNumGradients(x) << "\n \n";
+		//std::cout << "Numerical gradient_vec: " << dist->calcNumGradients(x) << "\n \n";
 		d = -prod(H_inv, gradient_vec);
 		
 		//std::cout << "d : " << d << "\n\n";

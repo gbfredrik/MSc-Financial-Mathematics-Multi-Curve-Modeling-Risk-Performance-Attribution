@@ -70,10 +70,10 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>C:\Program Files\Matlab\R2019a\extern\include;$(ProjectPath)\..\..\Dependencies\eigen-3.3.7;$(ProjectPath)\..\..\Dependencies\boost_1_72_0;$(ProjectPath);$(ProjectPath)\..\..\Dependencies\spectra-0.8.1\spectra-0.8.1\include;$(IncludePath)</IncludePath>
+    <IncludePath>C:\Program Files\Matlab\R2019a\extern\include;$(SolutionDir)\..\Dependencies\eigen-3.3.7;$(SolutionDir)\..\Dependencies\boost_1_72_0;$(SolutionDir);$(SolutionDir)\..\Dependencies\spectra-0.8.1\spectra-0.8.1\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>C:\Program Files\Matlab\R2019a\extern\include;$(ProjectPath)\..\..\Dependencies\eigen-3.3.7;$(ProjectPath)\..\..\Dependencies\boost_1_72_0;$(ProjectPath);$(ProjectPath)\..\..\Dependencies\spectra-0.8.1\spectra-0.8.1\include;$(IncludePath);$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <IncludePath>C:\Program Files\Matlab\R2019a\extern\include;$(SolutionDir)\..\Dependencies\eigen-3.3.7;$(SolutionDir)\..\Dependencies\boost_1_72_0;$(SolutionDir);$(SolutionDir)\..\Dependencies\spectra-0.8.1\spectra-0.8.1\include;$(IncludePath);$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -147,6 +147,9 @@
   <ItemGroup>
     <ProjectReference Include="..\MathLibrary\MathLibrary.vcxproj">
       <Project>{a18252bf-632c-435a-9887-422029fc1503}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\RiskFactorCalculation\RiskFactorCalculation.vcxproj">
+      <Project>{0b29d493-394b-4028-abdf-f76d5a63c1d4}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

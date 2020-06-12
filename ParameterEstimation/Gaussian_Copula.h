@@ -34,7 +34,7 @@ public:
 	void getSeries();
 	double calcStepSize(vector<double> const& x, vector<double> const& d);
 
-private:
+//private:
 	matrix<double> time_series;
 	matrix<double> buildP(vector<double> const& x);
 	vector<double> matrixToVector(matrix<double> const& matrix);

@@ -1,3 +1,4 @@
+#include "../../CurveLibrary/sample_handler.h"
 #include "../../ParameterEstimation/bfgs.h"
 #include "../../ParameterEstimation/Distribution.h"
 #include "../../ParameterEstimation/Gaussian.h"
@@ -108,9 +109,10 @@ int main() {
 	*/
 
 	//Läs in riskfria kurvan
+    matrix<double> U;
 	try {
 		//Senaste kurvan sist
-		U = read_matrix("U.csv", 3450, 3);
+		U = read_csv_matrix("U.csv");
 	}
 	catch (std::exception& ex) {
 		std::cout << "Error:" << ex.what() << "\n";
@@ -139,22 +141,23 @@ int main() {
 	Gaussian_Copula* gaussianC = &distG;
 
 	vector<double> t_params(4);
-	P_e(0) = 0.2;
-	P_e(1) = 0.3;
-	P_e(2) = 0.4;
-	P_e(3) = 5;
+    t_params(0) = 0.2;
+    t_params(1) = 0.3;
+    t_params(2) = 0.4;
+    t_params(3) = 5;
 
 
 	vector<double> norm_params(4);
-	P_e(0) = 0.2;
-	P_e(1) = 0.3;
-	P_e(2) = 0.4;
+    norm_params(0) = 0.2;
+    norm_params(1) = 0.3;
+    norm_params(2) = 0.4;
 	
 	identity_matrix<double> I(4);
 	int max_iter = 100;
 	double epsilon = pow(10, -7);
 
-	vector<double> t_copula_results = bfgs::minimize(t_params, I, max_iter, epsilon, TD);
+
+	vector<double> t_copula_results = bfgs::minimize(t_params, I, max_iter, epsilon, TC);
 
 	std::cout << "Done with copula rho \n\n";
 
@@ -169,13 +172,7 @@ int main() {
 	matrix<double> P_norm = gaussianC->buildP(norm_copula_results);
 	std::cout << "P Students t = " << P_norm << "\n\n";
 	std::cout << "FV Students t copula = " << norm_copula_results(4) << "\n\n";
-
-
-
-
 }
-
-
 
 vector<double> getUniformTimeseries(vector<double> series, vector<double> params) {
 	vector<double> garchVec = GARCH_vec(series, params);
