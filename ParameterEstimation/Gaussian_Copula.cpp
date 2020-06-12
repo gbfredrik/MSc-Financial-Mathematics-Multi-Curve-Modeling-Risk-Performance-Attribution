@@ -1,4 +1,6 @@
 #include "Gaussian_Copula.h"
+#include "../RiskFactorCalculation/FactorCalculation.h"
+
 
 
 Gaussian_Copula::Gaussian_Copula(matrix<double> series) : Distribution(series) {
@@ -201,31 +203,32 @@ vector<double> Gaussian_Copula::calcNumGradients(vector<double> const& x) {
 double Gaussian_Copula::calcStepSize(vector<double> const& x, vector<double> const& d) {
 
 	double a = 1;
-	//bool accepted = false;
-	////Kontrollera att rho är positiv definit, dvs minsta egenvärdet är positivt, annars halvera steglängden.
+	bool accepted = false;
+	//Kontrollera att rho är positiv definit, dvs minsta egenvärdet är positivt, annars halvera steglängden.
 
-	//while (!accepted) {
-	//	accepted = true;
+	while (!accepted) {
+		accepted = true;
+		for (size_t i = 0; i < x.size(); ++i) {
+			if (x(i) + a * d(i) < -1 || x(i) + a * d(i) > 1) {
+				accepted = false;
+				break;
+			}
+		}
 
-	//	for (size_t i = 0; i < x.size() - 1; ++i) {
-	//		if (x(i) + a * d(i) < 0 || x(i) + a * d(i) > 1) {
-	//			accepted = false;
-	//			a = 0.5 * a;
-	//			break;
-	//		}
-	//	}
+		matrix<double> Pnext = buildP(x + a * d);
+		double minEigenvalue = FactorCalculation::smallest_eigval(Pnext);
+		std::cout << "Smallest eigval = " << std::to_string(minEigenvalue) << std::endl;
+		if (minEigenvalue <= 0) {
+			accepted = false;
+		}
 
-	//	if (x(x.size() - 1) + a * d(d.size() - 1) <= 2) {
-	//		accepted = false;
-	//		a = 0.5 * a;
-	//	}
+		if (!accepted) {
+			a *= 0.5;
+		}
 
-	//	matrix<double> Pnext = buildP(x + a * d);
-	//	double minEigenvalue = ();
-
-	//	if (minEigenvalue <= 0) {
-	//		accepted = false;
-	//	}
-	//}
+		if (a == 0) {
+			break;
+		}
+	}
 	return a;
 }

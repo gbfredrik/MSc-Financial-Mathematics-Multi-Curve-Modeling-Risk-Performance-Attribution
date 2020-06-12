@@ -23,8 +23,10 @@ double T_Copula::function_value(vector<double> const& x) {
 	double det_P = matrixOperations::ublasToMatrixXd(P).determinant();
 	matrix<double> P_inv = matrixOperations::matrixXdToUblas(matrixOperations::ublasToMatrixXd(P).inverse());
 
+
+
 	for (size_t i = 0; i < time_series.size1(); ++i) {
-	
+
 		matrix_row<matrix<double> > U_row(time_series, i);
 
 		//Get N_inv(U)
@@ -33,7 +35,7 @@ double T_Copula::function_value(vector<double> const& x) {
 				boost::math::students_t T = boost::math::students_t::students_t_distribution(nu);
 				T_inv(j) = quantile(T, U_row(j));
 			}
-
+			
 		vector<double> tP = prod(T_inv, P_inv);
 		double tPt = inner_prod(tP, T_inv);
 	
@@ -62,7 +64,6 @@ vector<double> T_Copula::calcGradients(vector<double> const& x) {
 
 	//Get rho gradients as a vector
 	for (size_t i = 0; i < time_series.size1(); ++i) {
-
 		//Get T_inv(U)
 		matrix_row<matrix<double> > U_row(time_series, i);
 		//std::cout << "U_row = " << U_row << "\n\n";
@@ -242,6 +243,11 @@ double T_Copula::calcStepSize(vector<double> const& x, vector<double> const& d) 
 	double a = 1;
 	bool accepted = false;
 	//Kontrollera att rho är positiv definit, dvs minsta egenvärdet är positivt, annars halvera steglängden.
+
+
+	while (x(x.size() - 1) + a * d(d.size() - 1) <= 2 || x(x.size() - 1) + a * d(d.size() - 1) > 10) {
+		a *= 0.5;
+	}
 	
 	while (!accepted) {
 		accepted = true;
@@ -251,9 +257,6 @@ double T_Copula::calcStepSize(vector<double> const& x, vector<double> const& d) 
                 break;
 			}
 		}
-		if (x(x.size() - 1) + a * d(d.size() - 1) <= 2) {
-			accepted = false;
-		}
 
 		matrix<double> Pnext = buildP(x + a * d);
 		double minEigenvalue = FactorCalculation::smallest_eigval(Pnext);
@@ -262,9 +265,17 @@ double T_Copula::calcStepSize(vector<double> const& x, vector<double> const& d) 
 			accepted = false;
 		}
 
+		if (isnan(function_value(x + a * d))) {
+			accepted = false;
+		}
+
         if (!accepted) {
             a *= 0.5;
         }
+
+		if (a == 0) {
+			break;
+		}
 	}
 	return a;
 }
