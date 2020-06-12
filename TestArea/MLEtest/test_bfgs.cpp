@@ -155,7 +155,12 @@ int main() {
 	double epsilon = pow(10, -7);
 
 	vector<double> t_copula_results = bfgs::minimize(t_params, I, max_iter, epsilon, TD);
+
+	std::cout << "Done with copula rho \n\n";
+
 	vector<double> norm_copula_results = bfgs::minimize(norm_params, I, max_iter, epsilon, gaussianC);
+
+	std::cout << "Done with gaussian rho \n\n";
 
 	matrix<double> P_t = TC->buildP(t_copula_results);
 	std::cout << "P Students t = " << P_t << "\n\n";
