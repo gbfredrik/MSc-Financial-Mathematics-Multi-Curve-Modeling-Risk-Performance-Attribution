@@ -172,11 +172,11 @@ int main() {
 	//std::cout << "Done with gaussian rho \n\n";
 
 
-	vector<double> t_copula_results = runBFGS_TCopula(5, U, max_iter, epsilon);
+	vector<double> t_copula_results = runBFGS_TCopula(10, U, max_iter, epsilon);
 
 	std::cout << "Done t copula \n\n";
 
-	vector<double> norm_copula_results = runBFGS_normCopula(5, U, max_iter, epsilon);
+	vector<double> norm_copula_results = runBFGS_normCopula(10, U, max_iter, epsilon);
 
 	std::cout << "Done gaussian copula \n\n";
 
@@ -243,7 +243,8 @@ matrix<double> gen_copula_params(int n, int nRiskFactors, std::string dist) {
 	vector<double> params(nParams);
 	matrix<double> param_matrix(nParams, n);
 
-	std::default_random_engine generator;
+	std::random_device(rd);
+	std::default_random_engine generator(rd());
 	std::uniform_real_distribution<double> distribution(-0.6, 0.6);
 
 	for (size_t i = 0; i < n; ++i) {
