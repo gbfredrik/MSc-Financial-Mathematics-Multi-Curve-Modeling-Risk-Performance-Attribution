@@ -1,18 +1,13 @@
 #pragma once
 #include "Distribution.h"
 #include "../MathLibrary/matrixOperations.h"
-#include <boost/math/distributions/students_t.hpp>
+#include <boost/math/distributions/normal.hpp>
 
 #include <Eigen/Dense>
 
 #include <iostream>
 #include <numeric>
 #include <cmath>
-
-//Boost packages for numeric represenation
-#include <boost/numeric/ublas/matrix.hpp>
-#include <boost/numeric/ublas/matrix_proxy.hpp>
-#include <boost/numeric/ublas/io.hpp>
 
 //Boost packages for statistics
 #include <boost/math/tools/bivariate_statistics.hpp>
@@ -30,9 +25,9 @@
 
 using namespace boost::numeric::ublas;
 
-class T_Copula : public Distribution {
+class Gaussian_Copula : public Distribution {
 public:
-	T_Copula(matrix<double> series);
+	Gaussian_Copula(matrix<double> series);
 	double function_value(vector<double> const& x);
 	vector<double> calcGradients(vector<double> const& x);
 	vector<double> calcNumGradients(vector<double> const& x);
@@ -46,6 +41,4 @@ public:
 	matrix<double> vectorToMatrix(vector<double> const& vec);
 	vector<double> getElements(matrix<double> const& matrix);
 	vector<double> kronOfVectors(vector<double> const& v1, vector<double> const& v2);
-	double dGamma(double t);
-
 };

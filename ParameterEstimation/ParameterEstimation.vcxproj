@@ -132,6 +132,7 @@
     <ClInclude Include="bfgs.h" />
     <ClInclude Include="Distribution.h" />
     <ClInclude Include="Gaussian.h" />
+    <ClInclude Include="Gaussian_Copula.h" />
     <ClInclude Include="Student_t.h" />
     <ClInclude Include="T_Copula.h" />
   </ItemGroup>
@@ -139,12 +140,16 @@
     <ClCompile Include="bfgs.cpp" />
     <ClCompile Include="Distribution.cpp" />
     <ClCompile Include="Gaussian.cpp" />
+    <ClCompile Include="Gaussian_Copula.cpp" />
     <ClCompile Include="Student_t.cpp" />
     <ClCompile Include="T_Copula.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MathLibrary\MathLibrary.vcxproj">
       <Project>{a18252bf-632c-435a-9887-422029fc1503}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\RiskFactorCalculation\RiskFactorCalculation.vcxproj">
+      <Project>{0b29d493-394b-4028-abdf-f76d5a63c1d4}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

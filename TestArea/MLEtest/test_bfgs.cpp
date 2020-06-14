@@ -1,7 +1,10 @@
+#include "../../CurveLibrary/sample_handler.h"
 #include "../../ParameterEstimation/bfgs.h"
 #include "../../ParameterEstimation/Distribution.h"
 #include "../../ParameterEstimation/Gaussian.h"
 #include "../../ParameterEstimation/Student_t.h"
+#include "../../ParameterEstimation/T_Copula.h"
+#include "../../ParameterEstimation/Gaussian_Copula.h"
 
 #include <boost/math/distributions/normal.hpp>
 #include <boost/math/distributions/students_t.hpp>
@@ -31,9 +34,12 @@ vector<double> runBFGS_Gaussian(int n, vector<double> series, int max_iter, doub
 vector<double> runBFGS_T(int n, vector<double> series, int max_iter, double epsilon);
 vector<double> getUniformTimeseries(vector<double> series, vector<double> params);
 vector<double> GARCH_vec(vector<double> time_series, vector<double> x);
+matrix<double> gen_copula_params(int n, int nRiskFactors, std::string dist);
+vector<double> runBFGS_TCopula(int n, matrix<double> series, int max_iter, double epsilon);
+vector<double> runBFGS_normCopula(int n, matrix<double> series, int max_iter, double epsilon);
 
 int main() {
-	
+	/*
 	vector<double> time_series;
 	matrix<double> hist_rf;
 	matrix<double> E_rf;
@@ -103,9 +109,87 @@ int main() {
 	std::cout << "OptParams first eigenvector = " << OptParamsAll[0] << "\n\n";
 	std::cout << "OptParams second eigenvector = " << OptParamsAll[1] << "\n\n";
 	std::cout << "OptParams third eigenvector = " << OptParamsAll[2] << "\n\n";
+	*/
+
+
+	//Läs in riskfria kurvan
+    matrix<double> U;
+	try {
+		//Senaste kurvan sist
+		U = read_matrix("U_new.csv",1000,3);
+
+	}
+	catch (std::exception& ex) {
+		std::cout << "Error:" << ex.what() << "\n";
+		return 1;
+	}
+
+
+	//vector<double> testU(3);
+	//testU(0) = 0.8;
+	//testU(1) = 0.24;
+	//testU(2) = 0.92;
+
+//	matrix<double> Umat(1, 3);
+	//matrix_row<matrix<double> > U_row(Umat, 0);
+	//U_row = testU;
+
+	//double FV = T->function_value(P_e);
+
+	//vector<double> gradients = gaussianC->calcGradients(P_e);
+	//double FVgaussian = gaussianC->function_value(P_e);
+	//std::cout << "FV gaussian = " << gradients << "\n\n";
+	
+	T_Copula dist(U);
+	T_Copula* TC = &dist;
+
+	Gaussian_Copula distG(U);
+	Gaussian_Copula* gaussianC = &distG;
+
+	//vector<double> t_params(4);
+ //   t_params(0) = 0.2;
+ //   t_params(1) = 0.3;
+ //   t_params(2) = 0.4;
+ //   t_params(3) = 5;
+
+
+	//vector<double> norm_params(3);
+ //   norm_params(0) = 0.2;
+ //   norm_params(1) = 0.3;
+ //   norm_params(2) = 0.4;
+	//
+	//identity_matrix<double> I_C(4);
+	//identity_matrix<double> I_norm(3);
+	int max_iter = 100;
+	double epsilon = pow(10, -7);
+
+	//vector<double> t_copula_results = bfgs::minimize(t_params, I_C, max_iter, epsilon, TC);
+
+	//std::cout << "Done with copula rho \n\n";
+
+	//vector<double> norm_copula_results = bfgs::minimize(norm_params, I_norm, max_iter, epsilon, gaussianC);
+
+	//std::cout << "Done with gaussian rho \n\n";
+
+
+	vector<double> t_copula_results = runBFGS_TCopula(10, U, max_iter, epsilon);
+
+	std::cout << "Done t copula \n\n";
+
+	vector<double> norm_copula_results = runBFGS_normCopula(10, U, max_iter, epsilon);
+
+	std::cout << "Done gaussian copula \n\n";
+
+	matrix<double> P_t = TC->buildP(t_copula_results);
+
+
+	std::cout << "P Students t = " << P_t << "\n\n";
+	std::cout << "FV Students t copula = " << t_copula_results(t_copula_results.size()-1) << "\n\n";
+
+	matrix<double> P_norm = gaussianC->buildP(norm_copula_results);
+	std::cout << "P Gaussian = " << P_norm << "\n\n";
+	std::cout << "FV Gaussian copula = " << norm_copula_results(norm_copula_results.size() - 1) << "\n\n";
 }
-
-
 
 vector<double> getUniformTimeseries(vector<double> series, vector<double> params) {
 	vector<double> garchVec = GARCH_vec(series, params);
@@ -146,6 +230,143 @@ vector<double> GARCH_vec(vector<double> time_series, vector<double> x) {
 
 	return garch_vec;
 }
+
+
+matrix<double> gen_copula_params(int n, int nRiskFactors, std::string dist) {
+	int nParams;
+	if (dist == "normal") {
+		nParams = nRiskFactors;
+	}
+	else if (dist == "t") {
+		nParams = nRiskFactors + 1;
+	}
+	vector<double> params(nParams);
+	matrix<double> param_matrix(nParams, n);
+
+	std::random_device(rd);
+	std::default_random_engine generator(rd());
+	std::uniform_real_distribution<double> distribution(-0.6, 0.6);
+
+	for (size_t i = 0; i < n; ++i) {
+
+		for (size_t i = 0; i < nParams - 1; ++i) {
+			params(i) = distribution(generator);
+		}
+
+		if (dist == "t") {
+			params(nParams - 1) = 5;
+		}
+		else {
+			params(nParams - 1) = distribution(generator);
+		}
+
+		column(param_matrix, i) = params;
+	}
+
+	return param_matrix;
+}
+
+
+
+vector<double> runBFGS_TCopula(int n, matrix<double> series, int max_iter, double epsilon) {
+	int nRiskFactors = series.size2();
+
+	//Create Student_t object and set Hessian
+	T_Copula dist(series);
+	T_Copula* distribution = &dist;
+	matrix<double> H_inv(nRiskFactors + 1, nRiskFactors + 1);
+	identity_matrix<double> I(nRiskFactors + 1);
+	H_inv = I;
+	matrix<double> params(nRiskFactors + 1, n);
+	vector<double> FV(n);
+
+	params = gen_copula_params(n, nRiskFactors, "t");
+
+	// Run optimization problem n times.
+	for (size_t i = 0; i < params.size2(); ++i) {
+		vector<double> results = bfgs::minimize(column(params, i), H_inv, max_iter, epsilon, distribution);
+
+		for (size_t j = 0; j < params.size1(); ++j) {
+			column(params, i)(j) = results(j);
+		}
+		FV(i) = results(params.size1());
+	}
+
+	//Get smallest loglikelihood value and corresponding parameters
+	double smallest = FV(0);
+	int index = 0;
+	for (vector<double>::iterator it = FV.begin(); it != FV.end(); it++) {
+
+		if (*it < smallest) {
+			smallest = *it;
+			index = it - FV.begin();
+		}
+	}
+
+	std::cout << "All FV:S  : " << FV << "\n\n";
+	std::cout << "OPT FV = " << smallest << " at params = " << column(params, index) << "\n\n";
+
+	//Save optimal parameters and function value in opt_params
+	vector<double> opt_params(nRiskFactors + 1);
+
+	for (size_t i = 0; i < opt_params.size()-1; ++i) {
+		opt_params(i) = params(i, index);
+	}
+	opt_params(opt_params.size() - 1) = smallest;
+
+	return opt_params;
+}
+
+
+vector<double> runBFGS_normCopula(int n, matrix<double> series, int max_iter, double epsilon) {
+	int nRiskFactors = series.size2();
+
+	//Create Student_t object and set Hessian
+	Gaussian_Copula dist(series);
+	Gaussian_Copula* distribution = &dist;
+	matrix<double> H_inv(nRiskFactors, nRiskFactors);
+	identity_matrix<double> I(nRiskFactors);
+	H_inv = I;
+	matrix<double> params(nRiskFactors, n);
+	vector<double> FV(n);
+
+	params = gen_copula_params(n, nRiskFactors, "normal");
+	// Run optimization problem n times.
+	for (size_t i = 0; i < params.size2(); ++i) {
+		vector<double> results = bfgs::minimize(column(params, i), H_inv, max_iter, epsilon, distribution);
+
+		for (size_t j = 0; j < params.size1(); ++j) {
+			column(params, i)(j) = results(j);
+		}
+		FV(i) = results(params.size1());
+	}
+
+	//Get smallest loglikelihood value and corresponding parameters
+	double smallest = FV(0);
+	int index = 0;
+	for (vector<double>::iterator it = FV.begin(); it != FV.end(); it++) {
+
+		if (*it < smallest) {
+			smallest = *it;
+			index = it - FV.begin();
+		}
+	}
+
+	std::cout << "All FV:S  : " << FV << "\n\n";
+	std::cout << "OPT FV = " << smallest << " at params = " << column(params, index) << "\n\n";
+
+	//Save optimal parameters and function value in opt_params
+	vector<double> opt_params(nRiskFactors);
+
+	for (size_t i = 0; i < opt_params.size() - 1; ++i) {
+		opt_params(i) = params(i, index);
+	}
+	opt_params(opt_params.size() - 1) = smallest;
+
+	return opt_params;
+}
+
+
 
 vector<double> runBFGS_Gaussian(int n, vector<double> series, int max_iter, double epsilon) {
 	//Convert vector as matrix for BFGS minimize function
@@ -278,6 +499,7 @@ matrix<double> gen_start_params(int n, std::string dist){
 
 	return param_matrix;
 }
+
 
 
 vector<double> read_time_series_test(std::string const& file_name) {

@@ -54,7 +54,7 @@ inline bool write_txt_vector(ublas::vector<double> const& v, std::string const& 
 template<typename T>
 ublas::matrix<T> read_csv_matrix(std::string const& file_name) {
 	std::ifstream inf;
-	inf.open("X:/Examensarbete/Data/" + file_name);
+	inf.open(/*"X:/Examensarbete/Data/" +*/ file_name);
 
 	size_t rows{ 0 };
     size_t cols{ 0 };
