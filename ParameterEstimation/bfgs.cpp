@@ -3,7 +3,7 @@
 
 vector<double> bfgs::minimize(boost::numeric::ublas::vector<double> x, matrix<double> H_inv, int max_iter, double epsilon, Distribution* dist) {
 
-	//std::cout << "in minimize: ";
+	std::cout << "in bfgs minimize: ";
 	//dist->getSeries();
 
 	int n = x.size();
@@ -19,7 +19,8 @@ vector<double> bfgs::minimize(boost::numeric::ublas::vector<double> x, matrix<do
 	vector<double> gradient_vec(n);
 	//Init hessian inverse matrix
 	identity_matrix<double> I(n);
-	
+	dist->calcGradients(x);
+	std::cout << "norm : " << (dist->calcGradients(x)) << " \n\n";
 	while (norm_2(dist->calcGradients(x)) > epsilon && k < max_iter) {
 		std::cout << "New iteration \n\n";
 		gradient_vec = dist->calcGradients(x);

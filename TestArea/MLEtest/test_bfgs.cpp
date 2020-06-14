@@ -35,11 +35,11 @@ vector<double> runBFGS_T(int n, vector<double> series, int max_iter, double epsi
 vector<double> getUniformTimeseries(vector<double> series, vector<double> params);
 vector<double> GARCH_vec(vector<double> time_series, vector<double> x);
 matrix<double> gen_copula_params(int n, int nRiskFactors, std::string dist);
-vector<double> runBFGS_TCopula(int n, matrix<double> series, int max_iter, double epsilon);
-vector<double> runBFGS_normCopula(int n, matrix<double> series, int max_iter, double epsilon);
+vector<double> runBFGS_TCopula(int n, T_Copula* t, int max_iter, double epsilon);
+vector<double> runBFGS_normCopula(int n, Gaussian_Copula* norm, int max_iter, double epsilon);
 
 int main() {
-	/*
+	
 	vector<double> time_series;
 	matrix<double> hist_rf;
 	matrix<double> E_rf;
@@ -78,7 +78,7 @@ int main() {
 
 
 	// Optimize parameters for all riskfactors
-	int nSolutions = 1;
+	int nSolutions = 2;
 	int max_iter = 100;
 	double epsilon = pow(10, -7);
 
@@ -92,11 +92,11 @@ int main() {
 
 		//Get uniform Timeseries
 		if (optGaussian_xi(4) < optStudent_xi(5)) {	//Choose Gaussian marginal dist
-		
 			matrix_column<matrix<double> > U_column(U, i);
-			U_column = getUniformTimeseries(xi, optGaussian_xi); 
+			U_column = getUniformTimeseries(xi, optGaussian_xi);
 			OptParamsAll.push_back(optGaussian_xi);
-		} else {										//Choose Student t marginals
+		}
+		else {										//Choose Student t marginals
 			matrix_column<matrix<double> > U_column(U, i);
 			U_column = getUniformTimeseries(xi, optStudent_xi);
 			OptParamsAll.push_back(optStudent_xi);
@@ -105,14 +105,12 @@ int main() {
 
 	//matrix_column<matrix<double> > U_column(U, 0);
 	//std::cout << "U_column = " << U_column << "\n\n";
+	
 
-	std::cout << "OptParams first eigenvector = " << OptParamsAll[0] << "\n\n";
-	std::cout << "OptParams second eigenvector = " << OptParamsAll[1] << "\n\n";
-	std::cout << "OptParams third eigenvector = " << OptParamsAll[2] << "\n\n";
-	*/
-
+	//Copula estimation
 
 	//Läs in riskfria kurvan
+	/*
     matrix<double> U;
 	try {
 		//Senaste kurvan sist
@@ -124,63 +122,28 @@ int main() {
 		return 1;
 	}
 
-
-	//vector<double> testU(3);
-	//testU(0) = 0.8;
-	//testU(1) = 0.24;
-	//testU(2) = 0.92;
-
-//	matrix<double> Umat(1, 3);
-	//matrix_row<matrix<double> > U_row(Umat, 0);
-	//U_row = testU;
-
-	//double FV = T->function_value(P_e);
-
-	//vector<double> gradients = gaussianC->calcGradients(P_e);
-	//double FVgaussian = gaussianC->function_value(P_e);
-	//std::cout << "FV gaussian = " << gradients << "\n\n";
-	
+	*/
 	T_Copula dist(U);
 	T_Copula* TC = &dist;
 
 	Gaussian_Copula distG(U);
 	Gaussian_Copula* gaussianC = &distG;
 
-	//vector<double> t_params(4);
- //   t_params(0) = 0.2;
- //   t_params(1) = 0.3;
- //   t_params(2) = 0.4;
- //   t_params(3) = 5;
+	std::cout << "U = " << U << "\n\n";
 
-
-	//vector<double> norm_params(3);
- //   norm_params(0) = 0.2;
- //   norm_params(1) = 0.3;
- //   norm_params(2) = 0.4;
-	//
-	//identity_matrix<double> I_C(4);
-	//identity_matrix<double> I_norm(3);
-	int max_iter = 100;
-	double epsilon = pow(10, -7);
-
-	//vector<double> t_copula_results = bfgs::minimize(t_params, I_C, max_iter, epsilon, TC);
-
-	//std::cout << "Done with copula rho \n\n";
-
-	//vector<double> norm_copula_results = bfgs::minimize(norm_params, I_norm, max_iter, epsilon, gaussianC);
-
-	//std::cout << "Done with gaussian rho \n\n";
-
-
-	vector<double> t_copula_results = runBFGS_TCopula(10, U, max_iter, epsilon);
+	vector<double> t_copula_results = runBFGS_TCopula(10, TC, max_iter, epsilon);
 
 	std::cout << "Done t copula \n\n";
 
-	vector<double> norm_copula_results = runBFGS_normCopula(10, U, max_iter, epsilon);
+	vector<double> norm_copula_results = runBFGS_normCopula(10, gaussianC, max_iter, epsilon);
 
 	std::cout << "Done gaussian copula \n\n";
 
 	matrix<double> P_t = TC->buildP(t_copula_results);
+
+	std::cout << "OptParams first eigenvector = " << OptParamsAll[0] << "\n\n";
+	std::cout << "OptParams second eigenvector = " << OptParamsAll[1] << "\n\n";
+	std::cout << "OptParams third eigenvector = " << OptParamsAll[2] << "\n\n";
 
 
 	std::cout << "P Students t = " << P_t << "\n\n";
@@ -189,7 +152,9 @@ int main() {
 	matrix<double> P_norm = gaussianC->buildP(norm_copula_results);
 	std::cout << "P Gaussian = " << P_norm << "\n\n";
 	std::cout << "FV Gaussian copula = " << norm_copula_results(norm_copula_results.size() - 1) << "\n\n";
-}
+
+	
+	}
 
 vector<double> getUniformTimeseries(vector<double> series, vector<double> params) {
 	vector<double> garchVec = GARCH_vec(series, params);
@@ -200,12 +165,18 @@ vector<double> getUniformTimeseries(vector<double> series, vector<double> params
 		for (size_t i = 0; i < series.size(); ++i) {
 			boost::math::normal norm = boost::math::normal::normal_distribution(0, 1);
 			U(i) = cdf(norm,((series(i) - mu) / sqrt(garchVec(i))));
+			if (U(i) == 1) {
+				U(i) = U(i - 1);
+			}
 		}
 	}
 	else {
 		boost::math::students_t stud = boost::math::students_t::students_t_distribution(params(4));
 		for (size_t i = 0; i < series.size(); ++i) {
 			U(i) = cdf(stud, ((series(i) - mu) / sqrt(garchVec(i))));
+			if (U(i) == 1) {
+				U(i) = U(i - 1);
+			}
 		}
 	}
 
@@ -268,12 +239,12 @@ matrix<double> gen_copula_params(int n, int nRiskFactors, std::string dist) {
 
 
 
-vector<double> runBFGS_TCopula(int n, matrix<double> series, int max_iter, double epsilon) {
-	int nRiskFactors = series.size2();
+vector<double> runBFGS_TCopula(int n, T_Copula* distribution, int max_iter, double epsilon) {
+	int nRiskFactors = (distribution->time_series).size2();
 
 	//Create Student_t object and set Hessian
-	T_Copula dist(series);
-	T_Copula* distribution = &dist;
+	//T_Copula dist(series);
+	//T_Copula* distribution = &dist;
 	matrix<double> H_inv(nRiskFactors + 1, nRiskFactors + 1);
 	identity_matrix<double> I(nRiskFactors + 1);
 	H_inv = I;
@@ -282,13 +253,17 @@ vector<double> runBFGS_TCopula(int n, matrix<double> series, int max_iter, doubl
 
 	params = gen_copula_params(n, nRiskFactors, "t");
 
+	std::cout << "debug 1 \n\n";
+
 	// Run optimization problem n times.
 	for (size_t i = 0; i < params.size2(); ++i) {
+		std::cout << "start params = " << column(params, i) << " \n\n";
 		vector<double> results = bfgs::minimize(column(params, i), H_inv, max_iter, epsilon, distribution);
 
 		for (size_t j = 0; j < params.size1(); ++j) {
 			column(params, i)(j) = results(j);
 		}
+		std::cout << "debug 3 \n\n";
 		FV(i) = results(params.size1());
 	}
 
@@ -318,12 +293,12 @@ vector<double> runBFGS_TCopula(int n, matrix<double> series, int max_iter, doubl
 }
 
 
-vector<double> runBFGS_normCopula(int n, matrix<double> series, int max_iter, double epsilon) {
-	int nRiskFactors = series.size2();
+vector<double> runBFGS_normCopula(int n, Gaussian_Copula* distribution, int max_iter, double epsilon) {
+	int nRiskFactors = (distribution->time_series).size2();
 
 	//Create Student_t object and set Hessian
-	Gaussian_Copula dist(series);
-	Gaussian_Copula* distribution = &dist;
+	//Gaussian_Copula dist(series);
+	//Gaussian_Copula* distribution = &dist;
 	matrix<double> H_inv(nRiskFactors, nRiskFactors);
 	identity_matrix<double> I(nRiskFactors);
 	H_inv = I;
