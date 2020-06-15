@@ -129,10 +129,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Backtesting.h" />
+    <ClInclude Include="Likelihood.h" />
     <ClInclude Include="RiskMeasures.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\CurveLibrary\sample_handler.cpp" />
+    <ClCompile Include="Backtesting.cpp" />
+    <ClCompile Include="Likelihood.cpp" />
     <ClCompile Include="RiskMeasures.cpp" />
     <ClCompile Include="riskMeasureTester.cpp" />
   </ItemGroup>
