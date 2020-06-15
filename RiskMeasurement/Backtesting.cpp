@@ -151,12 +151,12 @@ double Backtesting::test_statistic_Z1(
 }
 
 // Helper functions
-ublas::vector<double> Backtesting::VaR_breaches(
+ublas::vector<int> Backtesting::VaR_breaches(
     ublas::vector<double> const& VaRs,
     ublas::vector<double> const& PnLs
 ) {
     size_t T{ VaRs.size() };
-    ublas::vector<double> indicator(T);
+    ublas::vector<int> indicator(T);
 
     for (size_t i{ 0 }; i < T; ++i) {
         indicator(i) = -VaRs(i) > PnLs(i);

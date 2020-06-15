@@ -1,6 +1,8 @@
 #pragma once
+
 #define _USE_MATH_DEFINES
 #include <cmath>
+
 #include <boost/numeric/ublas/matrix.hpp>
 
 class RiskMeasures {

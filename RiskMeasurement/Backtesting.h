@@ -52,7 +52,6 @@ private:
         double const u_10,
         double const u_11
     );
-
     static double test_statistic_Z1(
         boost::numeric::ublas::vector<double> const& VaRs,
         boost::numeric::ublas::vector<double> const& ESs,
@@ -60,7 +59,7 @@ private:
     );
 
     // Helper functions
-    static boost::numeric::ublas::vector<double> VaR_breaches(
+    static boost::numeric::ublas::vector<int> VaR_breaches(
         boost::numeric::ublas::vector<double> const& VaRs,
         boost::numeric::ublas::vector<double> const& PnLs
     );

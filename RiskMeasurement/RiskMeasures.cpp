@@ -91,7 +91,7 @@ double RiskMeasures::kde(
     double variance{ matrixOperations::vector_variance(x_simulated) };
     double sigma{ sqrt(variance) };
     double h{ pow(4.0 / (3.0 * n), 1.0 / 5.0) * sigma };
-    double sum{ 0 };
+    double sum{ 0.0 };
 
     for (size_t i{ 0 }; i < n; ++i) {
         sum += std::exp(-pow(x_realized - x_simulated(i), 2) / (2 * pow(h, 2)));

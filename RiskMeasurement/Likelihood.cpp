@@ -1,4 +1,3 @@
-#include "pch.h"
 #include "Likelihood.h"
 
 #include "../MathLibrary/matrixOperations.h"
@@ -53,7 +52,7 @@ ublas::vector<double> Likelihood::d_i(
 
 // Calculate d in Likelihood Ratio Test
 double Likelihood::d(ublas::vector<double> const& d_i, int const N) {
-    double d{ 0 };
+    double d{ 0.0 };
 
     for (size_t i{ 0 }, n{ d_i.size() }; i < n; ++i) {
         d += d_i(i);
@@ -64,7 +63,7 @@ double Likelihood::d(ublas::vector<double> const& d_i, int const N) {
 
 // Calculate sigma in Likelihood Ratio Test
 double Likelihood::sigma(double const d, ublas::vector<double> const& d_i, int const N) {
-    double sigma2{ 0 };
+    double sigma2{ 0.0 };
 
     //Calculate sigma^2
     for (size_t i{ 0 }, rows{ d_i.size() }; i < rows; ++i) {
