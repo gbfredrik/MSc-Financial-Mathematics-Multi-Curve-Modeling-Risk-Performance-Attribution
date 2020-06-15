@@ -3,11 +3,11 @@
 %load('fHist.mat')
 %load('piHist.mat')
 
-clearvars -except fForeign fDomestic fDemand fAll piAll
+clearvars -except fForeign fDomestic fDemand fAll piAll DemandOneJump DomesticOneJump fBaseQuarterly fDemandQuarterlyAvg fForeignNoJumps ForeignOneJump fTermQuarterly fDomesticNoJumps fDemandNoJumps
 
-% fForeign = table2array(fForeign); 
-% fDomestic = table2array(fDomestic);
-% fDemand = table2array(fDemand); 
+%fForeign = table2array(fAll); 
+fDomestic = table2array(DomesticOneJump);
+fDemand = table2array(DemandOneJump); 
 
 %% Simulate curves - All arguments
 startDay = 1;
@@ -98,6 +98,7 @@ hist = {};
 % hist.Demand = piAll(end-1000:end-300,:);
 
 %hist = {};
+
 hist.Domestic = fDomestic(1001:1356,1:730);
 hist.Foreign = fForeign(1001:1356,1:730);
 hist.Demand = fDemand(1001:1356,1:730);
@@ -171,6 +172,17 @@ T = 1:730;
 plot(T, fDomesticOutT')
 %pause(0.01);
 
+% subplot(3,1,1)
+% plot(T, fDomesticOutT')
+% title('Quote OIS')
+% 
+% subplot(3,1,2)
+% plot(T, fForeignOut')
+% title('Base OIS')
+% 
+% subplot(3,1,3)
+% plot(T, fDemandOutT')
+% title('Demand curve')
 
 %figure;
 %plot(T, fDemandOut')
