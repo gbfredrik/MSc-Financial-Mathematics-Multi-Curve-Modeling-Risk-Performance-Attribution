@@ -42,6 +42,9 @@ end
 
 %deltaF = L*r;
 
-plot(T,fSimulationsAllDays{10});
+%plot(T,fSimulationsAllDays{10});
+
+%%
+
 
 
