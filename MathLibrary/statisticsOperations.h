@@ -29,8 +29,9 @@ public:
 		boost::numeric::ublas::vector<double> const& fPrevPrev,
 		boost::numeric::ublas::vector<double> const& sigmaPrev
 	);
-	static double invCDFNorm(double const u, double const mu, double const sigma);
+	static double invCDFNorm(double const u, double const mu = 0.0, double const sigma = 1.0);
 	static double invCDFT(double const u, double const df);
+    static double invCDFchi2(double const u, double const df = 1.0);
 
 private:
 	//static double vectorMean(boost::numeric::ublas::vector<double> const& input);
