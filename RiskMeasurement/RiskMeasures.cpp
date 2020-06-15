@@ -4,13 +4,12 @@
 #include "../MathLibrary/statisticsOperations.h"
 
 #include <boost/numeric/ublas/matrix.hpp>
+#include <boost/numeric/ublas/matrix_proxy.hpp>
 #include <boost/numeric/ublas/vector_proxy.hpp>
-#include <boost/numeric/ublas/operation.hpp>
-#include <boost/math/distributions/inverse_chi_squared.hpp>
 
 using namespace boost::numeric;
 
-// --- VaR ---
+// Value-at-risk
 double RiskMeasures::VaR(
     ublas::vector<double> const& outcomes,
     double const c
@@ -44,107 +43,7 @@ double RiskMeasures::VaR(
 //    return VaR_measures;
 //}
 
-// --- VaR Backtesting---
-// VaR hypothesis backtesting
-bool RiskMeasures::VaR_hypothesis_test(
-    ublas::vector<double> const& VaRs, 
-    ublas::vector<double> const& PnLs, 
-    double const c,
-    double const alpha
-) {
-    int X_T{ test_statistic_X_T(VaRs, PnLs) };
-    int T{ static_cast<int>(VaRs.size()) };
-    double p{ 1 - c };
-    double Z{ test_statistic_Z(X_T, T, p) };
-    double tilde_m{ statisticsOperations::invCDFNorm(1 - alpha) }; // = invCDFNorm( 1 - alpha, 0.0, 1.0);
-    
-    return Z > tilde_m;
-}
-
-int RiskMeasures::test_statistic_X_T(
-    ublas::vector<double> const& VaRs, 
-    ublas::vector<double> const& PnLs
-) {
-    return sum(VaR_breaches(VaRs, PnLs));
-}
-
-double RiskMeasures::test_statistic_Z(int const X_T, int const T, double const p) {
-    return (X_T - T * p) / sqrt(T * p * (1.0 - p));
-}
-
-// VaR Christoffersen's test
-bool RiskMeasures::VaR_Christoffersen_test(
-    ublas::vector<double> const& VaRs, 
-    ublas::vector<double> const& PnLs, 
-    double const alpha
-) {
-    double u_00{ 0.0 };
-    double u_01{ 0.0 };
-    double u_10{ 0.0 };
-    double u_11{ 0.0 };
-    number_of_periods(VaRs, PnLs, u_00, u_01, u_10, u_11);
-    
-    double pi{ (u_01 + u_11) / (u_00 + u_01 + u_10 + u_11) };
-    double pi_01{ (u_01) / (u_00 + u_01) };
-    double pi_11{ (u_11) / (u_10 + u_11) };
-
-    double christoffersen_statistic{ 
-        test_statistic_christoffersen(
-            pi,
-            pi_01,
-            pi_11,
-            u_00,
-            u_01,
-            u_10,
-            u_11
-        )
-    };
-
-    double z{ statisticsOperations::invCDFchi2(1 - alpha) };
-
-    return christoffersen_statistic > z;
-}
-
-void RiskMeasures::number_of_periods(
-    ublas::vector<double> const& VaRs,
-    ublas::vector<double> const& PnLs,
-    double& u_00,
-    double& u_01,
-    double& u_10,
-    double& u_11
-) {
-    ublas::vector<int> indicator(VaR_breaches(VaRs, PnLs));
-    
-    for (size_t i{ 0 }, n{ VaRs.size() - 1}; i < n; ++i) {
-        bool exceed_current{ indicator(i) == 1};
-        bool exceed_next{ indicator(i + 1) == 1};
-
-        if (!exceed_current && !exceed_next) {
-            ++u_00;
-        } else if (!exceed_current && exceed_next) {
-            ++u_01;
-        } else if (exceed_current && !exceed_next) {
-            ++u_10;
-        } else if (exceed_current && exceed_next) {
-            ++u_11;
-        }
-    }
-}
-
-double RiskMeasures::test_statistic_christoffersen(
-    double const pi, 
-    double const pi_01, 
-    double const pi_11, 
-    double const u_00,
-    double const u_01,
-    double const u_10,
-    double const u_11
-) {
-    return -2.0 * ((u_00 + u_10) * log(1.0 - pi) + (u_01 + u_11) * log(pi))
-        + 2.0 * (u_00 * log(1.0 - pi_01) + u_01 * log(pi_01) + u_10 * log(1.0 - pi_11) + u_11 * log(pi_11));
-}
-
-// --- ES ---
+// Expected shortfall
 double RiskMeasures::ES(
     ublas::vector<double> const& outcomes,
     double const c
@@ -183,68 +82,39 @@ double RiskMeasures::ES(
 //    return ES_measures;
 //}
 
-// --- ES Backtesting ---
-// Test 1: Acerbi and Szekely
-
-bool RiskMeasures::ES_Acerbi_Szekely(
-    ublas::matrix<double> const& X,
-    ublas::vector<double> const& VaRs, 
-    ublas::vector<double> const& ESs, 
-    ublas::vector<double> const& PnLs, 
-    double const phi
+// Kernel density estimator
+double RiskMeasures::kde(
+    ublas::vector<double> const& x_simulated,
+    double const x_realized
 ) {
-    size_t M{ X.size2() }; // columns
-    ublas::vector<double> Z(M);
-    double Z_X_actual{ test_statistic_Z1(VaRs, ESs, PnLs) };
-    int n{ 0 };
+    size_t n{ x_simulated.size() };
+    double variance{ matrixOperations::vector_variance(x_simulated) };
+    double sigma{ sqrt(variance) };
+    double h{ pow(4.0 / (3.0 * n), 1.0 / 5.0) * sigma };
+    double sum{ 0 };
 
-    for (size_t i{ 0 }; i < M; ++i) {
-        Z(i) = test_statistic_Z1(VaRs, ESs, column(X, i)); // Todo: Control
-        if (Z(i) < Z_X_actual) {
-            ++n;
-        }
+    for (size_t i{ 0 }; i < n; ++i) {
+        sum += std::exp(-pow(x_realized - x_simulated(i), 2) / (2 * pow(h, 2)));
     }
 
-    double p{ n / static_cast<double>(M) };
-
-    return p < phi;
+    return (1.0 / (sqrt(2.0 * M_PI) * h * n)) * sum;
 }
 
-double RiskMeasures::test_statistic_Z1(
-    ublas::vector<double> const& VaRs, 
-    ublas::vector<double> const& ESs, 
-    ublas::vector<double> const& PnLs
+ublas::vector<double> RiskMeasures::kde_multi(
+    ublas::matrix<double> const& x_simulated,
+    ublas::vector<double> const& x_realized
 ) {
-    ublas::vector<int> indicator(VaR_breaches(VaRs, PnLs));
+    size_t m{ x_realized.size() };
+    ublas::vector<double> f(m);
 
-    int N_T{ sum(indicator) };
-    if (N_T == 0) { // Exit if no breaches to avoid div. by zero in Z_X.
-        return 0;
+    for (size_t j{ 0 }; j < m; ++j) {
+        f(j) = kde(column(x_simulated, j), x_realized(j));
     }
 
-    double Z_X{ sum(element_div(element_prod(PnLs, indicator), ESs)) / N_T + 1.0 };
-    
-    return Z_X;
+    return f;
 }
 
-// Kernel Density Estimator
-// Todo: Include
-
-// --- Helper functions ---
+// Helper functions
 int RiskMeasures::VaR_index(double const c, size_t const n) {
     return static_cast<int>(c * n);
-}
-
-ublas::vector<double> RiskMeasures::VaR_breaches(
-    ublas::vector<double> const& VaRs, 
-    ublas::vector<double> const& PnLs
-) {
-    size_t T{ VaRs.size() };
-    ublas::vector<double> indicator(T);
-
-    for (size_t i{ 0 }; i < T; ++i) {
-        indicator(i) = -VaRs(i) > PnLs(i);
-    }
-    
-    return indicator;
 }

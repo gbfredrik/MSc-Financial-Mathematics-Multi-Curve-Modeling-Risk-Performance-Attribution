@@ -32,7 +32,7 @@
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -129,10 +129,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Backtesting.h" />
+    <ClInclude Include="Likelihood.h" />
     <ClInclude Include="RiskMeasures.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\CurveLibrary\sample_handler.cpp" />
+    <ClCompile Include="Backtesting.cpp" />
+    <ClCompile Include="Likelihood.cpp" />
     <ClCompile Include="RiskMeasures.cpp" />
     <ClCompile Include="riskMeasureTester.cpp" />
   </ItemGroup>

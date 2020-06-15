@@ -18,6 +18,12 @@
     <ClInclude Include="RiskMeasures.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Backtesting.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Likelihood.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="RiskMeasures.cpp">
@@ -26,7 +32,10 @@
     <ClCompile Include="riskMeasureTester.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\CurveLibrary\sample_handler.cpp">
+    <ClCompile Include="Backtesting.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Likelihood.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
