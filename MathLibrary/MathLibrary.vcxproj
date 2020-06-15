@@ -90,11 +90,11 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\Program Files\Matlab\R2019a\extern\include;$(ProjectPath)\..\..\Dependencies\eigen-3.3.7;$(ProjectPath)\..\..\Dependencies\boost_1_72_0;$(ProjectPath);$(ProjectPath)\..\..\Dependencies\spectra-0.8.1\spectra-0.8.1\include;$(IncludePath);$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <IncludePath>C:\Program Files\Matlab\R2019a\extern\include;$(SolutionDir)\..\Dependencies\eigen-3.3.7;$(SolutionDir)\..\Dependencies\boost_1_72_0;$(SolutionDir);$(SolutionDir)\..\Dependencies\spectra-0.8.1\spectra-0.8.1\include;$(IncludePath);$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>C:\Program Files\Matlab\R2019a\extern\include;$(ProjectPath)\..\..\Dependencies\eigen-3.3.7;$(ProjectPath)\..\..\Dependencies\boost_1_72_0;$(ProjectPath);$(ProjectPath)\..\..\Dependencies\spectra-0.8.1\spectra-0.8.1\include;$(IncludePath)</IncludePath>
+    <IncludePath>C:\Program Files\Matlab\R2019a\extern\include;$(SolutionDir)\..\Dependencies\eigen-3.3.7;$(SolutionDir)\..\Dependencies\boost_1_72_0;$(SolutionDir);$(SolutionDir)\..\Dependencies\spectra-0.8.1\spectra-0.8.1\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
@@ -127,6 +127,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>\\ad.liu.se\home\corwe099\Documents\Dependencies\eigen-3.3.7;\\ad.liu.se\home\corwe099\Documents\Dependencies\boost_1_71_0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -147,6 +148,8 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>
+      </AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

@@ -7,96 +7,113 @@
 
 #include "sample_handler.h"
 #include "../MathLibrary/matrixOperations.h"
+#include "../MathLibrary/statisticsOperations.h"
 #include "../RiskFactorCalculation/FactorCalculation.h"
 
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/matrix_proxy.hpp>
 
 #include <algorithm>
+#include <vector>
+
+#include <WinUser.h>
 
 using namespace boost::numeric;
 
-LONG __stdcall squareXL(int x, int& y) {
+LONG __stdcall testXL(int x, int& y) {
 #pragma EXPORT
 
 	y += 100;
-
-	return x * x;
+    return x * x;
 }
 
-BOOL __stdcall ir_measurement_multiXL(BOOL const save_curves) {
-#pragma EXPORT
-
-	bool status{ 0 };
-
-	try	{
-		ublas::matrix<double> m_forward_curves_rf;
-		ublas::matrix<double> m_forward_curves_tenor;
-		
-		status = placeholder_ir_measurement_multi(m_forward_curves_rf, m_forward_curves_tenor);
-
-		if (save_curves) { // If computation is successful and saving is toggled
-			status = status && write_txt_matrix(m_forward_curves_rf, "forward_curves_rf.txt");
-			status = status && write_txt_matrix(m_forward_curves_tenor, "forward_curves_tenor.txt");
-		}
-	} catch (const std::exception&) {
-		return 0;
-	}
-
-	return status;
-}
-
-BOOL __stdcall run_all_multiXL(BOOL const compute_curves/*, ...*/) {
+BOOL __stdcall run_all_multiXL(
+	int const eigen_algorithm,
+	bool const eval_eigen,
+	double* return_norm_errors
+) {
 #pragma EXPORT
 
 	bool status{ 1 };
+	int count_tenor{ 1 };
 
-	try {
-		ublas::matrix<double> m_forward_curves_rf{};
-		ublas::matrix<double> m_forward_curves_tenor{};
-		if (compute_curves) { // Compute
-			status = placeholder_ir_measurement_multi(m_forward_curves_rf, m_forward_curves_tenor);
-			// TODO: Replace above to compute curve(s)
+	CurveCollection rf;
+	std::vector<CurveCollection> tenors(count_tenor);
 
-			// If computation is successful
-			status = status && write_csv_matrix(m_forward_curves_rf, "forward_curves_rf.csv");
-			status = status && write_csv_matrix(m_forward_curves_tenor, "forward_curves_tenor.csv");
-		} else { // Read
-			m_forward_curves_rf = read_csv_matrix("fHist.csv");
-			m_forward_curves_tenor = read_csv_matrix("piHist.csv");
-		}
-
-		ublas::matrix<double> m_diff{ matrixOperations::diff_matrix(m_forward_curves_rf) };
-		// Todo: Clean data here and process:
-		ublas::matrix_range<ublas::matrix<double>> m_diff_clean(
-			m_diff, 
-			ublas::range(0, min(1500, m_diff.size1())), 
-			ublas::range(0, m_diff.size2())
-		);
-		ublas::matrix<double> m_rf_centered{ matrixOperations::center_matrix(m_diff_clean) };
-
-		int k{ 6 };
-		ublas::matrix<double> m_rf_E(m_rf_centered.size2(), k);
-		ublas::vector<double> v_rf_Lambda(k);
-
-		enum class PCA_Algo {IRAM, BDCSVD};
-		PCA_Algo pca_algo{ PCA_Algo::IRAM };
-		if (pca_algo == PCA_Algo::IRAM) {
-			status = status && FactorCalculation::iram(m_rf_centered / sqrt(m_rf_centered.size1() - 1), k, m_rf_E, v_rf_Lambda);
-		} else if (pca_algo == PCA_Algo::BDCSVD) {
-			status = status && FactorCalculation::eigen_bdcsvd(m_rf_centered / sqrt(m_rf_centered.size1() - 1), k, m_rf_E, v_rf_Lambda);
-		}
-		
-		status = status && write_csv_matrix(m_rf_E, "rf_vec.csv");
-		status = status && write_csv_vector(v_rf_Lambda, "rf_val.csv");
-
-		ublas::matrix<double> m_rf_delta_xi{ FactorCalculation::compute_risk_factors(m_rf_E, m_diff) };
-		status = status && write_csv_matrix(m_rf_delta_xi, "rf_delta_xi.csv");
-
-		//...
-	} catch (std::exception const&) {
-		return 0;
+	rf.filename = "fHist3650";
+	for (CurveCollection& cc : tenors) {
+		cc.filename = "piHist3650";
 	}
 
+	try {
+		// Read
+		rf.m_A = read_csv_matrix("fHist3650.csv");
+		for (CurveCollection& cc : tenors) {
+			cc.m_A = read_csv_matrix("piHist3650.csv");
+		}
+	} catch (std::exception const&) {
+		return -1;
+	}
+
+	int k{ 6 };
+	placeholder_eigen(rf, eigen_algorithm, eval_eigen, k);
+	placeholder_eigen(tenors.at(0), eigen_algorithm, eval_eigen, k);
+	
 	return status;
+}
+
+void placeholder_eigen(
+	CurveCollection& curve_collection, 
+	int const eigen_algorithm, 
+	bool const eval_eigen,
+	int const k,
+    bool const save
+) {
+	curve_collection.m_diff = matrixOperations::diff_matrix(curve_collection.m_A);
+
+	// Todo: Clean data here and process:
+	ublas::matrix_range<ublas::matrix<double>> m_diff_clean(
+		curve_collection.m_diff,
+		ublas::range(0, min(1500, curve_collection.m_diff.size1())),
+		ublas::range(0, curve_collection.m_diff.size2())
+	);
+	ublas::matrix<double> m_centered{ matrixOperations::center_matrix(m_diff_clean) };
+
+	//curve_collection.m_E =  m_rf_E(m_centered.size2(), k);
+	//ublas::vector<double> v_Lambda(k);
+
+	enum class PCA_Algo { IRAM, BDCSVD };
+	if (PCA_Algo(eigen_algorithm) == PCA_Algo::IRAM) {
+		FactorCalculation::iram(
+			m_centered / sqrt(m_centered.size1() - 1),
+			k, 
+			curve_collection.m_E, 
+			curve_collection.v_Lambda
+		);
+	} else if (PCA_Algo(eigen_algorithm) == PCA_Algo::BDCSVD) {
+		FactorCalculation::eigen_bdcsvd(
+			m_centered / sqrt(m_centered.size1() - 1), 
+			k, 
+			curve_collection.m_E, 
+			curve_collection.v_Lambda
+		);
+	}
+    
+	curve_collection.m_delta_xi = FactorCalculation::compute_risk_factors(
+		curve_collection.m_E, 
+		curve_collection.m_diff
+	);
+
+	if (eval_eigen) { // Evaluate eigendecomposition
+		curve_collection.v_norm_errors = FactorCalculation::eig_all_norm_errors(
+			statisticsOperations::covm(m_diff_clean),
+			curve_collection.m_E,
+			curve_collection.v_Lambda
+		);
+	}
+    
+    if (save) {
+        write_csv_matrix(curve_collection.m_E, "eigvec_" + curve_collection.filename + ".csv");
+        write_csv_vector(curve_collection.v_Lambda, "eigval_" + curve_collection.filename + ".csv");
+    }
 }

@@ -1,5 +1,4 @@
 // Backtesting.cpp : Defines the functions for the static library.
-//
 
 #include "pch.h"
 #include "framework.h"
@@ -13,147 +12,173 @@
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/matrix_proxy.hpp>
 #include <boost/numeric/ublas/io.hpp>
+#include <boost/bind.hpp>
+#include <boost/ref.hpp >
 #include <boost/range/counting_range.hpp>
 #include <unsupported/Eigen/MatrixFunctions>
 #include <boost/math/distributions/normal.hpp>
+#include <boost/accumulators/accumulators.hpp>
+#include <boost/accumulators/statistics/variance.hpp>
 
-using namespace boost::numeric::ublas;
+
+using namespace boost::numeric;
 using namespace boost::math;
+
 
 // Pricing of FX swaps somewhere else
 
 
 //Likelihood ratio test functions
-vector<double> Likelihood::likelihoodRatioTest(matrix<double> const& matrix1, matrix<double> const& matrix2)
+int Likelihood::likelihoodRatioTest(ublas::vector<double> const& vector1, ublas::vector<double> const& vector2, double confidence_level)
 {
-	size_t rows = matrix1.size1();
-	size_t columns = matrix1.size2();
+	size_t N {vector1.size()};
+	ublas::vector<double> d_i(N);
+	double d;
+	double sigma;
+	double s;
+	int isBetter;
 
-	matrix<double> d_i(rows, columns);
-	vector<double> d(rows);
-	vector<double> sigma(rows);
-	vector<double> s(rows);
-	vector<double> p(rows);
-	double N = columns;
-	vector<double> confidence_level(rows);
-
-	d_i = Likelihood::d_i(matrix1, matrix2);
+	d_i = Likelihood::d_i(vector1, vector2);
 	d = Likelihood::d(d_i, N);
 	sigma = Likelihood::sigma(d, d_i, N);
 	s = Likelihood::s(sigma, N);
-	p = Likelihood::probability(d, s, confidence_level);
-	return p;
+	isBetter = Likelihood::isBetter(d, s, confidence_level);
+	return isBetter;
 }
 
 //Likelihood ratio test functions with residual
-vector<double> Likelihood::likelihoodRatioTestResidual(matrix<double> const& matrix1, matrix<double> const& matrix2, matrix<double> const& prices1, matrix<double> const& prices2)
+int Likelihood::likelihoodRatioTestResidual(ublas::vector<double> const& vector1, ublas::vector<double> const& vector2, ublas::vector<double> const& prices1, ublas::vector<double> const& prices2, double confidence_level)
 {
-	size_t rows = matrix1.size1();
-	size_t columns = matrix1.size2();
+	int N =  vector1.size();
+	ublas::vector<double> d_i;
+	double d;
+	double sigma;
+	double s;
+	int isBetter;
 
-	matrix<double> d_i(rows, columns);
-	vector<double> d(rows);
-	vector<double> sigma(rows);
-	vector<double> s(rows);
-	vector<double> p(rows);
-	double N = columns;
-	vector<double> confidence_level(rows);
-
-	d_i = Likelihood::dResidual_i(matrix1, matrix2, prices1, prices2);
+	d_i = Likelihood::dResidual_i(vector1, vector2, prices1, prices2);
 	d = Likelihood::d(d_i, N);
 	sigma = Likelihood::sigma(d, d_i, N);
 	s = Likelihood::s(sigma, N);
-	p = Likelihood::probability(d, s, confidence_level);
-	return p;
+	isBetter = Likelihood::isBetter(d, s, confidence_level);
+	return isBetter;
 }
 
 //Calculate logarithm of function values in Likelihood Ratio Test
-matrix<double> Likelihood::d_i(matrix<double> const& matrix1, matrix<double> const& matrix2)
+ublas::vector<double> Likelihood::d_i(ublas::vector<double> const& vector1, ublas::vector<double> const& vector2)
 {
-	size_t rows = matrix1.size1();
-	size_t columns = matrix1.size2();
+	size_t rows{ vector1.size() };
 
-	matrix<double> matrix1_log(rows, columns);
-	matrix<double> matrix2_log(rows, columns);
-	matrix<double> matrix_log(rows,columns);
+	ublas::vector<double> vector1_log(rows);
+	ublas::vector<double> vector2_log(rows);
+	ublas::vector<double> vector_log(rows);
 
-	matrix1_log = matrixOperations::matrixLog(matrix1);
-	matrix2_log = matrixOperations::matrixLog(matrix2);
-	return matrix_log = matrix1_log - matrix2_log;
+	vector1_log = matrixOperations::vectorLog(vector1);
+	vector2_log = matrixOperations::vectorLog(vector2);
+	return vector_log = vector1_log - vector2_log;
 }
 
 //Calculate d in Likelihood Ratio Test
-vector<double> Likelihood::d(matrix<double> const& d_i, double const N)
+double Likelihood::d(ublas::vector<double> const& d_i, int N)
 {
-	size_t rows = d_i.size1();
-	size_t columns = d_i.size2();
-	vector<double> d(rows,0);
+	size_t rows{ d_i.size() };
+	double d{ 0 };
 	for (size_t i = 0; i < rows; ++i) {
-		for (size_t j = 0; j < columns; ++j) {
-			d(i) += d_i(i, j);
-		}
+		d += d_i(i);
 	}
 	return d/N;
 }
 
 
 //Calculate sigma in Likelihood Ratio Test
-vector<double> Likelihood::sigma(vector<double> const& d, matrix<double> const& d_i, double const N)
+double Likelihood::sigma(double d, ublas::vector<double> const& d_i, int N)
 {
-	size_t rows = d_i.size1();
-	size_t columns = d_i.size2();
-	vector<double> sigma(rows, 0);
+	size_t rows{ d_i.size() };
+	double sigma{ 0 };
 
 	//Calculate sigma^2
 	for (size_t i = 0; i < rows; ++i) {
-		for (size_t j = 0; j < columns; ++j) {
-			sigma(i) += pow(d_i(i, j)-d(i),2);
-		}
+		sigma += pow(d_i(i)-d,2);
 	}
 	sigma /= (N - 1);
-
-	//Calculate sigma
-	for (size_t i = 0; i < rows; ++i) {
-		sigma(i) = sqrt(sigma(i));
-	}
-	return sigma;
+	return sqrt(sigma);
 }
 
 //Calculate s in Likelihood Ratio Test
-vector<double> Likelihood::s(vector<double> const& sigma, double const N)
+double Likelihood::s(double sigma, int N)
 {
-	size_t length = sigma.size();
-	vector<double> s(length);
-	s = sigma / sqrt(N);
-	return s;
+	return sigma / sqrt(N);
 }
 
 //Calculate residual in Likelihood Ratio Test
-matrix<double> Likelihood::dResidual_i(matrix<double> const& values_functions1, matrix<double> const& values_functions2, matrix<double> const& prices1, matrix<double> const& prices2)
+ublas::vector<double> Likelihood::dResidual_i(ublas::vector<double> const& values_functions1, ublas::vector<double> const& values_functions2, ublas::vector<double> const& prices1, ublas::vector<double> const& prices2)
 {
-	size_t rows = values_functions1.size1();
-	size_t columns = values_functions1.size2();
-	matrix<double> residual1(rows, columns);
-	matrix<double> residual2(rows, columns);
-	matrix<double> dResidual_i(rows, columns);
+	size_t rows{ values_functions1.size() };
+	ublas::vector<double> residual1(rows);
+	ublas::vector<double> residual2(rows);
+	ublas::vector<double> dResidual_i(rows);
 
 	residual1 = prices1 - values_functions1;
+	std::cout << "residual1: " << residual1 << std::endl;
 	residual2 = prices2 - values_functions2;
+	std::cout << "residual2: " << residual2 << std::endl;
 	dResidual_i = element_prod(residual1, residual1) - element_prod(residual2, residual2);
 	return dResidual_i;
 }
 
-//Calculate probability in Likelihood Ratio Test
-vector<double> Likelihood::probability(vector<double> const& d, vector<double> const& s, vector<double> const& confidence_level)
+//Calculate probability and test if it's better than cdf of confidence level in Likelihood Ratio Test
+int Likelihood::isBetter(double d, double s, double confidence_level)
 {
-	size_t length = d.size();
-	vector<double> p(length);
+	double p;
+	int isBetter;
 	normal norm;
-	p = element_div(d, s);
-	//for (size_t i = 0; i < length; ++i) { 
-		//p(i) = quantile(norm, confidence_level(i));
-	//}
-	return p;
+	double cdfInv = quantile(norm, confidence_level);
+	p = d / s;
+
+	if (p > cdfInv) {
+		isBetter = 1;
+	}
+	else {
+		isBetter = 0;
+	}
+	std::cout << "p: " << p << std::endl;
+	return isBetter;
+}
+
+ublas::vector<double> KernelDensity::kde_multi(ublas::matrix<double> x_simulated, ublas::vector<double> x_realized) {
+//ublas::vector<double> KernelDensity::kde_multi(ublas::vector<double> x_simulated, ublas::vector<double> x_realized) {
+	size_t m{ x_realized.size() };
+	ublas::vector<double> f(m);
+
+	for (size_t j = 0; j < m; ++j) {
+		ublas::matrix_column<ublas::matrix<double>> x_simulated_col(x_simulated, j); //Row or column?
+		double x_realized_m = x_realized(j);
+		f(j) = KernelDensity::kde(x_simulated_col, x_realized_m);
+		//f(j) = KernelDensity::kde(x_simulated, x_realized_m);
+	}
+	return f;
+}
+
+double KernelDensity::kde(ublas::vector<double> const& x_simulated, double x_realized) {
+	using namespace boost::accumulators;
+
+	int n = x_simulated.size();
+	double f;
+	double variance;
+	double sigma;
+	double h;
+	double sum{ 0 };
+	const double pi{ 3.141592653589793238L };
+	
+	variance = matrixOperations::vector_variance(x_simulated);
+	sigma = sqrt(variance);
+	h = pow(4.0 / (3.0* n), 1.0/5.0) * sigma;
+	
+	for (int i = 0; i < n; ++i){
+		sum += std::exp(- pow(x_realized - x_simulated(i),2) / (2 * pow(h, 2)));
+	}
+	f = (1.0 / (sqrt(2.0 * pi) * h * n))*sum;
+	return f;
 }
 
 

@@ -75,7 +75,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <TargetName>CURVELIBRARY</TargetName>
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\Program Files\Matlab\R2019a\extern\include;$(ProjectPath)\..\..\Dependencies\eigen-3.3.7;$(ProjectPath)\..\..\Dependencies\boost_1_72_0;$(ProjectPath);$(ProjectPath)\..\..\Dependencies\spectra-0.8.1\spectra-0.8.1\include;$(IncludePath);$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <IncludePath>C:\Program Files\Matlab\R2019a\extern\include;$(SolutionDir)\..\Dependencies\eigen-3.3.7;$(SolutionDir)\..\Dependencies\boost_1_72_0;$(SolutionDir);$(SolutionDir)\..\Dependencies\spectra-0.8.1\spectra-0.8.1\include;$(IncludePath);$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <TargetName>CURVELIBRARY</TargetName>
@@ -84,7 +84,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <TargetName>CURVELIBRARY</TargetName>
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>C:\Program Files\Matlab\R2019a\extern\include;$(ProjectPath)\..\..\Dependencies\eigen-3.3.7;$(ProjectPath)\..\..\Dependencies\boost_1_72_0;$(ProjectPath);$(ProjectPath)\..\..\Dependencies\spectra-0.8.1\spectra-0.8.1\include;$(IncludePath)</IncludePath>
+    <IncludePath>C:\Program Files\Matlab\R2019a\extern\include;$(SolutionDir)\..\Dependencies\eigen-3.3.7;$(SolutionDir)\..\Dependencies\boost_1_72_0;$(SolutionDir);$(SolutionDir)\..\Dependencies\spectra-0.8.1\spectra-0.8.1\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <TargetName>CURVELIBRARY</TargetName>
@@ -188,7 +188,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="sample_handler.cpp" />
+    <ClCompile Include="sample_handler.tcc" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MathLibrary\MathLibrary.vcxproj">
