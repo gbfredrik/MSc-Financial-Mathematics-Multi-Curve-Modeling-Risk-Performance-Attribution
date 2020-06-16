@@ -4,6 +4,7 @@
 
 T_Copula::T_Copula(matrix<double> series) : Distribution(series) {
 	time_series = series;
+
 }
 
 
@@ -61,7 +62,6 @@ vector<double> T_Copula::calcGradients(vector<double> const& x) {
 	zero_vector<double> zeroVec(n * n);
 	vector<double> dFdP = zeroVec;
 	double dFdnu = 0;
-
 	//Get rho gradients as a vector
 	for (size_t i = 0; i < time_series.size1(); ++i) {
 		//Get T_inv(U)

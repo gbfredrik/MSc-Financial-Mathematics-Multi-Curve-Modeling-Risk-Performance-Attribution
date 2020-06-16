@@ -50,10 +50,8 @@ vector<double> Gaussian_Copula::calcGradients(vector<double> const& x) {
 	zero_vector<double> zeroVec(n * n);
 	vector<double> dFdP = zeroVec;
 	double dFdnu = 0;
-
 	//Get rho gradients as a vector
 	for (size_t i = 0; i < time_series.size1(); ++i) {
-
 		//Get T_inv(U)
 		matrix_row<matrix<double> > U_row(time_series, i);
 		//std::cout << "U_row = " << U_row << "\n\n";
@@ -61,6 +59,7 @@ vector<double> Gaussian_Copula::calcGradients(vector<double> const& x) {
 		for (size_t j = 0; j < N_inv.size(); ++j) {
 			boost::math::normal norm = boost::math::normal::normal_distribution();
 			N_inv(j) = quantile(norm, U_row(j));
+
 		}
 		//std::cout << "T_inv = " << T_inv << "\n\n";
 
