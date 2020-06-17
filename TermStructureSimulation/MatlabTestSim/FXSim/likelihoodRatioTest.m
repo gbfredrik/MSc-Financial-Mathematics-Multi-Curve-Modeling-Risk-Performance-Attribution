@@ -1,7 +1,7 @@
 function [isBetter, probability] = likelihoodRatioTest(di, confidenceLevel)
     N = length(di);
     d = mean(di);
-    variance = (1/(N-1))*sum((di-d)^2);
+    variance = (1/(N-1))*sum((di-d).^2);
     stdDev = sqrt(variance);
     s = stdDev/sqrt(N);
     

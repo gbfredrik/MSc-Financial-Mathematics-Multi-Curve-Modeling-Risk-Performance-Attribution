@@ -1,10 +1,10 @@
 function f = kdeMulti(xSimulated, xRealized)
-    %xSimulated: matrix
+    %xSimulated: matrix?
     %xRealized: vector
     %f: vector
     
     m = length(xRealized);
-    f = zeros(1:m, 1);
+    f = zeros(1, m);
     
     for j = 1:m
        f(j) = kde(xSimulated, xRealized(j)); 
