@@ -1,7 +1,7 @@
 #include "../../CurveLibrary/sample_handler.h"
 #include "../MathLibrary/rvSim.h"
 #include "../MathLibrary/matrixOperations.h"
-#include "../Backtesting/backtesting.h"
+#include "../RiskMeasurement/backtesting.h"
 
 #include <iostream>
 //#include <numeric>
@@ -123,7 +123,7 @@ void test_likelihood2() {
 	//std::cout << "fV: " << fV << std::endl;
 
 	//vector<double> x_simMultiTest = read_csv_vector("KernelRnd1.csv");
-	//std::cout << "x_simMultiTest: " << x_simMultiTest << std::endl;
+    //std::cout << "x_simMultiTest: " << x_simMultiTest << std::endl;
 	//vector<double> x = read_csv_vector("KernelX.csv");
 	//std::cout << "x: " << x << std::endl;
 	//vector<double> fMultiTest = KernelDensity::kde_multi(x_simMultiTest, x);

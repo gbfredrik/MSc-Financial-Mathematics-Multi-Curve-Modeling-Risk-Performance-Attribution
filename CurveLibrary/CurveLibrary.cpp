@@ -62,6 +62,48 @@ BOOL __stdcall run_all_multiXL(
 	return status;
 }
 
+BOOL __stdcall run_all_fxXL(
+	int const eigen_algorithm,
+	bool const eval_eigen,
+	double* return_norm_errors
+) {
+#pragma EXPORT
+
+	bool status{ 1 };
+	int count_rf{ 3 };
+
+	std::vector<CurveCollection> rf(count_rf);
+
+	rf.at(0).filename = "fHist3650";
+	rf.at(1).filename = "fHist3650";
+	rf.at(2).filename = "fHist3650";
+
+	try {
+		// Read
+		rf.at(0).m_A = read_csv_matrix("FX_SEK_term.csv");
+		rf.at(1).m_A = read_csv_matrix("fHist3650.csv");
+		rf.at(2).m_A = read_csv_matrix("fHist3650.csv");
+		
+	}
+	catch (std::exception const&) {
+		return 0;
+	}
+
+	if (rf.at(0).m_A.size1() == 0) {
+		return 0;
+	}
+	
+	write_csv_matrix(rf.at(0).m_A, "test.csv");
+
+	int k{ 6 };
+	int k_pi{ 9 };
+	placeholder_eigen(rf.at(0), eigen_algorithm, eval_eigen, k, true);
+	placeholder_eigen(rf.at(1), eigen_algorithm, eval_eigen, k);
+	placeholder_eigen(rf.at(2), eigen_algorithm, eval_eigen, k_pi);
+	
+	return status;
+}
+
 void placeholder_eigen(
 	CurveCollection& curve_collection, 
 	int const eigen_algorithm, 

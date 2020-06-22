@@ -18,7 +18,7 @@ inline ublas::matrix<double> read_txt_matrix(std::string const& file_name) {
     }
 
     if (!(inf >> m)) {
-        std::cout << "Failed to write contents to matrix" << std::endl;
+        std::cout << "Failed to read contents to matrix" << std::endl;
     }
 
     inf.close();
@@ -54,7 +54,7 @@ inline bool write_txt_vector(ublas::vector<double> const& v, std::string const& 
 template<typename T>
 ublas::matrix<T> read_csv_matrix(std::string const& file_name) {
 	std::ifstream inf;
-	inf.open(/*"X:/Examensarbete/Data/" +*/ file_name);
+	inf.open("X:/Examensarbete/Data/" + file_name);
 
 	size_t rows{ 0 };
     size_t cols{ 0 };
@@ -115,7 +115,7 @@ ublas::vector<T> read_csv_vector(std::string const& file_name) {
 
 inline bool write_csv_matrix(ublas::matrix<double> const& m, std::string const& file_name) {
 	std::ofstream outf;
-	outf.open("./MSc Git/Data/m_" + file_name); // Appending "m_" to prevent accidental overwriting of important files
+	outf.open("X:/Examensarbete/Data/m_" + file_name); // Appending "m_" to prevent accidental overwriting of important files
 
     outf << m.size1() << ";" << m.size2() << std::endl;
 

@@ -12,6 +12,12 @@ BOOL __stdcall run_all_multiXL(
 	double* return_norm_errors
 );
 
+BOOL __stdcall run_all_fxXL(
+	int const eigen_algorithm,
+	bool const eval_eigen,
+	double* return_norm_errors
+);
+
 struct CurveCollection {
 	std::string filename;
 	boost::numeric::ublas::matrix<double> m_A;
