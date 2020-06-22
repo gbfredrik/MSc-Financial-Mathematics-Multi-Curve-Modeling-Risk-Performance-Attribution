@@ -1,13 +1,13 @@
 %% Estimate forward curves
 %load('10YrCurves.mat')
+%load('FXCurves')
 %load('fHist.mat')
 %load('piHist.mat')
 
-clearvars -except fForeign fDomestic fDemand fAll piAll
 
-% fForeign = table2array(fForeign); 
-% fDomestic = table2array(fDomestic);
-% fDemand = table2array(fDemand); 
+fForeign = table2array(ForeignOneJump); 
+fDomestic = table2array(DomesticOneJump);
+fDemand = table2array(DemandOneJump); 
 
 %% Simulate curves - All arguments
 startDay = 1;
@@ -17,26 +17,25 @@ D_Domestic = fDomestic(2:1001,1:730) - fDomestic(1:1000,1:730);
 D_Foreign = fForeign(2:1001,1:730) - fForeign(1:1000,1:730);
 D_Demand = fDemand(2:1001,1:730) - fDemand(1:1000,1:730);
 
-
-k_Domestic = 6;
-k_Foreign = 6;
-k_Demand = 6;
+k_Domestic = 3;
+k_Foreign = 3;
+k_Demand = 3;
 
 C_Domestic = cov(D_Domestic);
 C_Foreign = cov(D_Foreign);
 C_Demand = cov(D_Demand);
 
-[V,D] = eigs(C_Domestic, k_Domestic);
-[e,ind] = sort(diag(D),1, 'descend');
+[V,D_dom] = eigs(C_Domestic, k_Domestic);
+[e,ind] = sort(diag(D_dom),1, 'descend');
 E = {};
 E.Domestic = V(:,ind);
 
-[V,D] = eigs(C_Foreign, k_Foreign);
-[e,ind] = sort(diag(D),1, 'descend');
+[V,D_for] = eigs(C_Foreign, k_Foreign);
+[e,ind] = sort(diag(D_for),1, 'descend');
 E.Foreign = V(:,ind);
 
-[V,D] = eigs(C_Demand, k_Demand);
-[e,ind] = sort(diag(D),1, 'descend');
+[V,D_dem] = eigs(C_Demand, k_Demand);
+[e,ind] = sort(diag(D_dem),1, 'descend');
 E.Demand = V(:,ind);
 %%
 [params_Domestic, rhoHat_Domestic, df_Copula_Domestic] = modelRiskFactorsT(D_Domestic, E.Domestic);
@@ -98,6 +97,7 @@ hist = {};
 % hist.Demand = piAll(end-1000:end-300,:);
 
 %hist = {};
+
 hist.Domestic = fDomestic(1001:1356,1:730);
 hist.Foreign = fForeign(1001:1356,1:730);
 hist.Demand = fDemand(1001:1356,1:730);
@@ -168,9 +168,20 @@ T = 1:730;
 %subplot(1,2,2);
 %plot(T, fDomesticOutT')
 %plot(T, fForeignOut')
-plot(T, fDomesticOutT')
+% plot(T, fDomesticOutT')
 %pause(0.01);
 
+subplot(3,1,1)
+plot(T, fDomesticOutT')
+title('Quote OIS')
+
+subplot(3,1,2)
+plot(T, fForeignOut')
+title('Base OIS')
+
+subplot(3,1,3)
+plot(T, fDemandOutT')
+title('Demand curve')
 
 %figure;
 %plot(T, fDemandOut')

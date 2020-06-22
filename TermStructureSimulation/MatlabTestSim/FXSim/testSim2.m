@@ -1,16 +1,22 @@
 %% Estimate forward curves
-load('10YrCurves.mat')
+%load('10YrCurves.mat')
 %load('fHist.mat')
 %load('piHist.mat')
 
+clearvars -except fForeign fDomestic fDemand fAll piAll DemandOneJump DomesticOneJump fBaseQuarterly fDemandQuarterlyAvg fForeignNoJumps ForeignOneJump fTermQuarterly fDomesticNoJumps fDemandNoJumps
 
 
 %% Simulate curves - All arguments
 startDay = 1;
 endDay = 3400;
 
-DZero = fAll(2:end-1000,:) - fAll(1:end-1001,:);
-DTau = piAll(2:end-1000,:) - piAll(1:end-1001,:);
+DZero = fDomestic(2:1001,1:730) - fDomestic(1:1000,1:730);
+%DZero = fAll(2:1001,1:730) - fAll(1:1000,1:730);
+DTau = piAll(2:1001,1:730) - piAll(1:1000,1:730);
+
+
+%DZero = fAll(2:end-1000,:) - fAll(1:end-1001,:);
+%DTau = piAll(2:end-1000,:) - piAll(1:end-1001,:);
 
 kZero = 6;
 kTau = 6;
@@ -31,8 +37,9 @@ E.Tau = V(:,ind);
 
 %% Model risk factors
 
-[params_Zero, rhoHat_Zero, df_Copula_Zero] = modelRiskFactorsT(fAll(2:end,:) - fAll(1:end-1,:), E.Zero);
-[params_Tau, rhoHat_Tau, df_Copula_Tau] = modelRiskFactorsT(piAll(2:end,:) - piAll(1:end-1,:), E.Tau);
+[params_Zero, rhoHat_Zero, df_Copula_Zero] = modelRiskFactorsT(DZero, E.Zero);
+
+[params_Tau, rhoHat_Tau, df_Copula_Tau] = modelRiskFactorsT(DTau, E.Tau);
 
 %%
 
@@ -64,8 +71,8 @@ varRedType.Tau = 'none';
 % muGauss.Tau = params_Tau(1,:);
 
 muT = {};
-muT.Zero = params_Zero(1,:)
-muT.Tau = params_Tau(1,:)
+muT.Zero = params_Zero(1,:);
+muT.Tau = params_Tau(1,:);
 
 dfC = {};
 dfC.Zero =  [df_Copula_Zero,df_Copula_Zero,df_Copula_Zero,df_Copula_Zero,df_Copula_Zero,df_Copula_Zero];
@@ -75,7 +82,7 @@ dfM.Zero =  params_Zero(5,:);
 dfM.Tau =  params_Tau(5,:);
 
 % rhoGauss = {};
-% rhoT = {};
+ rhoT = {};
 % rhoGauss.Zero = [1 0.00123861276154339 0.146108166779178; 0.00123861276154339 1 0.0595445213255097; ...
 %     0.146108166779178 0.0595445213255097 1];
 % rhoGauss.Tau = [1 0.137704279260191 -0.000136374806469469; 0.137704279260191 1 0.00883802054182843; ...
@@ -98,14 +105,18 @@ alphaT = {};
 betaT = {};
 omegaT.Zero = params_Zero(2,:);
 omegaT.Tau = params_Tau(2,:);
-alphaT.Zero = params_Zero(4,:)
+alphaT.Zero = params_Zero(4,:);
 alphaT.Tau = params_Tau(4,:);
 betaT.Zero = params_Zero(3,:);
 betaT.Tau = params_Tau(3,:);
 
 hist = {};
-hist.f = fAll(end-1000:end-300,:);
-hist.pi = piAll(end-1000:end-300,:);
+hist.f = fDomestic(1001:1356,1:730);
+hist.pi = piAll(1001:1356,1:730);
+
+% hist.f = fAll(end-1000:end-300,1:730);
+% hist.pi = piAll(end-1000:end-300,1:730);
+
 
 fRes = {};
 fRes.Zero = zeros(size(fAll, 2), N);
@@ -156,13 +167,13 @@ tic
     marginalT, copulaT, varRedType, d, N, fRes, gammaGauss, kappa, xiHat, dfC, dfM);
 tid = toc
 
-
-T = 1:3650;
+T=1:730;
+%T = 1:3650;
 
 %subplot(1,2,1);
 %plot(T, fZeroOutGauss', T, fTauOutGauss')
 %subplot(1,2,2);
-plot(T, fTauOutT')
+plot(T, fZeroOutT')
 %pause(0.01);
 
 
