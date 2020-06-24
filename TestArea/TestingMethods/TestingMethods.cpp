@@ -18,12 +18,30 @@ using namespace boost::range;
 
 void test_likelihood();
 void test_likelihood2();
+void test_read();
 
 int main() {
-	test_likelihood();
-	test_likelihood2();
+	//test_likelihood();
+	//test_likelihood2();
+	test_read();
 }
 
+void test_read() {
+	matrix<double> matrix1;
+	matrix1 = read_csv_matrix("FX_SEK_base.csv");
+	if (matrix1.size1() == 0){
+		std::cout << "Failed reading file! "  << std::endl;
+	}
+	else {
+		std::cout << "Succesfull reading! " << std::endl;
+		std::cout << "Matrix: " << matrix1 << std::endl;
+	}
+
+	matrix1.resize(matrix1.size1(), 5);
+	std::cout << "\n Matrix: " << matrix1 << std::endl;
+}
+
+/*
 void test_likelihood() {
 	vector<double> functions1(2);
 	vector<double> functions2(2);
@@ -129,3 +147,4 @@ void test_likelihood2() {
 	//vector<double> fMultiTest = KernelDensity::kde_multi(x_simMultiTest, x);
 	//std::cout << "fMultiTest: " << fMultiTest << std::endl;
 }
+*/

@@ -158,3 +158,12 @@ double matrixOperations::vector_variance(ublas::vector<double> const& vec) {
 	return variance /= (length-1);
 }
 
+//Crop matrix
+/*void matrixOperations::crop_matrix(
+	ublas::vector<double> const& m,
+	double const curve_length)
+{
+
+}*/
+
+

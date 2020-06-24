@@ -30,7 +30,8 @@ LONG __stdcall testXL(int x, int& y) {
 BOOL __stdcall run_all_multiXL(
 	int const eigen_algorithm,
 	bool const eval_eigen,
-	double* return_norm_errors
+	double* return_norm_errors,
+	int curve_length
 ) {
 #pragma EXPORT
 
@@ -55,6 +56,13 @@ BOOL __stdcall run_all_multiXL(
 		return -1;
 	}
 
+	rf.m_A_trunc = rf.m_A;
+	rf.m_A_trunc.resize(rf.m_A_trunc.size1(), curve_length);
+	for (CurveCollection& cc : tenors) {
+		cc.m_A_trunc = cc.m_A;
+		cc.m_A_trunc.resize(cc.m_A_trunc.size1(), curve_length);
+	}
+
 	int k{ 6 };
 	placeholder_eigen(rf, eigen_algorithm, eval_eigen, k);
 	placeholder_eigen(tenors.at(0), eigen_algorithm, eval_eigen, k);
@@ -65,41 +73,62 @@ BOOL __stdcall run_all_multiXL(
 BOOL __stdcall run_all_fxXL(
 	int const eigen_algorithm,
 	bool const eval_eigen,
-	double* return_norm_errors
+	double* return_norm_errors,
+	int curve_length
 ) {
 #pragma EXPORT
 
 	bool status{ 1 };
-	int count_rf{ 3 };
+	int count_rf{ 2 };
+	int count_tenor{ 2 };
 
 	std::vector<CurveCollection> rf(count_rf);
+	std::vector<CurveCollection> tenors(count_tenor);
 
-	rf.at(0).filename = "fHist3650";
-	rf.at(1).filename = "fHist3650";
-	rf.at(2).filename = "fHist3650";
+	rf.at(0).filename = "FX_SEK_base";
+	rf.at(1).filename = "FX_SEK_term";
+	tenors.at(0).filename = "FX_SEK_fx";
+	tenors.at(1).filename = "FX_SEK_fxAvg";
 
 	try {
 		// Read
-		rf.at(0).m_A = read_csv_matrix("FX_SEK_term.csv");
-		rf.at(1).m_A = read_csv_matrix("fHist3650.csv");
-		rf.at(2).m_A = read_csv_matrix("fHist3650.csv");
+		rf.at(0).m_A = read_csv_matrix("FX_SEK_base.csv");
+		rf.at(1).m_A = read_csv_matrix("FX_SEK_term.csv");
+		tenors.at(0).m_A = read_csv_matrix("FX_SEK_fx.csv");
+		tenors.at(1).m_A = read_csv_matrix("FX_SEK_fxAvg.csv");
 		
 	}
 	catch (std::exception const&) {
 		return 0;
 	}
+	
+	// Truncate to minimum curve lengths
+	for (int i; i < count_rf; ++i) {
+		//rf.at(i).m_A_trunc = rf.at(i).m_A;
+		rf.at(i).m_A.resize(rf.at(i).m_A.size1(), curve_length);
+	}
 
-	if (rf.at(0).m_A.size1() == 0) {
-		return 0;
+	// Truncate to minimum curve lengths
+	for (int i; i < count_tenor; ++i) {
+		//rf.at(i).m_A_trunc = rf.at(i).m_A;
+		tenors.at(i).m_A.resize(tenors.at(i).m_A.size1(), curve_length);
 	}
 	
-	write_csv_matrix(rf.at(0).m_A, "test.csv");
+	/*
+	if (tenors.at(0).m_A.size1() == 0) {
+		return 0;
+	}
+	else
+	{
+		return 1;
+	}
+	*/
 
 	int k{ 6 };
-	int k_pi{ 9 };
+	int k_fx{ 9 };
 	placeholder_eigen(rf.at(0), eigen_algorithm, eval_eigen, k, true);
-	placeholder_eigen(rf.at(1), eigen_algorithm, eval_eigen, k);
-	placeholder_eigen(rf.at(2), eigen_algorithm, eval_eigen, k_pi);
+	placeholder_eigen(rf.at(1), eigen_algorithm, eval_eigen, k, true);
+	placeholder_eigen(tenors.at(1), eigen_algorithm, eval_eigen, k_fx, true);
 	
 	return status;
 }
@@ -159,3 +188,5 @@ void placeholder_eigen(
         write_csv_vector(curve_collection.v_Lambda, "eigval_" + curve_collection.filename + ".csv");
     }
 }
+
+
