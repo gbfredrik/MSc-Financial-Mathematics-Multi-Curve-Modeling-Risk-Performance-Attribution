@@ -28,7 +28,7 @@ double T_Copula::function_value(vector<double> const& x) {
 
 	for (size_t i = 0; i < time_series.size1(); ++i) {
 
-		matrix_row<matrix<double> > U_row(time_series, i);
+		matrix_row<matrix<double>> U_row(time_series, i);
 
 		//Get N_inv(U)
 		vector<double> T_inv(n);
@@ -65,7 +65,7 @@ vector<double> T_Copula::calcGradients(vector<double> const& x) {
 	//Get rho gradients as a vector
 	for (size_t i = 0; i < time_series.size1(); ++i) {
 		//Get T_inv(U)
-		matrix_row<matrix<double> > U_row(time_series, i);
+		matrix_row<matrix<double>> U_row(time_series, i);
 		//std::cout << "U_row = " << U_row << "\n\n";
 		vector<double> T_inv(n);
 		for (size_t j = 0; j < T_inv.size(); ++j) {

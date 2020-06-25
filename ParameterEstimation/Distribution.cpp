@@ -5,7 +5,7 @@
 Distribution::Distribution(matrix<double> series)
 	//: time_series(series) {}
 {
-	matrix_column<matrix<double> > x(series, 0);
+	matrix_column<matrix<double>> x(series, 0);
 	time_series = x;
 }
 vector<double> Distribution::calcNumGradients(vector<double> const& x) {

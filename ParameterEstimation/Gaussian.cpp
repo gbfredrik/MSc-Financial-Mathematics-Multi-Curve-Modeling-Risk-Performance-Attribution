@@ -6,14 +6,14 @@
 using namespace boost::numeric::ublas;
 
 Gaussian::Gaussian(matrix<double> series) : Distribution(series) {
-	matrix_column<matrix<double> > x(series, 0);
+	matrix_column<matrix<double>> x(series, 0);
 	time_series = x;
 
 	vector<double> garch_vec(time_series.size() + 1);
 	m_GARCH_vec = garch_vec;
 
 	//Calc variance for timeseries
-	boost::accumulators::accumulator_set<double, boost::accumulators::stats<boost::accumulators::tag::variance> > acc;
+	boost::accumulators::accumulator_set<double, boost::accumulators::stats<boost::accumulators::tag::variance>> acc;
 	for_each(time_series.begin(), time_series.end(), boost::bind<void>(boost::ref(acc), _1));
 
 	//Set variance as first element
