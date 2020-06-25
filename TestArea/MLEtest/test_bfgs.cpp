@@ -39,7 +39,6 @@ vector<double> runBFGS_TCopula(int n, T_Copula* t, int max_iter, double epsilon)
 vector<double> runBFGS_normCopula(int n, Gaussian_Copula* norm, int max_iter, double epsilon);
 
 int main() {
-	
 	vector<double> time_series;
 	matrix<double> hist_rf;
 	matrix<double> E_rf;
@@ -47,23 +46,23 @@ int main() {
 	//Läs in riskfria kurvan
 	try {
 		//Senaste kurvan sist
-		hist_rf = read_matrix("fHist.csv", 3451, 730);
+		hist_rf = read_csv_matrix("fHist.csv");
 	}
 	catch (std::exception & ex) {
 		std::cout << "Error:" << ex.what() << "\n";
 		return 1;
 	}
-
+    
 	//Läs in egenmatrisen för riskfria kurvan
 	try {
 		//Senaste kurvan sist
-		E_rf = read_matrix("EZero.csv", 730, 3);
+		E_rf = read_csv_matrix("EZero.csv");
 	}
 	catch (std::exception & ex) {
 		std::cout << "Error:" << ex.what() << "\n";
 		return 1;
 	}
-
+    
 	// Beräkna riskfaktorer på riskfria kurvan.
 	matrix<double> delta_f = delta_curves(hist_rf);
 	matrix<double> hist_riskfactors = prod(trans(E_rf), trans(delta_f));
@@ -87,8 +86,8 @@ int main() {
 
 		vector<double> optGaussian_xi = runBFGS_Gaussian(nSolutions, xi, max_iter, epsilon);
 		vector<double> optStudent_xi = runBFGS_T(nSolutions, xi, max_iter, epsilon);
-		std::cout << "OptGaussian = " << optGaussian_xi << "\n\n";
-		std::cout << "OptStudent = " << optStudent_xi << "\n\n";
+		//std::cout << "OptGaussian = " << optGaussian_xi << std::endl;
+		//std::cout << "OptStudent = " << optStudent_xi << std::endl;
 
 		//Get uniform Timeseries
 		if (optGaussian_xi(4) < optStudent_xi(5)) {	//Choose Gaussian marginal dist
@@ -104,7 +103,7 @@ int main() {
 	}
 
 	//matrix_column<matrix<double> > U_column(U, 0);
-	//std::cout << "U_column = " << U_column << "\n\n";
+	//std::cout << "U_column = " << U_column << std::endl;
 	
 
 	//Copula estimation
@@ -129,32 +128,32 @@ int main() {
 	Gaussian_Copula distG(U);
 	Gaussian_Copula* gaussianC = &distG;
 
-	std::cout << "U = " << U << "\n\n";
+	//std::cout << "U = " << U << std::endl;
 
 	vector<double> t_copula_results = runBFGS_TCopula(10, TC, max_iter, epsilon);
 
-	std::cout << "Done t copula \n\n";
+	//std::cout << "Done t copula \n\n";
 
 	vector<double> norm_copula_results = runBFGS_normCopula(10, gaussianC, max_iter, epsilon);
 
-	std::cout << "Done gaussian copula \n\n";
+	//std::cout << "Done gaussian copula \n\n";
 
 	matrix<double> P_t = TC->buildP(t_copula_results);
 
-	std::cout << "OptParams first eigenvector = " << OptParamsAll[0] << "\n\n";
-	std::cout << "OptParams second eigenvector = " << OptParamsAll[1] << "\n\n";
-	std::cout << "OptParams third eigenvector = " << OptParamsAll[2] << "\n\n";
+	std::cout << "OptParams first eigenvector = " << OptParamsAll[0] << std::endl;
+	std::cout << "OptParams second eigenvector = " << OptParamsAll[1] << std::endl;
+	std::cout << "OptParams third eigenvector = " << OptParamsAll[2] << std::endl;
 
 
-	std::cout << "P Students t = " << P_t << "\n\n";
-	std::cout << "FV Students t copula = " << t_copula_results(t_copula_results.size()-1) << "\n\n";
+	std::cout << "P Students t = " << P_t << std::endl;
+	std::cout << "FV Students t copula = " << t_copula_results(t_copula_results.size()-1) << std::endl;
 
 	matrix<double> P_norm = gaussianC->buildP(norm_copula_results);
-	std::cout << "P Gaussian = " << P_norm << "\n\n";
-	std::cout << "FV Gaussian copula = " << norm_copula_results(norm_copula_results.size() - 1) << "\n\n";
+	std::cout << "P Gaussian = " << P_norm << std::endl;
+	std::cout << "FV Gaussian copula = " << norm_copula_results(norm_copula_results.size() - 1) << std::endl;
 
 	
-	}
+}
 
 vector<double> getUniformTimeseries(vector<double> series, vector<double> params) {
 	vector<double> garchVec = GARCH_vec(series, params);
@@ -253,17 +252,17 @@ vector<double> runBFGS_TCopula(int n, T_Copula* distribution, int max_iter, doub
 
 	params = gen_copula_params(n, nRiskFactors, "t");
 
-	std::cout << "debug 1 \n\n";
+	//std::cout << "debug 1 \n\n";
 
 	// Run optimization problem n times.
 	for (size_t i = 0; i < params.size2(); ++i) {
-		std::cout << "start params = " << column(params, i) << " \n\n";
+		//std::cout << "start params = " << column(params, i) << " \n\n";
 		vector<double> results = bfgs::minimize(column(params, i), H_inv, max_iter, epsilon, distribution);
 
 		for (size_t j = 0; j < params.size1(); ++j) {
 			column(params, i)(j) = results(j);
 		}
-		std::cout << "debug 3 \n\n";
+		//std::cout << "debug 3 \n\n";
 		FV(i) = results(params.size1());
 	}
 
@@ -278,8 +277,8 @@ vector<double> runBFGS_TCopula(int n, T_Copula* distribution, int max_iter, doub
 		}
 	}
 
-	std::cout << "All FV:S  : " << FV << "\n\n";
-	std::cout << "OPT FV = " << smallest << " at params = " << column(params, index) << "\n\n";
+	std::cout << "All FV:S  : " << FV << std::endl;
+	std::cout << "OPT FV = " << smallest << " at params = " << column(params, index) << std::endl;
 
 	//Save optimal parameters and function value in opt_params
 	vector<double> opt_params(nRiskFactors + 1);
@@ -327,8 +326,8 @@ vector<double> runBFGS_normCopula(int n, Gaussian_Copula* distribution, int max_
 		}
 	}
 
-	std::cout << "All FV:S  : " << FV << "\n\n";
-	std::cout << "OPT FV = " << smallest << " at params = " << column(params, index) << "\n\n";
+	std::cout << "All FV:S  : " << FV << std::endl;
+	std::cout << "OPT FV = " << smallest << " at params = " << column(params, index) << std::endl;
 
 	//Save optimal parameters and function value in opt_params
 	vector<double> opt_params(nRiskFactors);
@@ -380,8 +379,8 @@ vector<double> runBFGS_Gaussian(int n, vector<double> series, int max_iter, doub
 		}
 	}
 
-	std::cout << "All FV:S  : " << FV << "\n\n";
-	std::cout << "OPT FV = " << smallest << " at params = " << column(params, index) << "\n\n";
+	std::cout << "All FV:S  : " << FV << std::endl;
+	std::cout << "OPT FV = " << smallest << " at params = " << column(params, index) << std::endl;
 
 	//Save optimal parameters and function value in opt_params
 	vector<double> opt_params(5);
@@ -431,8 +430,8 @@ vector<double> runBFGS_T(int n, vector<double> series, int max_iter, double epsi
 		}
 	}
 
-	std::cout << "All FV:S Student t: " << FV << "\n\n";
-	std::cout << "OPT FV Student T= " << smallest << " at params = " << column(params, index) << "\n\n";
+	std::cout << "All FV:S Student t: " << FV << std::endl;
+	std::cout << "OPT FV Student T= " << smallest << " at params = " << column(params, index) << std::endl;
 	//Save optimal parameters and function value in opt_params
 	vector<double> opt_params(6);
 	opt_params(0) = params(0, index);
@@ -532,7 +531,7 @@ matrix<double> read_matrix(std::string const& file_name, int rows, int columns) 
 	}
 
 	for (size_t i = 0; i < matrix.size1(); ++i) {
-	getline(fin, line);
+	    getline(fin, line);
 		std::stringstream s(line);
 
 		for (size_t j = 0; j < matrix.size2(); ++j) {

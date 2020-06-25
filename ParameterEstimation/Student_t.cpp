@@ -19,7 +19,7 @@ Student_t::Student_t(matrix<double> series) : Distribution(series) {
 
 
 void Student_t::getSeries() {
-	std::cout << time_series << "\n";
+	//std::cout << time_series << "\n";
 }
 
 void Student_t::update_GARCH_vec(vector<double> const& x) {
@@ -178,7 +178,7 @@ double Student_t::calcStepSize(vector<double> const& x, vector<double> const& d)
 		}
 	}
 
-	std::cout << "steglängd efter bivillkor student = " << a << "\n";
+	//std::cout << "steglängd efter bivillkor student = " << a << "\n";
 
 
 
@@ -191,7 +191,7 @@ double Student_t::calcStepSize(vector<double> const& x, vector<double> const& d)
 		}
 	}
 	
-	std::cout << "steglängd efter funktionsvärdeskoll student= " << a << "\n \n";
+	//std::cout << "steglängd efter funktionsvärdeskoll student= " << a << "\n \n";
 
 	return a;
 }

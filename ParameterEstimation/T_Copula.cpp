@@ -9,18 +9,18 @@ T_Copula::T_Copula(matrix<double> series) : Distribution(series) {
 
 
 void T_Copula::getSeries() {
-	std::cout << time_series << "\n";
+	//std::cout << time_series << "\n";
 }
 
 
 
 double T_Copula::function_value(vector<double> const& x) {
-	std::cout << "in FN T copula" << "\n\n";
+	//std::cout << "in FN T copula" << "\n\n";
 	double nu= x(x.size()-1);
 	double sum = 0;
 	int n = time_series.size2(); //Number of riskfaktors
 	matrix<double> P = buildP(x);
-	std::cout << "P = " << P << "\n\n";
+	//std::cout << "P = " << P << "\n\n";
 	double det_P = matrixOperations::ublasToMatrixXd(P).determinant();
 	matrix<double> P_inv = matrixOperations::matrixXdToUblas(matrixOperations::ublasToMatrixXd(P).inverse());
 
@@ -260,7 +260,7 @@ double T_Copula::calcStepSize(vector<double> const& x, vector<double> const& d) 
 
 		matrix<double> Pnext = buildP(x + a * d);
 		double minEigenvalue = FactorCalculation::smallest_eigval(Pnext);
-        std::cout << "Smallest eigval = " << std::to_string(minEigenvalue) << std::endl;
+        //std::cout << "Smallest eigval = " << std::to_string(minEigenvalue) << std::endl;
 		if (minEigenvalue <= 0) {
 			accepted = false;
 		}

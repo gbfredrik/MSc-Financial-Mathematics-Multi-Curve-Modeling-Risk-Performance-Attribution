@@ -34,7 +34,7 @@ matrix<double> Distribution::calcNumHessian(vector<double> const& x) {
 
 vector<double> Distribution::calcGradients(vector<double> const& x) {
 
-	std::cout << "calcGradients in Distribution \n";
+	//std::cout << "calcGradients in Distribution \n";
 
 	double dx = 2 * (200 * pow(x(0), 3) - 200 * x(0) * x(1) + x(0) - 1);
 	double dy = 200 * (x(1) - pow(x(0), 2));
@@ -47,7 +47,7 @@ vector<double> Distribution::calcGradients(vector<double> const& x) {
 
 void Distribution::getSeries() {
 	
-	std::cout << "In distribution: " << time_series;
+	//std::cout << "In distribution: " << time_series;
 }
 
 
@@ -67,16 +67,16 @@ double Distribution::calcStepSize(vector<double> const& x, vector<double> const&
 	//while (dist->function_value(x + a * d) > dist->function_value(x) + c1 * a * inner_prod(dist->calcGradients(x), d)
 	while (function_value(x + a * d) > function_value(x))
 	{
-		std::cout << "new f : " << function_value(x + a * d) << "\n";
-		std::cout << "old f : " << function_value(x) << "\n";
-		std::cout << "steglängd = " << a << "\n";
-		std::cout << "new parameters2 = " << x(0) + a * d(0) << ", " << x(1) + a * d(1) << "\n";
+		//std::cout << "new f : " << function_value(x + a * d) << "\n";
+		//std::cout << "old f : " << function_value(x) << "\n";
+		//std::cout << "steglängd = " << a << "\n";
+		//std::cout << "new parameters2 = " << x(0) + a * d(0) << ", " << x(1) + a * d(1) << "\n";
 		a = a * 0.5;
 	}
 
-	std::cout << "new f : " << function_value(x + a * d) << "\n";
-	std::cout << "old f : " << function_value(x) << "\n";
-	std::cout << "steglängd = " << a << "\n \n";
+	//std::cout << "new f : " << function_value(x + a * d) << "\n";
+	//std::cout << "old f : " << function_value(x) << "\n";
+	//std::cout << "steglängd = " << a << "\n \n";
 
 	return a;
 }

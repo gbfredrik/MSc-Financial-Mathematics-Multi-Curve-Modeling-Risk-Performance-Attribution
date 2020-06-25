@@ -129,12 +129,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\CurveLibrary\sample_handler.cpp" />
     <ClCompile Include="test_bfgs.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\ParameterEstimation\bfgs.h" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\CurveLibrary\CurveLibrary.vcxproj">
+      <Project>{d4fd8df2-ea38-4091-b96e-9fcc6786822e}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\..\ParameterEstimation\ParameterEstimation.vcxproj">
       <Project>{01b4bc4d-ad93-4b95-b059-8a7d3e2d143d}</Project>
     </ProjectReference>

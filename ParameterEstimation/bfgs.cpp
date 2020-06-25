@@ -3,7 +3,7 @@
 
 vector<double> bfgs::minimize(boost::numeric::ublas::vector<double> x, matrix<double> H_inv, int max_iter, double epsilon, Distribution* dist) {
 
-	std::cout << "in bfgs minimize: ";
+	//std::cout << "in bfgs minimize: ";
 	//dist->getSeries();
 
 	int n = x.size();
@@ -20,13 +20,13 @@ vector<double> bfgs::minimize(boost::numeric::ublas::vector<double> x, matrix<do
 	//Init hessian inverse matrix
 	identity_matrix<double> I(n);
 	dist->calcGradients(x);
-	std::cout << "norm : " << (dist->calcGradients(x)) << " \n\n";
+	//std::cout << "norm : " << (dist->calcGradients(x)) << " \n\n";
 	while (norm_2(dist->calcGradients(x)) > epsilon && k < max_iter) {
-		std::cout << "New iteration \n\n";
+		//std::cout << "New iteration \n\n";
 		gradient_vec = dist->calcGradients(x);
-		std::cout << "    H_inv: " << H_inv << "\n\n";
+		//std::cout << "    H_inv: " << H_inv << "\n\n";
 		//std::cout << "Num H_inv: " << dist->calcNumHessian(x) << "\n\n";
-		std::cout << "gradient_vec: " << gradient_vec << "\n \n";
+		//std::cout << "gradient_vec: " << gradient_vec << "\n \n";
 		//std::cout << "Numerical gradient_vec: " << dist->calcNumGradients(x) << "\n \n";
 		d = -prod(H_inv, gradient_vec);
 
@@ -53,12 +53,12 @@ vector<double> bfgs::minimize(boost::numeric::ublas::vector<double> x, matrix<do
 		x = x_new;
 		k = k + 1;
 		
-		std::cout << "k = " << k << " , Function value = " << dist->function_value(x) << " for parameters : " << x  
-					<< " and norm of gradients = " << norm_2(dist->calcGradients(x)) << "\n \n \n\n";
+		//std::cout << "k = " << k << " , Function value = " << dist->function_value(x) << " for parameters : " << x  
+		//			<< " and norm of gradients = " << norm_2(dist->calcGradients(x)) << "\n \n \n\n";
 	}
 
-	std::cout << "Final k = " << k << " , Function value = " << dist->function_value(x) << " for parameters : " << x
-		<< " and norm of gradients = " << norm_2(dist->calcGradients(x)) << "\n \n \n\n";
+	//std::cout << "Final k = " << k << " , Function value = " << dist->function_value(x) << " for parameters : " << x
+	//	<< " and norm of gradients = " << norm_2(dist->calcGradients(x)) << "\n \n \n\n";
 	
 	vector<double> results(n+1);
 

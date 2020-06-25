@@ -19,12 +19,12 @@ Gaussian::Gaussian(matrix<double> series) : Distribution(series) {
 	//Set variance as first element
 	m_GARCH_vec(0) = boost::accumulators::variance(acc);
 
-	std::cout << "GARCH0 = " << m_GARCH_vec(0) << "\n\n";
+	//std::cout << "GARCH0 = " << m_GARCH_vec(0) << "\n\n";
 }
 
 
 void Gaussian::getSeries() {
-	std::cout << "In gaussian: " << time_series << "\n";
+	//std::cout << "In gaussian: " << time_series << "\n";
 }
 
 //Update garch vector with new parameters
@@ -265,7 +265,7 @@ double Gaussian::calcStepSize(vector<double> const& x, vector<double> const& d) 
 		}
 	}
 
-	std::cout << "alpha efter bivillkorsuppfyllning gauss = " << a << "\n\n";
+	//std::cout << "alpha efter bivillkorsuppfyllning gauss = " << a << "\n\n";
 
 
 
@@ -277,7 +277,7 @@ double Gaussian::calcStepSize(vector<double> const& x, vector<double> const& d) 
 
 	}
 
-	std::cout << "alpha efter funktionsvärdestest gaussian = " << a << "\n\n";
+	//std::cout << "alpha efter funktionsvärdestest gaussian = " << a << "\n\n";
 
 	return a;
 }

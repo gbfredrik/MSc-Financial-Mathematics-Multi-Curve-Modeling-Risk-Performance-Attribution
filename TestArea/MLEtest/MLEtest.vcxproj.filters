@@ -18,6 +18,9 @@
     <ClCompile Include="test_bfgs.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\CurveLibrary\sample_handler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\ParameterEstimation\bfgs.h">

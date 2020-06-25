@@ -8,15 +8,15 @@ Gaussian_Copula::Gaussian_Copula(matrix<double> series) : Distribution(series) {
 }
 
 void Gaussian_Copula::getSeries() {
-	std::cout << time_series << "\n";
+	//std::cout << time_series << "\n";
 }
 
 double Gaussian_Copula::function_value(vector<double> const& x) {
-	std::cout << "in FN Gaussian copula" << "\n\n";
+	//std::cout << "in FN Gaussian copula" << "\n\n";
 	double sum = 0;
 	int n = time_series.size2(); //Number of riskfaktors
 	matrix<double> P = buildP(x);
-	std::cout << "P = " << P << "\n\n";
+	//std::cout << "P = " << P << "\n\n";
 	double det_P = matrixOperations::ublasToMatrixXd(P).determinant();
 	matrix<double> P_inv = matrixOperations::matrixXdToUblas(matrixOperations::ublasToMatrixXd(P).inverse());
 
@@ -78,11 +78,11 @@ vector<double> Gaussian_Copula::calcGradients(vector<double> const& x) {
 		dFdP = dFdP + dFdP_temp;
 	}
 
-	std::cout << "dFdP = " << dFdP << "\n\n";
+	//std::cout << "dFdP = " << dFdP << "\n\n";
 
 	//Get rho gradients as matrix
 	matrix<double> dFdP_mat = vectorToMatrix(dFdP);
-	std::cout << "dFdP_mat = " << dFdP_mat << "\n\n";
+	//std::cout << "dFdP_mat = " << dFdP_mat << "\n\n";
 
 	//Get optimization parameters from rho matrix
 	vector<double> dfdParams = getElements(dFdP_mat);
@@ -216,7 +216,7 @@ double Gaussian_Copula::calcStepSize(vector<double> const& x, vector<double> con
 
 		matrix<double> Pnext = buildP(x + a * d);
 		double minEigenvalue = FactorCalculation::smallest_eigval(Pnext);
-		std::cout << "Smallest eigval = " << std::to_string(minEigenvalue) << std::endl;
+		//std::cout << "Smallest eigval = " << std::to_string(minEigenvalue) << std::endl;
 		if (minEigenvalue <= 0) {
 			accepted = false;
 		}
