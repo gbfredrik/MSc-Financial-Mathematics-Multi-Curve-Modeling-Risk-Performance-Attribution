@@ -1,12 +1,9 @@
-measurementPath = 'X:\Examensarbete\exjobb2020\measurement';
-% measurementPath = '/home/jorbl45/axel/jorbl45/prog/XiFinPortfolio/matlab/measurement';
+measurementPath = '.\measurement';
 
 addpath(measurementPath)
-
-  fBaseAll = [];
-  fTermAll = [];
-  piAll = [];
-  zAll = [];
+fxSwapCalcPrices = [];
+fxSwapDemand = []; 
+ 
 
 c = 1;
 if (c==1) % USDSEK
@@ -29,6 +26,7 @@ currencyTermID = mexPortfolio('currencyCode', currencyTerm);
 % indIBOR = find(strcmp(tenorIRS, iborTenor));
 
 if (c==1) % Currently hardcoded
+  nY = 2; % Number of years the curves span
   indBaseOIS = (1:16)';
   indTermOIS = (30:42)';
   indFx = 57;
@@ -48,6 +46,7 @@ end
 % cashID = mexPortfolio('createCash', currency, accountName, cashDCC, cashFrq, cashEom, cashBDC, cal, irStartDate);
 
 onID = -1;
+
 tnID = -1;
 for i=1:length(indFxSwap)
   tmp = ric{1}{indFxSwap(i)};
@@ -61,23 +60,37 @@ for i=1:length(indFxSwap)
     end
   end
 end
-
 isHolidayBase = mexPortfolio('isHoliday', onBaseCal, floor(times), floor(times)); % Note that projected holidays may change over time (holidays are added and removed, hence the date when the calendar is defined is important)
 isHolidayTerm = mexPortfolio('isHoliday', onTermCal, floor(times), floor(times)); % Note that projected holidays may change over time (holidays are added and removed, hence the date when the calendar is defined is important)
 times((isHolidayBase==1) | (isHolidayTerm==1)) = []; % Removes dates when there is a holiday in at least one country
 
 
- %for k=1:length(times)
-for k=2547:2557
-    %for k=2500:2600
+indAll = [indBaseOIS ; indTermOIS ; indFxSwap];
+ricAll = [ric{1}(indBaseOIS) ric{1}(indTermOIS) ric{1}(indFxSwap)];
+
+fBaseH = ones(length(times), nY*365+20)*inf;
+fTermH = ones(length(times), nY*365+20)*inf;
+piH = ones(length(times), nY*365+20)*inf;
+zH = ones(length(times), length(indAll))*inf;
+yieldH = ones(length(times), length(indAll))*inf;
+firstDates = ones(length(times), 1)*inf;
+lastDates = ones(length(times), 1)*inf;
+piAvgH = ones(length(times), nY*365+20)*inf;
+
+h = waitbar(0, 'Calculating.....');
+
+%setappdata(h,'canceling',0);
+
+% for k=1:length(times)
+%start = 2547;
+start = 1642;
+endVar = length(times);
+%start = 19;
+%endVar = 25;
+for k=start:endVar
+
   tradeDate = floor(times(k));
 %   datestr(tradeDate)
-
-  isHolidayBase = mexPortfolio('isHoliday', onBaseCal, tradeDate, tradeDate); % Note that projected holidays may change over time (holidays are added and removed, hence the date when the calendar is defined is important)
-  isHolidayTerm = mexPortfolio('isHoliday', onTermCal, tradeDate, tradeDate); % Note that projected holidays may change over time (holidays are added and removed, hence the date when the calendar is defined is important)
-  if (isHolidayBase || isHolidayTerm) % Currently skips if holiday in one currency, due to missing OIS data
-    continue;
-  end
 
   indOIS = [indBaseOIS ; indTermOIS];
   oisID = zeros(size(indOIS));
@@ -96,6 +109,8 @@ for k=2547:2557
     end
     % Create OIS
     [oisID(j)] = mexPortfolio('initFromGenericInterest', assetID{1}(indOIS(j)), 1, mid, tradeDate, 1);
+    
+    midAll(k-(start-1),j) = mid;
   end
 
 %   % IBOR
@@ -122,33 +137,39 @@ for k=2547:2557
   fxSwapID = zeros(size(indFxSwap));
   fxSwapPrices = ones(3,length(indFxSwap))*Inf;
   for j=1:length(indFxSwap)
+    waitbar((k-start) / (endVar-start), h, sprintf('%12.9f', (k-start) / (endVar-start)))
     % Retrieve data
     [timeData, data] = mexPortfolio('getValues', assetID{1}(indFxSwap(j)), times(k), currencyTermTimeZone, {'BID', 'ASK'});
     if (floor(timeData) ~= floor(times(k)))
       data = [NaN ; NaN];
     end
+    midBasisH(k-(start-1),j) = mean(data(1:2,1));
     if (assetID{1}(indFxSwap(j)) == onID) % Bid and ask prices switch order for ON
       onSettlementDate = mexPortfolio('settlementDate', assetID{1}(indFxSwap(j)), tradeDate);
-      onMaturityDate = mexPortfolio('maturityDate', assetID{1}(indFxSwap(j)), onSettlementDate);
+      onMaturityDate = mexPortfolio('maturityDate', assetID{1}(indFxSwap(j)), tradeDate);
       if (onMaturityDate < settlementDate) % Need to add rate for TN      
         [timeData, dataTN] = mexPortfolio('getValues', tnID, times(k), currencyTermTimeZone, {'BID', 'ASK'});
+        %midBasisH(k-(start-1),j) = mean(dataTN(1:2,1));
         if (floor(timeData) ~= floor(times(k)))
           dataTN = [NaN ; NaN];
         end
       else % Already at settlement date, no TN
         dataTN = [0 ; 0];        
       end
-      fxSwapPrices(1:2,j) = dataFx + data(2:-1:1) + dataTN(2:-1:1);      
+      fxSwapPrices(1:2,j) = dataFx - data(2:-1:1) - dataTN(2:-1:1);      
     elseif (assetID{1}(indFxSwap(j)) == tnID) % Bid and ask prices switch order for TN
-      fxSwapPrices(1:2,j) = dataFx + data(2:-1:1);
+      fxSwapPrices(1:2,j) = dataFx - data(2:-1:1);
     else
       fxSwapPrices(1:2,j) = dataFx + data;
     end
+    
     if (sum(isnan(data))==0)
-      mid = mean(dataFx+data);
+      mid = mean(fxSwapPrices(1:2,j));
     else
       mid = 0;
     end
+    midFxH(k-(start-1),j) = mid;
+    
     % Create FxSwap
     [fxSwapID(j)] = mexPortfolio('initFromGenericFxSwap', assetID{1}(indFxSwap(j)), 1, exchangeRate, mid, tradeDate, 1);
   end
@@ -159,6 +180,7 @@ for k=2547:2557
   instrID = [oisID ; fxSwapID];
   prices = [oisPrices fxSwapPrices];
   ricInstr = [ric{1}(indOIS) ric{1}(indFxSwap)];
+  indInstr = 1:length(instrID);
   
   
   conTransf = []; % If this is not set, then the standard setting will be applied in computeForwardRates
@@ -166,6 +188,10 @@ for k=2547:2557
   useEF = zeros(size(instrID)); % No deviation from market prices
   [instr,removeAsset,flg] = createInstrumentsClasses(pl, tradeDate, ricInstr, instrID, prices, conType);
   instrID(removeAsset) = [];
+  indInstr(removeAsset) = [];
+  removeFX = removeAsset(length(oisID):end);
+  fxSwapID(removeAsset(length(oisID):end)) = [];
+  oisID(removeAsset(1:length(oisID))) = [];
   if (~isempty(conTransf))
     conTransf(removeAsset) = [];
   end
@@ -183,26 +209,24 @@ for k=2547:2557
     error('Currently limitation in the time horizon for solver, change indOIS and indIRS which are set manually')
   end  
  
-  if (k~=1)
-    mexPortfolio('clearMarketState');
-  end
-  mexPortfolio('initMarketState', tradeDate, currencyTermTimeZone);
-  fxRateID = mexPortfolio('setMarketStateExchangeRate', tradeDate, currencyTermTimeZone, currencyBase, currencyTerm, exchangeRate, settlementDate);
-  fBaseCurveID = mexPortfolio('setMarketStateTermStructureDiscreteForward', tradeDate, currencyTermTimeZone, currencyBase, 'Interbank', 'ON', 'Forward', fDates, f);
-  fTermCurveID = mexPortfolio('setMarketStateTermStructureDiscreteForward', tradeDate, currencyTermTimeZone, currencyTerm, 'Interbank', 'ON', 'Forward', fDates, f);
-  piCurveID = mexPortfolio('setMarketStateCurrencyDiscreteForward', tradeDate, currencyTermTimeZone, currencyBase, currencyTerm, 'SpreadRelative', fDates, piSpread);
-  fxCurveID = mexPortfolio('setMarketStateCurrencyRelative', tradeDate, currencyTermTimeZone, fBaseCurveID, fTermCurveID, piCurveID, currencyBase, currencyTerm, 'Forward');
+  snapTime = tradeDate + 0.5; % Sets time of snapshot to 12:00 in local time
+  mexPortfolio('initMarketState', snapTime, currencyTermTimeZone);
+  fxRateID = mexPortfolio('setMarketStateExchangeRate', snapTime, currencyTermTimeZone, currencyBase, currencyTerm, exchangeRate, settlementDate);
+  fBaseCurveID = mexPortfolio('setMarketStateTermStructureDiscreteForward', snapTime, currencyTermTimeZone, currencyBase, 'Interbank', 'ON', 'Forward', fDates, f);
+  fTermCurveID = mexPortfolio('setMarketStateTermStructureDiscreteForward', snapTime, currencyTermTimeZone, currencyTerm, 'Interbank', 'ON', 'Forward', fDates, f);
+  piCurveID = mexPortfolio('setMarketStateCurrencyDiscreteForward', snapTime, currencyTermTimeZone, currencyBase, currencyTerm, 'SpreadRelative', fDates, piSpread);
+  fxCurveID = mexPortfolio('setMarketStateCurrencyRelative', snapTime, currencyTermTimeZone, fBaseCurveID, fTermCurveID, piCurveID, currencyBase, currencyTerm, 'Forward');
+  curveIDs = [fBaseCurveID ; fTermCurveID ; piCurveID];
   
 	mu = 1.0;
 	nIterations = 200;
-    iterationPrint = 1; %true;
+    iterationPrint = 0; %true;
 	checkKKT = 1; %true;
 	precision = 1E-6;
 	precisionEq = 1E-10;
 	precisionKKT = 1E-10;
 	muDecrease = 0.1;
 	maxRelStep = 0.99;
-  curveIDs = [fBaseCurveID ; fTermCurveID ; piCurveID];
   mexPortfolio('initBlomvallNdengo', mu, nIterations, iterationPrint, checkKKT, precision, precisionEq, precisionKKT, muDecrease, maxRelStep, curveIDs);
 
   for i=1:length(curveIDs)
@@ -215,50 +239,75 @@ for k=2547:2557
     cb = ones(nF-1,1);
     cb(1:min(round(knowledgeHorizon*365),length(cb))) = exp((T(1:min(round(knowledgeHorizon*365),length(cb)))-knowledgeHorizon)*log(informationDecrease^2));
     cb(1) = 0;
-    
+    cb = cb*10; 
+   
     if (curveIDs(i) == piCurveID) % Example where a jump for one specific day is allowed
         cpL = zeros(nF-1,1);
         cpL(1) = 0;
+        nJumps = 0;
+        jumpDates = zeros(1,1);
+        cb = cb/10;
+        
+        % Set jump at specified dates
         for n = 1:nF-1
+            [yTrade,mTrade,~] = datevec(tradeDate);
             [y,m,d] = datevec(fDates(n));
-            if d == 1 && (m == 1 || m == 4 || m == 7 || m == 10) 
-                jumpDate = n-1;
+           %if d == 1 && (m == 1 || m == 4 || m == 7 || m == 10) %&& y == 2017 % m = 1 % && (m == 1 || m == 4 || m == 7 || m == 10) 
+           if d == 1 && m == 1 && y == yTrade+1 %&& mTrade == 12 % m == 1 % && (m == 1 || m == 4 || m == 7 || m == 10) 
+                nJumps = nJumps + 1 ;
+                if n == 1
+                    jumpDate = 1;
+                else
+                    jumpDate = n-1;
+                end
                 if fDates(jumpDate) ~= tradeDate
-                    cb(jumpDate-1) = 0; cb(jumpDate) = 0; cb(jumpDate+1) = 0; 
+                     cb(jumpDate) = 0; cb(jumpDate-1) = 0; cb(jumpDate+1) = 0; 
                 else 
                     cb(jumpDate) = 0; cb(jumpDate+1) = 0;
                 end
-                if m == 1
-                    cpL(jumpDate) = 10;
-                else
-                    cpL(jumpDate) = 0.1;
-                end
+                cpL(jumpDate) = 100;
+                jumpDates(nJumps) = jumpDate;    
             end
         end
       mexPortfolio('setParamBlomvallNdengo', curveIDs(i), 'cpL', cpL); % First order derivative, with middle removed (central difference)
-    end
-    
-%     if (curveIDs(i) == piCurveID) % Example where a jump for one specific day is allowed
-%       cpL = zeros(nF-1,1);
-%       cpL(1) = 0;
-%       jumpDate = 1;
-%       cb(jumpDate-1) = 0; cb(jumpDate) = 0; cb(jumpDate+1) = 0;
-%       cpL(jumpDate) = 100;
-%       mexPortfolio('setParamBlomvallNdengo', curveIDs(i), 'cpL', cpL); % First order derivative, with middle removed (central difference)
-%     end
+    end    
     mexPortfolio('setParamBlomvallNdengo', curveIDs(i), 'cb', cb); % Second order derivative
   end
   
   zType = ones(size(instrID))*2; % Type of z-variable (price error): 0 = None, 1 = Price, 2 = Parallel shift of forward rates or spread from forward rates
-  E = ones(size(instrID))*100;   % Objective function coefficient for z-variables
+  E = ones(size(instrID))*100;
+  for i=1:length(instrID)
+    at = mexPortfolio('assetType', instrID(i));
+    if (at == pl.atOIS)
+      curr = mexPortfolio('assetCurrency', instrID(i));
+      if (curr == currencyBaseID)
+        E(i) = 100;
+      elseif (curr == currencyTermID)
+        E(i) = 100;
+      else
+        error('Incorrect currency')
+      end
+    elseif (at == pl.atFxSwap)      
+      E(i) = 1;     
+    end
+  end
+     % Objective function coefficient for z-variables
   F = ones(size(instrID));       % Scaling of z-variable in constraint
 
-  [u, P, z] = mexPortfolio('solveBlomvallNdengo', instrID, zType, E, F);
-
+  [u, P, z, theoreticalP, marketQuoteP] = mexPortfolio('solveBlomvallNdengo', instrID, zType, E, F);
   
   fBase = u(1:nF);
   fTerm = u(nF+1:2*nF);
   pi = u(2*nF+1:end);
+  fBaseH(k-(start-1),1:nF) = fBase;
+  fTermH(k-(start-1),1:nF) = fTerm;
+  piH(k-(start-1),1:nF) = pi;
+  zH(k-(start-1),indInstr) = abs(z);
+  for j=1:length(instrID)
+    yieldH(k-(start-1),indInstr(j)) = instr.data{j}.price(3);
+  end
+  firstDates(k) = tradeDate;
+  lastDates(k) = lastDate;
 
   instrT = zeros(size(z));
   instrf = zeros(size(z));
@@ -280,30 +329,60 @@ for k=2547:2557
     end
   end
   
-  %plot(T(1:end-1), fBase, T(1:end-1), fTerm, T(1:end-1), pi);
   plot(T(1:end-1), fBase, T(1:end-1), fTerm, T(1:end-1), pi, instrT, instrf+z, 'o');
-  axis([0 2 -0.05 0.05])
   [~, eInd] = sort(abs(z), 1, 'descend');
   for j = 1:min(3,length(eInd))
-    % text(instrT(eInd(j))+0.1, instrf(eInd(j)) + z(eInd(j)), instr.assetRIC(eInd(j)));
+    text(instrT(eInd(j))+0.1, instrf(eInd(j)) + z(eInd(j)), instr.assetRIC(eInd(j)));
   end   
   title(datestr(times(k)));
   
   for j=1:length(instrID)
-     [timeData, data] = mexPortfolio('getValues', instrID(j), times(k), currencyTermTimeZone, {'BID', 'ASK'});
-    fprintf('%3d %18s %12s %9f %9f\n',j,instr.assetRIC{j}, datestr(instr.maturityDate(j)), instr.data{j}.price(3), z(j));    
+%     [timeData, data] = mexPortfolio('getValues', instrID(j), times(k), currencyTermTimeZone, {'BID', 'ASK'});
+    fprintf('%3d %18s %12s %9f %9f %9f %9f\n',j,instr.assetRIC{j}, datestr(instr.maturityDate(j)), instr.data{j}.price(3), z(j), theoreticalP(j), marketQuoteP(j));    
   end
- 
-  fBaseAll = [fBaseAll; fBase(1:730)'];
-  fTermAll = [fTermAll; fTerm(1:730)'];
-  piAll = [piAll; pi(1:730)'];
-  zAll = [zAll; mean(abs(z)), min(abs(z)),  max(abs(z))];
   
-  %   pause;
-  pause(0.01);
+  % Statistics from pricing error z. Saved for every k
+  zAll(k-(start-1),:) = [mean(abs(z)), median(abs(z)), min(abs(z)),  max(abs(z))];
+  
+  % Calculate fxSwap prices 
+  x = 1;
+  for i=length(oisID)+1:length(instrID)
+      if removeFX(i-(length(oisID)-1))
+        x = x + 1;
+      end
+      n = instr.maturityDate(i)-tradeDate;
+      fxSwapCalcPrices(k-(start-1), x) = exchangeRate*exp((fTerm(1:n)./365)'*T(2:n+1)'-(fBase(1:n)./365)'*T(2:n+1)'+(pi(1:n)./365)'*T(2:n+1)');
+      fxSwapDemand(k-(start-1), x) = fxSwapCalcPrices(k-(start-1),x)-exchangeRate;
+      x = x + 1;
+  end
+  tradeDates(k-(start-1),:) = datevec(tradeDate);
+%  pause;  
+%  pause(0.5);
+ % stop
+  if getappdata(h, 'cancel_callback') == 1
+    errordlg('Stopped by user');    
+    break;  % Stop the loop: for coubnt_i1
+  end
+  
+ % Modify demand curve for PCA
+ piAvgH(k-(start-1),1:nF) = pi;
+ for i = 1:length(jumpDates)
+     if jumpDates(i) == 1
+         piAvgH(k-(start-1),jumpDates(i)) = pi(jumpDates(i)+1);
+     else
+        piAvgH(k-(start-1),jumpDates(i)) = (pi(jumpDates(i)-1) + pi(jumpDates(i)+1))/2;
+     end
+ end
 end
 
 rmpath(measurementPath)
-
+close(h)
+% hej
+%%
+filename = 'X:\Examensarbete\DataTest\test_14-20_FX1-Base100-Term1000_cb10_';
+writematrix(fBaseH, strcat(filename,'fBase.csv'), 'Delimiter', 'semi')
+writematrix(fTermH, strcat(filename,'fTerm.csv'), 'Delimiter', 'semi')
+writematrix(piH, strcat(filename,'pi.csv'), 'Delimiter', 'semi')
+writematrix(piAvgH, strcat(filename,'piAvg.csv'), 'Delimiter', 'semi')
 
 
