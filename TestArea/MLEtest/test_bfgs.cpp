@@ -30,7 +30,8 @@
 #include <strstream>
 #include <sstream>
 #include <random>
-
+#include <chrono>
+typedef std::chrono::high_resolution_clock Clock;
 using namespace boost::numeric;
 
 ublas::vector<double> read_time_series_test(std::string const& file_name);
@@ -62,6 +63,7 @@ int main() {
         std::cout << "Error:" << ex.what() << std::endl;
         return 1;
     }
+    auto t1 = Clock::now();
 
     // Ber�kna riskfaktorer p� riskfria kurvan.
     ublas::matrix<double> delta_f(matrixOperations::diff_matrix(hist_rf));
@@ -121,6 +123,11 @@ int main() {
     ublas::matrix<double> P_norm = gaussianC->buildP(norm_copula_results);
     std::cout << "P Gaussian = " << P_norm << std::endl;
     std::cout << "FV Gaussian copula = " << norm_copula_results(norm_copula_results.size() - 1) << std::endl;
+    
+    auto t2 = Clock::now();
+    std::cout << "Delta t2-t1: "
+        << std::chrono::duration_cast<std::chrono::seconds>(t2 - t1).count()
+        << " seconds" << std::endl;
 }
 
 ublas::vector<double> getUniformTimeseries(ublas::vector<double> series, ublas::vector<double> params) {
