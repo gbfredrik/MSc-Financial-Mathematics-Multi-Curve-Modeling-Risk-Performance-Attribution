@@ -1,21 +1,35 @@
-%% Estimate forward curves
-%load('10YrCurves.mat')
-%load('FXCurves')
-%load('fHist.mat')
-%load('piHist.mat')
+clear
+close all
+%%
+
+fileNameBase = "FX_SEK_base_";
+fileNameTerm = "FX_SEK_term_";
+fileNameFx = "FX_SEK_fxAvg_";
+%fileNameBase = "IRS_USD_ois";
+%fileNameTerm = "IRS_USD_tenor";
+%fileExt = "";
+
+fileExt = "FX1-OIS1000_cb100"; % Change
+csvStr = ".csv";
+
+fForeign = readmatrix(strcat(fileNameBase, fileExt, csvStr));
+fDomestic = readmatrix(strcat(fileNameTerm, fileExt, csvStr));
+fDemand = readmatrix(strcat(fileNameFx, fileExt, csvStr));
 
 
-fForeign = table2array(ForeignOneJump); 
-fDomestic = table2array(DomesticOneJump);
-fDemand = table2array(DemandOneJump); 
 
 %% Simulate curves - All arguments
 startDay = 1;
-endDay = 3400;
+endDay = 1500;
+endSample = 1783;
 
-D_Domestic = fDomestic(2:1001,1:730) - fDomestic(1:1000,1:730);
-D_Foreign = fForeign(2:1001,1:730) - fForeign(1:1000,1:730);
-D_Demand = fDemand(2:1001,1:730) - fDemand(1:1000,1:730);
+D_Domestic = fDomestic(2:endDay,1:730) - fDomestic(1:endDay-1,1:730);
+D_Foreign = fForeign(2:endDay,1:730) - fForeign(1:endDay-1,1:730);
+D_Demand = fDemand(2:endDay,1:730) - fDemand(1:endDay-1,1:730);
+
+% D_Domestic = fDomestic(2444:3845,1:730) - fDomestic(2443:3844,1:730);
+% D_Foreign = fForeign(2444:3845,1:730) - fForeign(2443:3844,1:730);
+% D_Demand = fDemand(2444:3845,1:730) - fDemand(2443:3844,1:730);
 
 k_Domestic = 3;
 k_Foreign = 3;
@@ -98,9 +112,17 @@ hist = {};
 
 %hist = {};
 
-hist.Domestic = fDomestic(1001:1356,1:730);
-hist.Foreign = fForeign(1001:1356,1:730);
-hist.Demand = fDemand(1001:1356,1:730);
+
+%hist.Domestic = fDomestic(1001:1356,1:730);
+% hist.Domestic = fDomestic(1001:1356,1:730);
+% hist.Foreign = fForeign(1001:1356,1:730);
+% hist.Demand = fDemand(1001:1356,1:730);
+% hist.Domestic = fDomestic(1001:1385,1:730);
+% hist.Foreign = fForeign(1001:1385,1:730);
+% hist.Demand = fDemand(1001:1385,1:730);
+hist.Domestic = fDomestic(endDay:endSample,1:730);
+hist.Foreign = fForeign(endDay:endSample,1:730);
+hist.Demand = fDemand(endDay:endSample,1:730);
 
 fRes = {};
 %fRes.Domestic = zeros(size(fAll, 2), N);
@@ -114,7 +136,7 @@ fRes.Demand = zeros(730, N);
 
 gammaGauss = {};
 gammaGauss.Domestic = zeros(k_Domestic, 1);
-gammaGauss.Foreign = zeros(k_Domestic, 1);
+gammaGauss.Foreign = zeros(k_Foreign, 1);
 gammaGauss.Demand = zeros(k_Demand, 1);
 
 xiHat = {};
@@ -171,6 +193,7 @@ T = 1:730;
 % plot(T, fDomesticOutT')
 %pause(0.01);
 
+
 subplot(3,1,1)
 plot(T, fDomesticOutT')
 title('Quote OIS')
@@ -182,9 +205,16 @@ title('Base OIS')
 subplot(3,1,3)
 plot(T, fDemandOutT')
 title('Demand curve')
+sgtitle(fileExt)
 
-%figure;
-%plot(T, fDemandOut')
+figure;
+subplot(2,1,1)
+plot(cov(fDomesticOutT'));
+title('Domestic curve')
+subplot(2,1,2)
+plot(cov(fForeignOut'));
+title('Foreign')
+sgtitle(fileExt)
  
 %mean(test,2)
 clear FXsimMultipleYield.mexw64
