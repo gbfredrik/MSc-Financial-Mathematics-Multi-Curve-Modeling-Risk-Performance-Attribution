@@ -1,17 +1,11 @@
 ﻿#include "bfgs.h"
 
+#include "Distribution.h"
+
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/matrix_proxy.hpp>
-#include <boost/numeric/ublas/io.hpp>
-#include <boost/math/statistics/bivariate_statistics.hpp>
-#include <boost/math/distributions/normal.hpp>
-
-#include <boost/random.hpp>
-#include <boost/random/normal_distribution.hpp>
 
 #include <iostream>
-#include <numeric>
-#include <cmath>
 
 using namespace boost::numeric;
 
@@ -44,6 +38,7 @@ ublas::vector<double> bfgs::minimize(
         alpha = dist->calcStepSize(x, d);
         s = alpha * d;
         x_new = x + s;
+        //x_new = x + alpha * d;
         //std::cout << std::setprecision(16) << "Nya s   = " << s << std::endl;
         //std::cout << std::setprecision(16) << "Gamla s = " << x_new - x << std::endl << std::endl;
 
