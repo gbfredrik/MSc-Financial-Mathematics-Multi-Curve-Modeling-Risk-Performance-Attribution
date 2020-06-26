@@ -17,11 +17,6 @@ Student_t::Student_t(matrix<double> series) : Distribution(series) {
 
 }
 
-
-void Student_t::getSeries() {
-	//std::cout << time_series << "\n";
-}
-
 void Student_t::update_GARCH_vec(vector<double> const& x) {
 	vector<double> garch_vec(time_series.size() + 1);
 

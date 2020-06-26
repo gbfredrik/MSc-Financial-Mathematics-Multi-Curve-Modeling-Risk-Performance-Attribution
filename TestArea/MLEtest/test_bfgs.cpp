@@ -112,17 +112,17 @@ int main() {
     ublas::vector<double> t_copula_results = runBFGS_TCopula(10, TC, max_iter, epsilon);
     ublas::vector<double> norm_copula_results = runBFGS_normCopula(10, gaussianC, max_iter, epsilon);
 
-    ublas::matrix<double> P_t = TC->buildP(t_copula_results);
+    //ublas::matrix<double> P_t = TC->buildP(t_copula_results);
 
     std::cout << "OptParams first eigenvector = " << OptParamsAll[0] << std::endl;
     std::cout << "OptParams second eigenvector = " << OptParamsAll[1] << std::endl;
     std::cout << "OptParams third eigenvector = " << OptParamsAll[2] << std::endl;
 
-    std::cout << "P Students t = " << P_t << std::endl;
+    //std::cout << "P Students t = " << P_t << std::endl;
     std::cout << "FV Students t copula = " << t_copula_results(t_copula_results.size() - 1) << std::endl;
 
-    ublas::matrix<double> P_norm = gaussianC->buildP(norm_copula_results);
-    std::cout << "P Gaussian = " << P_norm << std::endl;
+    //ublas::matrix<double> P_norm = gaussianC->buildP(norm_copula_results);
+    //std::cout << "P Gaussian = " << P_norm << std::endl;
     std::cout << "FV Gaussian copula = " << norm_copula_results(norm_copula_results.size() - 1) << std::endl;
     
     auto t2 = Clock::now();
@@ -177,16 +177,17 @@ ublas::vector<double> GARCH_vec(ublas::vector<double> time_series, ublas::vector
 
 ublas::matrix<double> gen_copula_params(size_t n, int nRiskFactors, std::string dist) {
     size_t nParams{ 0 };
+
     if (dist == "normal") {
         nParams = nRiskFactors;
-    }
-    else if (dist == "t") {
+    } else if (dist == "t") {
         nParams = nRiskFactors + 1;
     }
+
     ublas::vector<double> params(nParams);
     ublas::matrix<double> param_matrix(nParams, n);
 
-    std::random_device(rd);
+    std::random_device rd;
     std::default_random_engine generator(rd());
     std::uniform_real_distribution<double> distribution(-0.6, 0.6);
 

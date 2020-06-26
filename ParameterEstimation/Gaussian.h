@@ -36,7 +36,6 @@ public:
 	matrix<double> calcNumHessian(vector<double> const& x);
 	vector<double> calcNumGradients(vector<double> const& x);
 	vector<double> calcGradients(vector<double> const& x);
-	void getSeries();
 	double calcStepSize(vector<double> const& x, vector<double> const& d);
 
 private:

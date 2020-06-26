@@ -22,11 +22,6 @@ Gaussian::Gaussian(matrix<double> series) : Distribution(series) {
 	//std::cout << "GARCH0 = " << m_GARCH_vec(0) << "\n\n";
 }
 
-
-void Gaussian::getSeries() {
-	//std::cout << "In gaussian: " << time_series << "\n";
-}
-
 //Update garch vector with new parameters
 void Gaussian::update_GARCH_vec(vector<double> const& x) {  // datum växer med index
 

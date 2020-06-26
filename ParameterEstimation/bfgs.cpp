@@ -42,7 +42,8 @@ ublas::vector<double> bfgs::minimize(
         //std::cout << std::setprecision(16) << "Nya s   = " << s << std::endl;
         //std::cout << std::setprecision(16) << "Gamla s = " << x_new - x << std::endl << std::endl;
 
-        y = dist->calcGradients(x_new) - gradient_vec;
+        ublas::vector<double> gradient_vec_new{ dist->calcGradients(x_new) };
+        y = gradient_vec_new - gradient_vec;
         //s = x_new - x; // Gammal lösning men verkar sämre
         scale_H = inner_prod(y, s);
         l = 1.0 / scale_H;
@@ -55,7 +56,7 @@ ublas::vector<double> bfgs::minimize(
         help_prod = prod((I - l * outer_prod(s, y)), H_inv);
         H_inv = prod(help_prod, (I - l * outer_prod(y, s))) + l * outer_prod(s, s);
         x = x_new;
-        gradient_vec = dist->calcGradients(x);
+        gradient_vec = gradient_vec_new;
         ++k;
     }
 

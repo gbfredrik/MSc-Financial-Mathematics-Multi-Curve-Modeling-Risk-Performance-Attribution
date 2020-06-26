@@ -6,37 +6,24 @@
 
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/matrix_proxy.hpp>
-#include <boost/math/statistics/bivariate_statistics.hpp>
-#include <boost/math/constants/constants.hpp>
-#include <boost/qvm/mat_operations.hpp>
-#include <boost/accumulators/accumulators.hpp>
-#include <boost/accumulators/statistics/stats.hpp>
-#include <boost/accumulators/statistics/variance.hpp>
-#include <boost/bind.hpp>
 #include <boost/math/special_functions/digamma.hpp>
 
-#include <Eigen/Dense>
-
 #include <iostream>
-#include <numeric>
 #include <cmath>
 
 using namespace boost::numeric;
 
-Gaussian_Copula::Gaussian_Copula(ublas::matrix<double> series) : Distribution(series) {
-    time_series = series;
-}
-
-void Gaussian_Copula::getSeries() {
-    //std::cout << time_series << "\n";
+Gaussian_Copula::Gaussian_Copula(ublas::matrix<double> series) 
+    : Distribution(series), time_series{ series }
+{
 }
 
 double Gaussian_Copula::function_value(ublas::vector<double> const& x) {
     double sum{ 0.0 };
     size_t n{ time_series.size2() }; //Number of riskfaktors
     ublas::matrix<double> P{ buildP(x) };
-    double det_P{ matrixOperations::ublasToMatrixXd(P).determinant() };
-    ublas::matrix<double> P_inv{ matrixOperations::matrixXdToUblas(matrixOperations::ublasToMatrixXd(P).inverse()) };
+    double det_P{ matrixOperations::matrix_det(P) };
+    ublas::matrix<double> P_inv{ matrixOperations::matrix_inv(P) };
 
     for (size_t i{ 0 }, rows{ time_series.size1() }; i < rows; ++i) {
         ublas::matrix_row<ublas::matrix<double>> U_row(time_series, i);
@@ -50,7 +37,7 @@ double Gaussian_Copula::function_value(ublas::vector<double> const& x) {
         ublas::identity_matrix<double> I(n);
         ublas::vector<double> nPI{ prod(N_inv, P_inv - I) };
         double nPIn{ inner_prod(nPI, N_inv) };
-                
+        
         sum += - 0.5 * nPIn - 0.5 * log(det_P);
     }
 
@@ -76,13 +63,12 @@ ublas::vector<double> Gaussian_Copula::calcGradients(ublas::vector<double> const
         }
 
         ublas::matrix<double> P{ buildP(x) };
-        ublas::matrix<double> P_inv{ matrixOperations::matrixXdToUblas(matrixOperations::ublasToMatrixXd(P).inverse()) };
-
-        //Get P_inv as a vector of the columns
-        ublas::vector<double> vec_Pinv{ matrixToVector(P_inv) };
+        ublas::matrix<double> P_inv{ matrixOperations::matrix_inv(P) };
+        ublas::vector<double> vec_Pinv{ matrixOperations::matrixToVector(P_inv) };
 
         //Kroneckers product of two vectors
-        ublas::vector<double> vKron{ kronOfVectors(prod(N_inv, P_inv), prod(N_inv, P_inv)) };
+        ublas::vector<double> temp{ prod(N_inv, P_inv) };
+        ublas::vector<double> vKron{ matrixOperations::kron_prod_vec(temp, temp) };
 
         //Get gradients for time_series(i)
         ublas::vector<double> dFdP_temp{ 0.5 * vKron - 0.5 * vec_Pinv };
@@ -90,27 +76,12 @@ ublas::vector<double> Gaussian_Copula::calcGradients(ublas::vector<double> const
     }
 
     //Get rho gradients as matrix
-    ublas::matrix<double> dFdP_mat{ vectorToMatrix(dFdP) };
+    ublas::matrix<double> dFdP_mat{ matrixOperations::vectorToMatrix(dFdP, time_series.size2()) };
 
     //Get optimization parameters from rho matrix
     ublas::vector<double> dfdParams{ getElements(dFdP_mat) };
 
     return -dfdParams;
-}
-
-ublas::matrix<double> Gaussian_Copula::vectorToMatrix(ublas::vector<double> const& vec) {
-    size_t n{ time_series.size2() };
-    ublas::matrix<double> resMatrix(n, n);
-    size_t counter{ 0 };
-
-    for (size_t j{ 0 }; j < n; ++j) {
-        for (size_t i{ 0 }; i < n; ++i) {
-            resMatrix(i, j) = vec(counter);
-            ++counter;
-        }
-    }
-
-    return resMatrix;
 }
 
 ublas::matrix<double> Gaussian_Copula::buildP(ublas::vector<double> const& x) {
@@ -133,44 +104,14 @@ ublas::matrix<double> Gaussian_Copula::buildP(ublas::vector<double> const& x) {
     return P;
 }
 
-
 ublas::vector<double> Gaussian_Copula::getElements(ublas::matrix<double> const& P) {
     size_t n{ time_series.size2() };
-    ublas::vector<double> resVec((n - 1) * n * 0.5); // Vector with optimization parameters in P
+    ublas::vector<double> resVec(static_cast<size_t>((n - 1) * n * 0.5)); // Vector with optimization parameters in P
     size_t counter{ 0 };    //keep track of fetched elements
 
     for (size_t i{ 0 }; i < n; ++i) {
         for (size_t j{ 0 }; j < i; ++j) {
             resVec(counter) = P(i, j);
-            ++counter;
-        }
-    }
-
-    return resVec;
-}
-
-ublas::vector<double> Gaussian_Copula::kronOfVectors(ublas::vector<double> const& v1, ublas::vector<double> const& v2) {
-    ublas::vector<double> vKron(v1.size() * v2.size());
-    size_t counter{ 0 };
-
-    for (size_t i{ 0 }; i < v1.size(); ++i) {
-        for (size_t j{ 0 }; j < v2.size(); ++j) {
-            vKron(counter) = v1(i) * v2(j);
-            ++counter;
-        }
-    }
-
-    return vKron;
-}
-
-ublas::vector<double> Gaussian_Copula::matrixToVector(ublas::matrix<double> const& matrix) {
-    size_t n{ matrix.size1() };
-    ublas::vector<double> resVec(n * n);
-    size_t counter{ 0 };
-
-    for (size_t j{ 0 }; j < n; ++j) {
-        for (size_t i{ 0 }; i < n; ++i) {
-            resVec(counter) = matrix(i, j);
             ++counter;
         }
     }
@@ -203,7 +144,10 @@ ublas::vector<double> Gaussian_Copula::calcNumGradients(ublas::vector<double> co
     return num_gradients;
 }
 
-double Gaussian_Copula::calcStepSize(ublas::vector<double> const& x, ublas::vector<double> const& d) {
+double Gaussian_Copula::calcStepSize(
+    ublas::vector<double> const& x, 
+    ublas::vector<double> const& d
+) {
     double a{ 1.0 };
     bool accepted{ false };
     //Kontrollera att rho är positiv definit, dvs minsta egenvärdet är positivt, annars halvera steglängden.
@@ -228,7 +172,7 @@ double Gaussian_Copula::calcStepSize(ublas::vector<double> const& x, ublas::vect
             a *= 0.5;
         }
 
-        if (a == 0) {
+        if (a == 0.0) {
             break;
         }
     }
