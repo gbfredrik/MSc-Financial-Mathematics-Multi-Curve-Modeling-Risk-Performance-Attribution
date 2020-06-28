@@ -5,11 +5,11 @@ close all
 fileNameBase = "FX_SEK_base_";
 fileNameTerm = "FX_SEK_term_";
 fileNameFx = "FX_SEK_fxAvg_";
-%fileNameBase = "IRS_USD_ois";
-%fileNameTerm = "IRS_USD_tenor";
-%fileExt = "";
+% fileNameBase = "IRS_USD_ois";
+% fileNameTerm = "IRS_USD_tenor";
+% fileExt = "";
 
-fileExt = "FX1-OIS1000_cb100"; % Change
+fileExt = "FX1-base1000-term100_cb10_jumpY"; % Change
 csvStr = ".csv";
 
 fForeign = readmatrix(strcat(fileNameBase, fileExt, csvStr));
@@ -33,7 +33,7 @@ D_Demand = fDemand(2:endDay,1:730) - fDemand(1:endDay-1,1:730);
 
 k_Domestic = 3;
 k_Foreign = 3;
-k_Demand = 3;
+k_Demand = 6;
 
 C_Domestic = cov(D_Domestic);
 C_Foreign = cov(D_Foreign);
@@ -209,10 +209,10 @@ sgtitle(fileExt)
 
 figure;
 subplot(2,1,1)
-plot(cov(fDomesticOutT'));
+plot(var(fDomesticOutT'));
 title('Domestic curve')
 subplot(2,1,2)
-plot(cov(fForeignOut'));
+plot(var(fForeignOut'));
 title('Foreign')
 sgtitle(fileExt)
  

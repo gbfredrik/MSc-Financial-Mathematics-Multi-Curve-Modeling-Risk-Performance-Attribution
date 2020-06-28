@@ -21,6 +21,34 @@ maturitiesBase = [zeros(nTradeDates, 1) maturitiesBase];
 maturitiesTerm = [zeros(nTradeDates, 1) maturitiesTerm];
 midPriceTerm = [zeros(nTradeDates, 1) midPriceTerm];
 
+%% Simulera N nästadagskurvor för varje out-of-sample dag.
+
+outOfSample = 1:80;
+inSample = 81:100;
+lastDiscPoint = 649;
+curve = basisSpread;
+N = 2000;
+fSimulationsAllDays = cell(1,size(inSample,2));
+
+T = 1:lastDiscPoint;
+
+D_Demand = curve(outOfSample(1)+1:outOfSample(end),1:lastDiscPoint) - ...
+            curve(outOfSample(1):outOfSample(end)-1,1:lastDiscPoint);
+
+mu = mean(D_Demand);
+CDemand = cov(D_Demand);
+
+deltaF = lhsnorm(mu', CDemand, N)';
+
+
+for i = 1:size(inSample,2)
+    fCurrent = curve(i,1:lastDiscPoint);
+    fSimulations = (repmat(fCurrent',1,N) + deltaF)';
+    fSimulationsAllDays{1,i} = fSimulations;
+end
+
+
+
 %% Pricing FX swaps - optimization model
 [nTradeDates, nContractDates] = size(fBase); 
 [~,nRICs] = size(basis);
