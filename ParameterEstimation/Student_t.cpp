@@ -38,10 +38,10 @@ void Student_t::update_GARCH_vec(ublas::vector<double> const& x) {
 double Student_t::function_value(ublas::vector<double> const& x) {
     update_GARCH_vec(x);
 
-    double sum{ 0.0 };
     double constant{ lgamma((x(4) + 1) / 2) - lgamma(x(4) / 2) - 0.5 * log(M_PI)
         - 0.5 * log(x(4)) };
-
+    
+    double sum{ 0.0 };
     for (size_t i{ 0 }, n{ m_GARCH_vec.size() - 1}; i < n; ++i) {
         sum = sum + constant - 0.5 * log(m_GARCH_vec(i)) - 0.5 * (x(4) + 1) * log(1 + pow(time_series(i) - x(3), 2) / (x(4) * m_GARCH_vec(i)));
     } 

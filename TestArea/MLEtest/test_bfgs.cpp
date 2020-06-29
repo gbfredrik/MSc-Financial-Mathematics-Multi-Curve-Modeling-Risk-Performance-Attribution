@@ -188,18 +188,17 @@ ublas::matrix<double> gen_copula_params(size_t n, int nRiskFactors, std::string 
     ublas::matrix<double> param_matrix(nParams, n);
 
     std::random_device rd;
-    std::default_random_engine generator(rd());
-    std::uniform_real_distribution<double> distribution(-0.6, 0.6);
+    std::default_random_engine generator{ rd() };
+    std::uniform_real_distribution<double> distribution{ -0.6, 0.6 };
 
     for (size_t i{ 0 }; i < n; ++i) {
-        for (size_t i{ 0 }; i < nParams - 1; ++i) {
-            params(i) = distribution(generator);
+        for (size_t j{ 0 }; j < nParams - 1; ++j) {
+            params(j) = distribution(generator);
         }
 
         if (dist == "t") {
             params(nParams - 1) = 5;
-        }
-        else {
+        } else {
             params(nParams - 1) = distribution(generator);
         }
 
