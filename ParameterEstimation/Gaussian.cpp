@@ -47,12 +47,10 @@ double Gaussian::function_value(vector<double> const& x) {
 }
 
 vector<double> Gaussian::calcNumGradients(vector<double> const& x) {
-
 	double epsilon = 2.2*pow(10, -16);
 	vector<double> increment(sqrt(epsilon) * x);
 	vector<double> num_gradients(4);
 
-	
 	vector<double> x_0diff = x;
 	x_0diff(0) += increment(0);
 	vector<double> x_1diff = x;
@@ -62,15 +60,14 @@ vector<double> Gaussian::calcNumGradients(vector<double> const& x) {
 	vector<double> x_3diff = x;
 	x_3diff(3) += increment(3);
 
-	num_gradients(0) = (function_value(x_0diff) - function_value(x)) / (x_0diff(0) - x(0));
-	num_gradients(1) = (function_value(x_1diff) - function_value(x)) / (x_1diff(1) - x(1));
-	num_gradients(2) = (function_value(x_2diff) - function_value(x)) / (x_2diff(2) - x(2));
-	num_gradients(3) = (function_value(x_3diff) - function_value(x)) / (x_3diff(3) - x(3));
-
+    double f_val{ function_value(x) };
+	num_gradients(0) = (function_value(x_0diff) - f_val) / (x_0diff(0) - x(0));
+	num_gradients(1) = (function_value(x_1diff) - f_val) / (x_1diff(1) - x(1));
+	num_gradients(2) = (function_value(x_2diff) - f_val) / (x_2diff(2) - x(2));
+	num_gradients(3) = (function_value(x_3diff) - f_val) / (x_3diff(3) - x(3));
 
 	return num_gradients;
 }
-
 
 // Hessian: https://v8doc.sas.com/sashtml/ormp/chap5/sect28.htm
 //

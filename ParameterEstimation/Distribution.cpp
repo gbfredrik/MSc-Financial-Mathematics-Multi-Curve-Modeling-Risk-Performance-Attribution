@@ -2,7 +2,6 @@
 
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/matrix_proxy.hpp>
-//#include <boost/numeric/ublas/io.hpp>
 
 #include <iostream>
 #include <cmath>
@@ -16,6 +15,12 @@ Distribution::Distribution(ublas::matrix<double> series)
 	time_series = x;
 }
 
+ublas::matrix<double> Distribution::calcNumHessian(ublas::vector<double> const& x) {
+    ublas::matrix<double> v(0,0);
+
+	return v;
+}
+
 ublas::vector<double> Distribution::calcNumGradients(ublas::vector<double> const& x) {
 	double increment{ 0.00001 };
     ublas::vector<double> num_gradients(4);
@@ -24,16 +29,11 @@ ublas::vector<double> Distribution::calcNumGradients(ublas::vector<double> const
     ublas::vector<double> x_1diff(x);
 	x_1diff(1) += increment;
 
-	num_gradients(0) = (function_value(x_0diff) - function_value(x)) / increment;
-	num_gradients(1) = (function_value(x_1diff) - function_value(x)) / increment;
+    double f_val{ function_value(x) };
+	num_gradients(0) = (function_value(x_0diff) - f_val) / increment;
+	num_gradients(1) = (function_value(x_1diff) - f_val) / increment;
 
 	return num_gradients;
-}
-
-ublas::matrix<double> Distribution::calcNumHessian(ublas::vector<double> const& x) {
-    ublas::matrix<double> v(0,0);
-
-	return v;
 }
 
 ublas::vector<double> Distribution::calcGradients(ublas::vector<double> const& x) {
@@ -57,7 +57,7 @@ double Distribution::calcStepSize(
     double c2{ 0.9 };
 
 	while (function_value(x + a * d) > function_value(x)) {
-		a = a * 0.5;
+		a *= 0.5;
 	}
 
     return a;
