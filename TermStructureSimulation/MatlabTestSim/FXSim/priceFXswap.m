@@ -7,6 +7,12 @@ function price = priceFXswap(spotPrice, fBase, fTerm, pi, T, maturity)
     else
         error('Input maturity not a member of term structure maturities')
     end
+   
+    if maturity > 2
+        price = "NaN";
+        return
+    end
+    
     fBase = fBase(1:ind-1);
     fTerm = fTerm(1:ind-1);
     pi = pi(1:ind-1);

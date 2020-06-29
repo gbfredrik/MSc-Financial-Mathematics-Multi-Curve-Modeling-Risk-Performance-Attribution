@@ -25,29 +25,29 @@ maturitiesBase = [zeros(nTradeDates, 1) maturitiesBase]; %Ta bort och lägg i fun
 maturitiesTerm = [zeros(nTradeDates, 1) maturitiesTerm];
 midPriceTerm = [zeros(nTradeDates, 1) midPriceTerm];
 
-%% RAW INTERPOLATION
-
-%% Simulate basis curves for in-sample data set
+%% Setup
 inSample = 1:20;
 N = 2000;
 
 nFXContracts = 22;
-%curveLength = 730;
 midPriceFX = midPriceFX(:,1:nFXContracts);
 maturitiesFx = maturitiesFx(:,1:nFXContracts);
 basis = basis(:,1:nFXContracts);
-%basisCurve = zeros(nTradeDates,curveLength);
 
 [nTradeDates, nRICs] = size(maturitiesFx);
 outOfSample = inSample(end)+1:nTradeDates; %1783
 outOfSampleSize = size(outOfSample,2);
- 
+
 [~, curveLength] = size(fTerm);
 basisCurve = ones(nTradeDates, curveLength)*inf;
 
 basisSimulationsAllDays = cell(1,outOfSampleSize);
 lastBasisPoint = curveLength-20;
 
+%% RAW INTERPOLATION
+
+%% Simulate basis curves for in-sample data set
+ 
 % Calculate the basis curve
 for tradeDate = 1:nTradeDates
     basisCurve(tradeDate,:) = curveFxSwapRawInterpol(maturitiesFx(tradeDate,:), basis(tradeDate,:), curveLength);
@@ -80,9 +80,7 @@ close(h)
 
 %% Calculate realised portfolio value changes for all out-of-sample dates
 
-RealisedPortfolioValueChanges = zeros(1,size(outOfSample,2) - 1);
-
-
+realisedPortfolioValueChangesRI = zeros(1,size(outOfSample,2) - 1);
 
 for i = 1:size(outOfSample,2)-1
      forwardPrices_t2 = zeros(1,nFXContracts);  
@@ -115,7 +113,7 @@ for i = 1:size(outOfSample,2)-1
                                                  T(outOfSample(1)+i,:), ...
                                                  maturities);
                                              
-    RealisedPortfolioValueChanges(i+1) = portfolioValueNextDay;
+    realisedPortfolioValueChangesRI(i+1) = portfolioValueNextDay;
 end
 
 
@@ -123,7 +121,7 @@ end
 
 simulatedPortfolioValues_t2 = zeros(size(outOfSample,2) - 1, N);
 simulatedPortfolioValues_t1 = zeros(size(outOfSample,2) - 1, N);
-simPortfolioValueChanges =  zeros(size(outOfSample,2) - 1, N);
+simPortfolioValueChangesRI =  zeros(size(outOfSample,2) - 1, N);
 
 
 %Iterera över alla in-sample dagar
@@ -161,18 +159,34 @@ for i = 1:size(outOfSample,2)-1
             %                                                         maturitiesFx(i), ...
             %                                                         maturityContracts);
         
-        simPortfolioValueChanges(i+1,n) = simulatedPortfolioValues_t2(i+1,n); % - simPortfolioValues(i) if initial value is not zero.
+        simPortfolioValueChangesRI(i+1,n) = simulatedPortfolioValues_t2(i+1,n); % - simPortfolioValues(i) if initial value is not zero.
         end
-
-        
-        
 end
-
 
 %% Caluculate kernel for each in-saple date
 
-kernelsRawInterpol = kdeMulti(simPortfolioValueChanges, RealisedPortfolioValueChanges);
+kernelRI = kdeMulti((simPortfolioValueChangesRI(2:end,:), realisedPortfolioValueChangesRI(2:end));
 
+
+%% Calculate price differences for out of sample
+
+priceDiffsDaily = zeros(size(outOfSample,2)-1);
+forwardPrice = zeros(size(outOfSample,2)-1);
+for i = 1:size(outOfSample,2)-1
+    priceDiffsContracts = zeros(nFXContracts);
+   for k = 1:nFXContracts
+    FXMaturities = [0 (maturitiesFx(outOfSample(1)+i,:))];
+    basisCurve = [0 basis(outOfSample(1)+i,:)];
+    forwardPrice(k) = priceFXswapRawInterpol(exchangeRate(outOfSample(1)+i), ...
+                                             basisCurve, ...
+                                             FXMaturities, ...
+                                             maturitiesFx(outOfSample(1)+i,k)); 
+   end
+    priceDiffsContracts(k) = abs(forwardPrice(k) - midPriceFX(outOfSample(1)+i));
+                                                              
+    priceDiffsDaily(i) = sum(priceDiffsContracts);
+                                  
+end
 
 
 

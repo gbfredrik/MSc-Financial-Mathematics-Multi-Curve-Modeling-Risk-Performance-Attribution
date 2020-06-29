@@ -7,7 +7,7 @@ function f = kdeMulti(xSimulated, xRealized)
     f = zeros(1, m);
     
     for j = 1:m
-       f(j) = kde(xSimulated, xRealized(j)); 
+       f(j) = kde(xSimulated(j,:), xRealized(j)); 
        %f(j) = kde(xSimulated(j,:), xRealized(j));
     end
 end

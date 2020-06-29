@@ -4,13 +4,13 @@
 %load('piHist.mat')
 
 clearvars -except fForeign fDomestic fDemand fAll piAll FXSEKcurveRi100
-demand = table2array(FXSEKcurveRi100);
+basisSpread = table2array(FXSEKcurveRi100);
 
 %% Simulate N curves one day ahead
-outOfSample = [1 80];
+outOfSample = 1:80;
 inSample = 81:100;
 lastDiscPoint = 649;
-curve = demand;git 
+curve = basisSpread;
 N = 2000;
 fSimulationsAllDays = cell(1,size(inSample,2));
 
