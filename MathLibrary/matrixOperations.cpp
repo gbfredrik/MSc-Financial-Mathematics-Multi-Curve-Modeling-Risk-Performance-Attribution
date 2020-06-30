@@ -110,7 +110,7 @@ ublas::matrix<double> matrixOperations::vectorToMatrix(
     return resMatrix;
 }
 
-ublas::matrix<double> matrixOperations::diff_matrix(ublas::matrix<double>& m_curves) { // Can this be "streamlined"? E.g. by directly returning a subset - a subset?
+ublas::matrix<double> matrixOperations::diff_matrix(ublas::matrix<double>& m_curves) {
     ublas::matrix_range<ublas::matrix<double>> m_1{
         m_curves,
         ublas::range(0, m_curves.size1() - 1),
@@ -205,3 +205,11 @@ ublas::vector<double> matrixOperations::kron_prod_vec(ublas::vector<double> cons
 
     return vKron;
 }
+
+//Crop matrix
+/*void matrixOperations::crop_matrix(
+	ublas::vector<double> const& m,
+	double const curve_length)
+{
+
+}*/

@@ -18,5 +18,8 @@
     <ClCompile Include="TestingMethods.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\CurveLibrary\sample_handler.tcc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

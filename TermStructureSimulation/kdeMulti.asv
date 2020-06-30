@@ -1,0 +1,21 @@
+function f = kdeMulti(xSimulated, xRealized)
+    %xSimulated: matrix?
+    %xRealized: vector
+    %f: vector
+    
+    m = length(xRealized);
+    f = zeros(m, 1);
+    
+    for j = 1:m
+       f(j) = kde(xSimulated, xRealized(j)); 
+       %f(j) = kde(xSimulated(j,:), xRealized(j));
+    end
+end
+
+function fMulti = KernelMulti(x_s, x_r)
+    fMulti = zeros(1,length(x_r));
+    for i = 1:length(x_r)
+       %fMulti(i) =  Kernel(x_s(:,i), x_r(i));
+       fMulti(i) =  Kernel(x_s, x_r(i));
+    end
+end
