@@ -47,7 +47,7 @@
     <ClCompile Include="pch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="sample_handler.tcc">
+    <ClCompile Include="sample_handler.cpp">
       <Filter>Source Files\Helpers</Filter>
     </ClCompile>
   </ItemGroup>

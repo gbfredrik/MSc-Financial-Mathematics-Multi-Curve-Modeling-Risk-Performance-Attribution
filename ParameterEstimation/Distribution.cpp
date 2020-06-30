@@ -1,84 +1,66 @@
 #include "Distribution.h"
 
+#include <boost/numeric/ublas/matrix.hpp>
+#include <boost/numeric/ublas/matrix_proxy.hpp>
 
+#include <iostream>
+#include <cmath>
 
-Distribution::Distribution(matrix<double> series)
+using namespace boost::numeric;
+
+Distribution::Distribution(ublas::matrix<double> series)
 	//: time_series(series) {}
 {
-	matrix_column<matrix<double> > x(series, 0);
+    ublas::matrix_column<ublas::matrix<double>> x(series, 0);
 	time_series = x;
 }
-vector<double> Distribution::calcNumGradients(vector<double> const& x) {
 
+ublas::matrix<double> Distribution::calcNumHessian(ublas::vector<double> const& /*x*/) {
+    ublas::matrix<double> v(0, 0);
 
+	return v;
+}
 
+ublas::vector<double> Distribution::calcNumGradients(ublas::vector<double> const& x) {
 	double increment{ 0.00001 };
-	vector<double> num_gradients(4);
-	vector<double> x_0diff(x);
+    ublas::vector<double> num_gradients(4);
+    ublas::vector<double> x_0diff(x);
 	x_0diff(0) += increment;
-	vector<double> x_1diff(x);
+    ublas::vector<double> x_1diff(x);
 	x_1diff(1) += increment;
 
-	num_gradients(0) = (function_value(x_0diff) - function_value(x)) / increment;
-	num_gradients(1) = (function_value(x_1diff) - function_value(x)) / increment;
+    double f_val{ function_value(x) };
+	num_gradients(0) = (function_value(x_0diff) - f_val) / increment;
+	num_gradients(1) = (function_value(x_1diff) - f_val) / increment;
 
 	return num_gradients;
 }
 
-matrix<double> Distribution::calcNumHessian(vector<double> const& x) {
-	matrix<double> v(0,0);
-	return v;
-}
+ublas::vector<double> Distribution::calcGradients(ublas::vector<double> const& x) {
+    ublas::vector<double> gradients(2);
+	gradients(0) = 2 * (200 * pow(x(0), 3) - 200 * x(0) * x(1) + x(0) - 1);
+	gradients(1) = 200 * (x(1) - pow(x(0), 2));
 
-
-
-vector<double> Distribution::calcGradients(vector<double> const& x) {
-
-	std::cout << "calcGradients in Distribution \n";
-
-	double dx = 2 * (200 * pow(x(0), 3) - 200 * x(0) * x(1) + x(0) - 1);
-	double dy = 200 * (x(1) - pow(x(0), 2));
-
-	vector<double> gradients(2);
-	gradients(0) = dx;
-	gradients(1) = dy;
 	return gradients;
 }
 
-void Distribution::getSeries() {
-	
-	std::cout << "In distribution: " << time_series;
+double Distribution::function_value(ublas::vector<double> const& x) {
+	return pow(1 - x(0), 2) + 100 * pow(x(1) - x(0) * x(0), 2);
 }
 
+double Distribution::calcStepSize(
+    ublas::vector<double> const& x, 
+    ublas::vector<double> const& d
+) {
+    double a{ 1.0 };
+    //double c1{ pow(10, -4) };
+    //double c2{ 0.9 };
 
-double Distribution::function_value(vector<double> const& x) {
-
-	double function_value = pow(1 - x(0), 2) + 100 * pow(x(1) - x(0) * x(0), 2);
-	return function_value;
-}
-
-double Distribution::calcStepSize(vector<double> const& x, vector<double> const& d) {
-
-	double a = 1;
-	double c1 = pow(10, -4);
-	double c2 = 0.9;
-
-
-	//while (dist->function_value(x + a * d) > dist->function_value(x) + c1 * a * inner_prod(dist->calcGradients(x), d)
-	while (function_value(x + a * d) > function_value(x))
-	{
-		std::cout << "new f : " << function_value(x + a * d) << "\n";
-		std::cout << "old f : " << function_value(x) << "\n";
-		std::cout << "steglängd = " << a << "\n";
-		std::cout << "new parameters2 = " << x(0) + a * d(0) << ", " << x(1) + a * d(1) << "\n";
-		a = a * 0.5;
+	while (function_value(x + a * d) > function_value(x)) {
+		a *= 0.5;
 	}
 
-	std::cout << "new f : " << function_value(x + a * d) << "\n";
-	std::cout << "old f : " << function_value(x) << "\n";
-	std::cout << "steglängd = " << a << "\n \n";
-
-	return a;
+    return a;
 }
 
 Distribution::~Distribution(void) {}

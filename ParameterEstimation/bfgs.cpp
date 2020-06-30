@@ -1,74 +1,69 @@
-#include "bfgs.h"
+﻿#include "bfgs.h"
 
+#include "Distribution.h"
 
-vector<double> bfgs::minimize(boost::numeric::ublas::vector<double> x, matrix<double> H_inv, int max_iter, double epsilon, Distribution* dist) {
+#include <boost/numeric/ublas/matrix.hpp>
+#include <boost/numeric/ublas/matrix_proxy.hpp>
 
-	std::cout << "in bfgs minimize: ";
-	//dist->getSeries();
+using namespace boost::numeric;
 
-	int n = x.size();
-	matrix<double> help_prod(n, n);
-	vector<double> d(n);
-	double alpha;
-	int k = 0;
-	vector<double> x_new(n);
-	vector<double> y(n);
-	vector<double> s(n);
-	double scale_H;
-	double l;
-	vector<double> gradient_vec(n);
-	//Init hessian inverse matrix
-	identity_matrix<double> I(n);
-	dist->calcGradients(x);
-	std::cout << "norm : " << (dist->calcGradients(x)) << " \n\n";
-	while (norm_2(dist->calcGradients(x)) > epsilon && k < max_iter) {
-		std::cout << "New iteration \n\n";
-		gradient_vec = dist->calcGradients(x);
-		std::cout << "    H_inv: " << H_inv << "\n\n";
-		//std::cout << "Num H_inv: " << dist->calcNumHessian(x) << "\n\n";
-		std::cout << "gradient_vec: " << gradient_vec << "\n \n";
-		//std::cout << "Numerical gradient_vec: " << dist->calcNumGradients(x) << "\n \n";
-		d = -prod(H_inv, gradient_vec);
+ublas::vector<double> bfgs::minimize(
+    ublas::vector<double> x,
+    ublas::matrix<double> H_inv,
+    int const max_iter,
+    double const epsilon,
+    Distribution* dist
+) {
+    size_t n{ x.size() };
+    ublas::matrix<double> help_prod(n, n);
+    ublas::vector<double> d(n);
+    ublas::vector<double> x_new(n);
+    ublas::vector<double> y(n);
+    ublas::vector<double> s(n);
+    ublas::vector<double> gradient_vec(n);
+    double alpha{};
+    double scale_H{};
+    double l{};
+    int k{ 0 };
+    //Init hessian inverse matrix
+    ublas::identity_matrix<double> I(n);
 
-		//std::cout << "d : " << d << "\n\n";
-		alpha = dist->calcStepSize(x, d);
-		x_new = x + alpha * d;
+    gradient_vec = dist->calcGradients(x);
 
-		y = dist->calcGradients(x_new) - dist->calcGradients(x);
-		s = x_new - x;
-		scale_H = inner_prod(y, s);
-		l = 1 /scale_H;
+    while (ublas::norm_2(gradient_vec) > epsilon && k < max_iter) {
+        //gradient_vec = dist->calcGradients(x);
+        d = -prod(H_inv, gradient_vec);
+        alpha = dist->calcStepSize(x, d);
+        s = alpha * d;
+        x_new = x + s;
+        //x_new = x + alpha * d;
+        //std::cout << std::setprecision(16) << "Nya s   = " << s << std::endl;
+        //std::cout << std::setprecision(16) << "Gamla s = " << x_new - x << std::endl << std::endl;
 
-		//std::cout << "y: " << y << "\n\n";
-		//std::cout << "s: " << s << "\n\n";
-		//std::cout << "l: " << l << "\n\n";
+        ublas::vector<double> gradient_vec_new{ dist->calcGradients(x_new) };
+        y = gradient_vec_new - gradient_vec;
+        //s = x_new - x; // Gammal lösning men verkar sämre
+        scale_H = inner_prod(y, s);
+        l = 1.0 / scale_H;
 
-		if (scale_H == 0) {
-			std::cout << "Break since H has invalid values. \n\n";
-			break;
-		}
+        if (scale_H == 0) {
+            std::cout << "Breaking since H has invalid values.\n\n";
+            break;
+        }
 
-		help_prod = prod((I - l * outer_prod(s, y)), H_inv);
-		H_inv = prod(help_prod, (I - l * outer_prod(y, s))) + l * outer_prod(s, s);
-		x = x_new;
-		k = k + 1;
-		
-		std::cout << "k = " << k << " , Function value = " << dist->function_value(x) << " for parameters : " << x  
-					<< " and norm of gradients = " << norm_2(dist->calcGradients(x)) << "\n \n \n\n";
-	}
+        help_prod = prod((I - l * outer_prod(s, y)), H_inv);
+        H_inv = prod(help_prod, (I - l * outer_prod(y, s))) + l * outer_prod(s, s);
+        x = x_new;
+        gradient_vec = gradient_vec_new;
+        ++k;
+    }
 
-	std::cout << "Final k = " << k << " , Function value = " << dist->function_value(x) << " for parameters : " << x
-		<< " and norm of gradients = " << norm_2(dist->calcGradients(x)) << "\n \n \n\n";
-	
-	vector<double> results(n+1);
+    ublas::vector<double> results(n + 1);
 
-	
-	for (size_t i = 0; i < results.size() - 1; i++) {
-		results(i) = x(i);
-	}
+    for (size_t i{ 0 }; i < results.size() - 1; ++i) {
+        results(i) = x(i);
+    }
+    results(n) = dist->function_value(x);
 
-	results(n) = dist -> function_value(x);
-
-	return results;
+    return results;
 }
-
