@@ -5,6 +5,7 @@
 #include "framework.h"
 #include "CurveLibrary.h" // Must be this order, otherwise functions are not exported!
 
+#include "CurveCollection.h"
 #include "sample_handler.h"
 #include "../MathLibrary/matrixOperations.h"
 #include "../MathLibrary/statisticsOperations.h"
@@ -41,6 +42,7 @@ BOOL __stdcall run_all_multiXL(
 	CurveCollection rf;
 	std::vector<CurveCollection> tenors(count_tenor);
 
+    // Setup and read files
 	rf.filename = "fHist3650";
 	for (CurveCollection& cc : tenors) {
 		cc.filename = "piHist3650";
@@ -48,9 +50,9 @@ BOOL __stdcall run_all_multiXL(
 
 	try {
 		// Read
-		rf.m_A = read_csv_matrix("fHist3650.csv");
+		rf.m_A = read_csv_matrix("fHist3650.csv"); // Todo: replace w/ rf.filename
 		for (CurveCollection& cc : tenors) {
-			cc.m_A = read_csv_matrix("piHist3650.csv");
+			cc.m_A = read_csv_matrix("piHist3650.csv"); // Todo: replace w/ cc.filename
 		}
 	} catch (std::exception const&) {
 		return -1;
@@ -65,8 +67,12 @@ BOOL __stdcall run_all_multiXL(
 
 	int k{ 6 };
 	placeholder_eigen(rf, eigen_algorithm, eval_eigen, k);
-	placeholder_eigen(tenors.at(0), eigen_algorithm, eval_eigen, k);
-	
+    for (CurveCollection& cc : tenors) {
+        placeholder_eigen(cc, eigen_algorithm, eval_eigen, k);
+    }
+
+
+
 	return status;
 }
 
@@ -103,13 +109,13 @@ BOOL __stdcall run_all_fxXL(
 	}
 	
 	// Truncate to minimum curve lengths
-	for (int i; i < count_rf; ++i) {
+    for (int i{ 0 }; i < count_rf; ++i) {
 		//rf.at(i).m_A_trunc = rf.at(i).m_A;
 		rf.at(i).m_A.resize(rf.at(i).m_A.size1(), curve_length);
 	}
 
 	// Truncate to minimum curve lengths
-	for (int i; i < count_tenor; ++i) {
+    for (int i{ 0 }; i < count_tenor; ++i) {
 		//rf.at(i).m_A_trunc = rf.at(i).m_A;
 		tenors.at(i).m_A.resize(tenors.at(i).m_A.size1(), curve_length);
 	}
