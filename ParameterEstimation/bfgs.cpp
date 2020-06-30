@@ -202,7 +202,7 @@ ublas::vector<double> bfgs::run_bfgs_gaussian_copula(size_t const n, Gaussian_Co
     ublas::matrix<double> params(nRiskFactors, n);
     ublas::vector<double> FV(n);
 
-    params = gen_copula_params(n, nRiskFactors, "normal");
+    params = gen_copula_params(n, nRiskFactors, "normal"); // Todo: Move
     // Run optimization problem n times.
     for (size_t i{ 0 }, cols{ params.size2() }; i < cols; ++i) {
         ublas::vector<double> results{ bfgs::minimize(column(params, i), H_inv, max_iter, epsilon, distribution) };
@@ -239,7 +239,7 @@ ublas::vector<double> bfgs::run_bfgs_t_copula(size_t const n, T_Copula* distribu
     ublas::matrix<double> params(nRiskFactors + 1, n);
     ublas::vector<double> FV(n);
 
-    params = gen_copula_params(n, nRiskFactors, "t");
+    params = gen_copula_params(n, nRiskFactors, "t"); // Todo: Move
 
     // Run optimization problem n times.
     for (size_t i{ 0 }, cols{ params.size2() }; i < cols; ++i) {
