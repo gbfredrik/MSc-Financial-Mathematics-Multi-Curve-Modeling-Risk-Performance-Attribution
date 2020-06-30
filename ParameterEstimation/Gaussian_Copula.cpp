@@ -8,7 +8,6 @@
 #include <boost/numeric/ublas/matrix_proxy.hpp>
 #include <boost/math/special_functions/digamma.hpp>
 
-#include <iostream>
 #include <cmath>
 
 using namespace boost::numeric;
@@ -47,10 +46,8 @@ double Gaussian_Copula::function_value(ublas::vector<double> const& x) {
 ublas::vector<double> Gaussian_Copula::calcGradients(ublas::vector<double> const& x) {
     ublas::vector<double> gradients(x.size());
     size_t n{ time_series.size2() }; //Number of riskfaktors
-    double sum{ 0.0 };
     ublas::zero_vector<double> zeroVec(n * n);
     ublas::vector<double> dFdP{ zeroVec };
-    double dFdnu{ 0.0 };
 
     //Get rho gradients as a vector
     for (size_t i{ 0 }, rows{ time_series.size1() }; i < rows; ++i) {

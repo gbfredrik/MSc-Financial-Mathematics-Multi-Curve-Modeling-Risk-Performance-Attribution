@@ -15,8 +15,8 @@ Distribution::Distribution(ublas::matrix<double> series)
 	time_series = x;
 }
 
-ublas::matrix<double> Distribution::calcNumHessian(ublas::vector<double> const& x) {
-    ublas::matrix<double> v(0,0);
+ublas::matrix<double> Distribution::calcNumHessian(ublas::vector<double> const& /*x*/) {
+    ublas::matrix<double> v(0, 0);
 
 	return v;
 }
@@ -53,8 +53,8 @@ double Distribution::calcStepSize(
     ublas::vector<double> const& d
 ) {
     double a{ 1.0 };
-    double c1{ pow(10, -4) };
-    double c2{ 0.9 };
+    //double c1{ pow(10, -4) };
+    //double c2{ 0.9 };
 
 	while (function_value(x + a * d) > function_value(x)) {
 		a *= 0.5;

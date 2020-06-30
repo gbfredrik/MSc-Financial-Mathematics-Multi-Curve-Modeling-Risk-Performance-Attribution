@@ -56,7 +56,6 @@ ublas::vector<double> Student_t::calcGradients(ublas::vector<double> const& x) {
     double da{ 0.0 };
     double db{ 0.0 };
     double dmu{ 0.0 };
-    double ddf{ 0.0 };
 
     ublas::vector<double> inner_w{ derivative_w(x) };
     ublas::vector<double> inner_a{ derivative_a(x) };
@@ -117,7 +116,7 @@ double Student_t::calcStepSize(
 ) {
     double a{ 1.0 };
     double c1{ pow(10, -4) };
-    double c2{ 0.9 };
+    //double c2{ 0.9 };
 
     while (x(0) + a * d(0) < 0 
         || x(1) + a * d(1) < 0 

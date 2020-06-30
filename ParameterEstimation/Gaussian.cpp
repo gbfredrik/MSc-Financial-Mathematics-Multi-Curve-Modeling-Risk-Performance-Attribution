@@ -105,14 +105,11 @@ ublas::vector<double> Gaussian::calcNumGradients(ublas::vector<double> const& x)
 // Hessian: https://v8doc.sas.com/sashtml/ormp/chap5/sect28.htm
 //
 ublas::matrix<double> Gaussian::calcNumHessian(ublas::vector<double> const& x) {
-    //ublas::vector<double> num_gradients(4);
     ublas::vector<double> h(4);
     for (size_t i{ 0 }, n{ h.size() }; i < n; ++i) {
         h(i) = 0;
     }
 
-    double epsilon{ 4.8 * pow(10, -6) };
-    
     ublas::vector<double> inc(4);
     inc(0) = 0.0000000000001;
     inc(1) = 0.0000000000001;
@@ -185,8 +182,8 @@ double Gaussian::calcStepSize(
     ublas::vector<double> const& d
 ) {
     double a{ 1.0 };
-    double c1{ pow(10, -3) };
-    double c2{ 0.9 };
+    //double c1{ pow(10, -3) };
+    //double c2{ 0.9 };
 
     while (x(0) + a * d(0) < 0 
         || x(1) + a * d(1) < 0 
