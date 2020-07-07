@@ -159,12 +159,15 @@
     <ClCompile Include="TestingMethods.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Backtesting\Backtesting.vcxproj">
-      <Project>{61306c73-edc9-401b-9f84-0542cdd2e2a4}</Project>
+    <ProjectReference Include="..\..\RiskMeasurement\RiskMeasurement.vcxproj">
+      <Project>{b9ecea01-4658-4223-beaa-bf811008f260}</Project>
     </ProjectReference>
     <ProjectReference Include="..\MathLibrary\MathLibrary.vcxproj">
       <Project>{a18252bf-632c-435a-9887-422029fc1503}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\CurveLibrary\sample_handler.tcc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

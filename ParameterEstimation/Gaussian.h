@@ -1,50 +1,29 @@
 #pragma once
+#define _USE_MATH_DEFINES
 #include "Distribution.h"
 
-#include <iostream>
-#include <numeric>
-#include <cmath>
-
-//Boost packages for numeric represenation
 #include <boost/numeric/ublas/matrix.hpp>
-#include <boost/numeric/ublas/matrix_proxy.hpp>
-#include <boost/numeric/ublas/io.hpp>
-
-//Boost packages for statistics
-#include <boost/math/tools/bivariate_statistics.hpp>
-#include <boost/math/distributions/normal.hpp>
-
-#include <boost/math/constants/constants.hpp>
-
-
-#include <boost/accumulators/accumulators.hpp>
-#include <boost/accumulators/statistics/stats.hpp>
-#include <boost/accumulators/statistics/variance.hpp>
-#include <boost/bind.hpp>
-
-
-#include <boost/qvm/mat_operations.hpp>
-
-
-using namespace boost::numeric::ublas;
 
 class Gaussian : public Distribution {
 public: 
-	Gaussian(matrix<double> series);
-	void update_GARCH_vec(vector<double> const& x);
-	double function_value(vector<double> const& x);
-	matrix<double> calcNumHessian(vector<double> const& x);
-	vector<double> calcNumGradients(vector<double> const& x);
-	vector<double> calcGradients(vector<double> const& x);
-	void getSeries();
-	double calcStepSize(vector<double> const& x, vector<double> const& d);
+    Gaussian(boost::numeric::ublas::matrix<double> series);
+
+    void update_garch_vec(boost::numeric::ublas::vector<double> const& x);
+    double function_value(boost::numeric::ublas::vector<double> const& x);
+    boost::numeric::ublas::vector<double> calc_gradients(boost::numeric::ublas::vector<double> const& x);
+    boost::numeric::ublas::vector<double> calc_num_gradients(boost::numeric::ublas::vector<double> const& x);
+    boost::numeric::ublas::matrix<double> calc_num_hessian(boost::numeric::ublas::vector<double> const& x);
+    double calc_step_size(
+        boost::numeric::ublas::vector<double> const& x, 
+        boost::numeric::ublas::vector<double> const& d
+    );
 
 private:
-	vector<double> time_series;
-	vector<double> m_GARCH_vec;
-	double garch0;
-	vector<double> derivative_w(vector<double> const& x);
-	vector<double> derivative_a(vector<double> const& x);
-	vector<double> derivative_b(vector<double> const& x);
+    boost::numeric::ublas::vector<double> time_series;
+    boost::numeric::ublas::vector<double> m_garch_vec;
+    double garch0;
 
+    boost::numeric::ublas::vector<double> derivative_w(boost::numeric::ublas::vector<double> const& x);
+    boost::numeric::ublas::vector<double> derivative_a(boost::numeric::ublas::vector<double> const& x);
+    boost::numeric::ublas::vector<double> derivative_b(boost::numeric::ublas::vector<double> const& x);
 };
