@@ -26,43 +26,55 @@ E.Zero = EZero;
 E.Tau = ETau;
 
 kZero = 9;
-kTau = 9;
+kPi = 9;
 
-E_k = {};
-EZero_k = EZero(:,1:kZero);
-ETau_k = ETau(:,1:kTau);
-E_k.Zero = EZero_k;
-E_k.Tau = ETau_k;
+%E_k = {};
+%EZero_k = EZero(:,1:kZero);
+%ETau_k = ETau(:,1:kTau);
+%E_k.Zero = EZero_k;
+%E_k.Tau = ETau_k;
 
 %% Init parameters
 n = size(fHistIS, 2);
-A = intMatrix(n);
-r = A*fHistIS';
-piSpot = A * piHistIS';
 y = y(1, 2) / 100;
 f = fHistIS';
 pi = piHistIS';
-fOOS = fHistOOS';
-piOOS = piHistOOS';
 N = 1000;
+k = {};
+k.zero = kZero;
+k.Pi = kPi;
+curveData = {};
+curveData.zero = fHistIS;
+curveData.pi = piHistIS;
+times = times(2758:end);
+startDate(1) = times(1);
+endDate(1) = times(end);
+floatCashFlows = {};
+fixCashFlows = {};
+floatCashFlows.oneY = [2; 94; 186; 277; 367]';
+fixCashFlows.oneY  = [367]';
 
+%%
+n = size(fHistIS, 2);
+A = intMatrix(n);
+tic
+r = A*fHistIS';
+toc
 %% Excecute performance attribution
 
 % Input to mex-file:
 %   0 - N: nominal amount                   - vector
 %   1 - y: instrument yield                 - vector
 %   2 - E: eigenvector matrices             - struct of matrices
-%   3 - k: num. of. risk factors,           - vector of scalars        - scalar
+%   3 - k: num. of. risk factors,           - vector of scalars
 %   4 - floatCashFlows                      - struct of vectors
 %   5 - fixCashFlows                        - struct of vectors
 %   6 - curveData                           - matrix
 %   7 - times, days from origin             - vector
-%   8 - startDate
-%   9 - endDate
+%   8 - startDateIS
+%   9 - endDateIS
 
-[NPV, carry, sumRiskFactors, epsI, epsA, epsP] = paMex(N, y, E, kZero, kTau, floatCashFlows, fixCashFlows, f, pi, times, startDate, endDate);
-
-
-
-
-
+tic
+[NPV, carry, sumRiskFactors, epsI, epsA, epsP] = paMex(N, y, E, k, floatCashFlows, fixCashFlows, curveData, times, startDate, endDate);
+toc
+%mex ../paMex.cpp ../pa.cpp ../../Mathlibrary/statisticsOperations.cpp ../../Mathlibrary/matrixOperations.cpp ../../Mathlibrary/rvSim.cpp -IX:/boost_1_72_0 -IX:\exjobb\eigen-eigen-323c052e1731

@@ -107,3 +107,6 @@ matrix<double> matrixOperations::center_matrix(matrix<double> const& diff_matrix
 
 	return centered_matrix;
 }
+
+
+

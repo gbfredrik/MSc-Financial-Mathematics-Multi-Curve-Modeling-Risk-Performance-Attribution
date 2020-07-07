@@ -1,26 +1,22 @@
-function [H] = hes(N, y, floatCashFlowsUnknown, fixCashFlows, deltaTj, aZero, aPi, r, pi, floatcf, floatCashFlowsKnown)
+function [H] = hesOLD(N, y, floatCashFlows, fixCashFlows, deltaTj, aZero, aPi, r, pi)
 
-numFix = length(fixCashFlows);
-numUnknownFloat = length(floatCashFlowsUnknown);
-numKnownFloat = length(floatCashFlowsKnown);
+numCashFix = length(fixCashFlows);
+numCashFloat = length(floatCashFlows);
+
+
 
 fix = 0;
 % Calc fix leg
-for i = 1:numFix
-    fix = fix + deltaTj(i) * (startdate/365 * aZero(startdate + 1,:) - fixCashFlows(i)/365 * aZero(fixCashFlows(i) + 1,:))' ...
-        *(startdate/365 * aZero(floatCashFlows(1) + 1,:) - fixCashFlows(i)/365 * aZero(fixCashFlows(i) + 1,:)) ...
+for i = 1:numCashFix
+    fix = fix + deltaTj(i) * (floatCashFlows(1)/365 * aZero(floatCashFlows(1) + 1,:) - fixCashFlows(i)/365 * aZero(fixCashFlows(i) + 1,:))' ...
+        *(floatCashFlows(1)/365 * aZero(floatCashFlows(1) + 1,:) - fixCashFlows(i)/365 * aZero(fixCashFlows(i) + 1,:)) ...
         * exp(floatCashFlows(1)/365 * r(floatCashFlows(1) + 1) - fixCashFlows(i)/365 * r(fixCashFlows(i) + 1))';
 end
 fix = N * y * fix;
 
 % Calc float leg
 float = 0;
-for i = 1:numKnownFloat
-    float = float + floatcf(i) * (startdate/365 * aZero(startdate + 1,:) - floatCashFlowsKnown(i)/365 * aZero(floatCashFlowsKnown(i) + 1,:))' ...
-        *(startdate/365 * aZero(startdate + 1,:) - floatCashFlowsKnown(i)/365 * aZero(floatCashFlowsKnown(i) + 1,:)) ...
-        * exp(startdate/365 * r(startdate + 1) - floatCashFlowsKnown(i)/365 * r(floatCashFlowsKnown(i) + 1))';
-end
-for i = 1:numUnknownFloat - 1
+for i = 1:numCashFloat - 1
     float = float + (floatCashFlows(i + 1)/365 * aPi(floatCashFlows(i + 1) + 1,:) - floatCashFlows(i)/365 * (aZero(floatCashFlows(i) + 1,:) + aPi(floatCashFlows(i) + 1,:))...
         + floatCashFlows(1)/365 * aZero(floatCashFlows(1) + 1,:))' ...
         * (floatCashFlows(i + 1)/365 * aPi(floatCashFlows(i + 1) + 1,:) - floatCashFlows(i)/365 * (aZero(floatCashFlows(i) + 1,:) + aPi(floatCashFlows(i) + 1,:))...
