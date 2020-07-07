@@ -20,7 +20,7 @@ Gaussian_Copula::Gaussian_Copula(ublas::matrix<double> series)
 double Gaussian_Copula::function_value(ublas::vector<double> const& x) {
     double sum{ 0.0 };
     size_t n{ time_series.size2() }; //Number of riskfaktors
-    ublas::matrix<double> P{ buildP(x) };
+    ublas::matrix<double> P{ build_p(x) };
     double det_P{ matrixOperations::matrix_det(P) };
     ublas::matrix<double> P_inv{ matrixOperations::matrix_inv(P) };
 
@@ -43,7 +43,7 @@ double Gaussian_Copula::function_value(ublas::vector<double> const& x) {
     return -sum;
 }
 
-ublas::vector<double> Gaussian_Copula::calcGradients(ublas::vector<double> const& x) {
+ublas::vector<double> Gaussian_Copula::calc_gradients(ublas::vector<double> const& x) {
     ublas::vector<double> gradients(x.size());
     size_t n{ time_series.size2() }; //Number of riskfaktors
     ublas::zero_vector<double> zeroVec(n * n);
@@ -59,7 +59,7 @@ ublas::vector<double> Gaussian_Copula::calcGradients(ublas::vector<double> const
             N_inv(j) = statisticsOperations::invCDFNorm(U_row(j));
         }
 
-        ublas::matrix<double> P{ buildP(x) };
+        ublas::matrix<double> P{ build_p(x) };
         ublas::matrix<double> P_inv{ matrixOperations::matrix_inv(P) };
         ublas::vector<double> vec_Pinv{ matrixOperations::matrixToVector(P_inv) };
 
@@ -76,12 +76,12 @@ ublas::vector<double> Gaussian_Copula::calcGradients(ublas::vector<double> const
     ublas::matrix<double> dFdP_mat{ matrixOperations::vectorToMatrix(dFdP, time_series.size2()) };
 
     //Get optimization parameters from rho matrix
-    ublas::vector<double> dfdParams{ getElements(dFdP_mat) };
+    ublas::vector<double> dfdParams{ get_elements(dFdP_mat) };
 
     return -dfdParams;
 }
 
-ublas::matrix<double> Gaussian_Copula::buildP(ublas::vector<double> const& x) {
+ublas::matrix<double> Gaussian_Copula::build_p(ublas::vector<double> const& x) {
     size_t n{ time_series.size2() };
     ublas::matrix<double> P(n, n);
     size_t counter{ 0 };    //keep track of fetched elements
@@ -101,7 +101,7 @@ ublas::matrix<double> Gaussian_Copula::buildP(ublas::vector<double> const& x) {
     return P;
 }
 
-ublas::vector<double> Gaussian_Copula::getElements(ublas::matrix<double> const& P) {
+ublas::vector<double> Gaussian_Copula::get_elements(ublas::matrix<double> const& P) {
     size_t n{ time_series.size2() };
     ublas::vector<double> resVec(static_cast<size_t>((n - 1) * n * 0.5)); // Vector with optimization parameters in P
     size_t counter{ 0 };    //keep track of fetched elements
@@ -116,7 +116,7 @@ ublas::vector<double> Gaussian_Copula::getElements(ublas::matrix<double> const& 
     return resVec;
 }
 
-ublas::vector<double> Gaussian_Copula::calcNumGradients(ublas::vector<double> const& x) {
+ublas::vector<double> Gaussian_Copula::calc_num_gradients(ublas::vector<double> const& x) {
     double epsilon{ 2.2 * pow(10, -16) };
     ublas::vector<double> increment{ sqrt(epsilon) * x };
     ublas::vector<double> num_gradients(x.size());
@@ -141,7 +141,7 @@ ublas::vector<double> Gaussian_Copula::calcNumGradients(ublas::vector<double> co
     return num_gradients;
 }
 
-double Gaussian_Copula::calcStepSize(
+double Gaussian_Copula::calc_step_size(
     ublas::vector<double> const& x, 
     ublas::vector<double> const& d
 ) {
@@ -158,7 +158,7 @@ double Gaussian_Copula::calcStepSize(
             }
         }
 
-        ublas::matrix<double> Pnext{ buildP(x + a * d) };
+        ublas::matrix<double> Pnext{ build_p(x + a * d) };
         double minEigenvalue{ FactorCalculation::smallest_eigval(Pnext) };
 
         if (minEigenvalue <= 0) {

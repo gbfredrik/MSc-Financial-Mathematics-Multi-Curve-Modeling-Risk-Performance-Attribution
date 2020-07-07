@@ -25,7 +25,7 @@ double T_Copula::function_value(ublas::vector<double> const& x) {
     double nu{ x(x.size() - 1) };
     double sum{ 0.0 };
     size_t n{ time_series.size2() }; //Number of riskfaktors
-    ublas::matrix<double> P{ buildP(x) };
+    ublas::matrix<double> P{ build_p(x) };
     double det_P{ matrixOperations::matrix_det(P) };
     ublas::matrix<double> P_inv{ matrixOperations::matrix_inv(P) };
 
@@ -52,11 +52,10 @@ double T_Copula::function_value(ublas::vector<double> const& x) {
 	return -sum;
 }
 
-ublas::vector<double> T_Copula::calcGradients(ublas::vector<double> const& x) {
+ublas::vector<double> T_Copula::calc_gradients(ublas::vector<double> const& x) {
 	ublas::vector<double> gradients(x.size());
     double nu{ x(x.size() - 1) };
     size_t n{ time_series.size2() }; //Number of riskfaktors
-	double sum{ 0.0 };
     ublas::zero_vector<double> zeroVec(n * n);
     ublas::vector<double> dFdP{ zeroVec };
     double dFdnu{ 0.0 };
@@ -70,7 +69,7 @@ ublas::vector<double> T_Copula::calcGradients(ublas::vector<double> const& x) {
 			T_inv(j) = statisticsOperations::invCDFT(U_row(j), nu);
 		}
 
-        ublas::matrix<double> P{ buildP(x) };
+        ublas::matrix<double> P{ build_p(x) };
         ublas::matrix<double> P_inv{ matrixOperations::matrix_inv(P) };
 
 		//Get P_inv as a vector of the columns
@@ -104,7 +103,7 @@ ublas::vector<double> T_Copula::calcGradients(ublas::vector<double> const& x) {
     ublas::matrix<double> dFdP_mat{ matrixOperations::vectorToMatrix(dFdP, time_series.size2()) };
 
 	//Get optimization parameters from rho matrix
-	ublas::vector<double> dfdParams{ getElements(dFdP_mat) };
+	ublas::vector<double> dfdParams{ get_elements(dFdP_mat) };
 
 	for (size_t d{ 0 }; d < gradients.size(); ++d) {
 		if (d == gradients.size() - 1) {
@@ -121,7 +120,7 @@ double T_Copula::dGamma(double const t) {
 	return tgamma(t) * boost::math::digamma(t);
 }
 
-ublas::matrix<double> T_Copula::buildP(ublas::vector<double> const& x) {
+ublas::matrix<double> T_Copula::build_p(ublas::vector<double> const& x) {
     size_t n{ time_series.size2() };
 	ublas::matrix<double> P(n, n);
 	size_t counter{ 0 };	//keep track of fetched elements
@@ -141,7 +140,7 @@ ublas::matrix<double> T_Copula::buildP(ublas::vector<double> const& x) {
 	return P;
 }
 
-ublas::vector<double> T_Copula::getElements(ublas::matrix<double> const& P) {
+ublas::vector<double> T_Copula::get_elements(ublas::matrix<double> const& P) {
     size_t n{ time_series.size2() };
     ublas::vector<double> resVec(static_cast<size_t>((n - 1) * n * 0.5)); // Vector with optimization parameters in P
 	size_t counter{ 0 };	//keep track of fetched elements
@@ -156,7 +155,7 @@ ublas::vector<double> T_Copula::getElements(ublas::matrix<double> const& P) {
 	return resVec;
 }
 
-ublas::vector<double> T_Copula::calcNumGradients(ublas::vector<double> const& x) {
+ublas::vector<double> T_Copula::calc_num_gradients(ublas::vector<double> const& x) {
     double epsilon{ 2.2 * pow(10, -16) };
     ublas::vector<double> increment{ sqrt(epsilon) * x };
 	ublas::vector<double> num_gradients(x.size());
@@ -183,7 +182,7 @@ ublas::vector<double> T_Copula::calcNumGradients(ublas::vector<double> const& x)
 	return num_gradients;
 }
 
-double T_Copula::calcStepSize(ublas::vector<double> const& x, ublas::vector<double> const& d) {
+double T_Copula::calc_step_size(ublas::vector<double> const& x, ublas::vector<double> const& d) {
     double a{ 1.0 };
     bool accepted{ false };
 	//Kontrollera att rho är positiv definit, dvs minsta egenvärdet är positivt, annars halvera steglängden.
@@ -201,7 +200,7 @@ double T_Copula::calcStepSize(ublas::vector<double> const& x, ublas::vector<doub
 			}
 		}
 
-        ublas::matrix<double> Pnext{ buildP(x + a * d) };
+        ublas::matrix<double> Pnext{ build_p(x + a * d) };
         double minEigenvalue{ FactorCalculation::smallest_eigval(Pnext) };
         //std::cout << "Smallest eigval = " << std::to_string(minEigenvalue) << std::endl;
 		if (minEigenvalue <= 0) {

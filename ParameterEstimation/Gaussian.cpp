@@ -18,38 +18,38 @@ Gaussian::Gaussian(ublas::matrix<double> series) : Distribution(series) {
     time_series = x;
 
     ublas::vector<double> garch_vec(time_series.size() + 1);
-    m_GARCH_vec = garch_vec;
+    m_garch_vec = garch_vec;
 
     //Calc variance for timeseries
     boost::accumulators::accumulator_set<double, boost::accumulators::stats<boost::accumulators::tag::variance>> acc;
     for_each(time_series.begin(), time_series.end(), boost::bind<void>(boost::ref(acc), _1));
 
     //Set variance as first element
-    m_GARCH_vec(0) = boost::accumulators::variance(acc);
+    m_garch_vec(0) = boost::accumulators::variance(acc);
 }
 
 //Update garch vector with new parameters
-void Gaussian::update_GARCH_vec(ublas::vector<double> const& x) {  // datum växer med index
+void Gaussian::update_garch_vec(ublas::vector<double> const& x) {  // datum växer med index
     for (size_t i{ 0 }, n{ time_series.size() }; i < n; ++i) {
-        m_GARCH_vec(i + 1) = x(0) + x(1) * pow(time_series(i), 2) + x(2) * m_GARCH_vec(i);
+        m_garch_vec(i + 1) = x(0) + x(1) * pow(time_series(i), 2) + x(2) * m_garch_vec(i);
     }
 }
 
 //Calculate function value given parameters x
 double Gaussian::function_value(ublas::vector<double> const& x) {
-    update_GARCH_vec(x);
+    update_garch_vec(x);
 
     double sum{ 0.0 };
-    for (size_t i{ 0 }, n{ m_GARCH_vec.size() - 1 }; i < n; ++i) {
-        sum += log(2 * M_PI * m_GARCH_vec(i)) + pow(time_series(i) - x(3), 2) / (m_GARCH_vec(i));
+    for (size_t i{ 0 }, n{ m_garch_vec.size() - 1 }; i < n; ++i) {
+        sum += log(2 * M_PI * m_garch_vec(i)) + pow(time_series(i) - x(3), 2) / (m_garch_vec(i));
     }
 
     return 0.5 * sum;
 }
 
 //Calculate gradients, x = [omega alpha beta mu]
-ublas::vector<double> Gaussian::calcGradients(ublas::vector<double> const&  x) {
-    update_GARCH_vec(x);
+ublas::vector<double> Gaussian::calc_gradients(ublas::vector<double> const&  x) {
+    update_garch_vec(x);
     
     double dw{ 0.0 };
     double da{ 0.0 };
@@ -61,13 +61,13 @@ ublas::vector<double> Gaussian::calcGradients(ublas::vector<double> const&  x) {
     ublas::vector<double> inner_b{ derivative_b(x) };
 
     double temp{ 0.0 };
-    for (size_t i{ 0 }, n{ m_GARCH_vec.size() - 1 }; i < n; ++i) {
-        temp = 0.5 * (m_GARCH_vec(i) - pow(time_series(i) - x(3), 2)) / (pow(m_GARCH_vec(i), 2));
+    for (size_t i{ 0 }, n{ m_garch_vec.size() - 1 }; i < n; ++i) {
+        temp = 0.5 * (m_garch_vec(i) - pow(time_series(i) - x(3), 2)) / (pow(m_garch_vec(i), 2));
 
         dw += temp * inner_w(i);
         da += temp * inner_a(i);
         db += temp * inner_b(i);
-        dmu -= (time_series(i) - x(3)) / m_GARCH_vec(i);
+        dmu -= (time_series(i) - x(3)) / m_garch_vec(i);
     }
 
     ublas::vector<double> gradients(4);
@@ -79,7 +79,7 @@ ublas::vector<double> Gaussian::calcGradients(ublas::vector<double> const&  x) {
     return gradients;
 }
 
-ublas::vector<double> Gaussian::calcNumGradients(ublas::vector<double> const& x) {
+ublas::vector<double> Gaussian::calc_num_gradients(ublas::vector<double> const& x) {
     double epsilon{ 2.2 * pow(10, -16) };
     ublas::vector<double> increment{ sqrt(epsilon) * x };
     ublas::vector<double> num_gradients(4);
@@ -104,7 +104,7 @@ ublas::vector<double> Gaussian::calcNumGradients(ublas::vector<double> const& x)
 
 // Hessian: https://v8doc.sas.com/sashtml/ormp/chap5/sect28.htm
 //
-ublas::matrix<double> Gaussian::calcNumHessian(ublas::vector<double> const& x) {
+ublas::matrix<double> Gaussian::calc_num_hessian(ublas::vector<double> const& x) {
     ublas::vector<double> h(4);
     for (size_t i{ 0 }, n{ h.size() }; i < n; ++i) {
         h(i) = 0;
@@ -125,15 +125,15 @@ ublas::matrix<double> Gaussian::calcNumHessian(ublas::vector<double> const& x) {
     ublas::vector<double> hmu{ h };
     hmu(3) += inc(3);
 
-    ublas::vector<double> grad_x_add_hw{ calcGradients(x + hw) };
-    ublas::vector<double> grad_x_add_ha{ calcGradients(x + ha) };
-    ublas::vector<double> grad_x_add_hb{ calcGradients(x + hb) };
-    ublas::vector<double> grad_x_add_hmu{ calcGradients(x + hmu) };
+    ublas::vector<double> grad_x_add_hw{ calc_gradients(x + hw) };
+    ublas::vector<double> grad_x_add_ha{ calc_gradients(x + ha) };
+    ublas::vector<double> grad_x_add_hb{ calc_gradients(x + hb) };
+    ublas::vector<double> grad_x_add_hmu{ calc_gradients(x + hmu) };
 
-    ublas::vector<double> grad_x_sub_hw{ calcGradients(x - hw) };
-    ublas::vector<double> grad_x_sub_ha{ calcGradients(x - ha) };
-    ublas::vector<double> grad_x_sub_hb{ calcGradients(x - hb) };
-    ublas::vector<double> grad_x_sub_hmu{ calcGradients(x - hmu) };
+    ublas::vector<double> grad_x_sub_hw{ calc_gradients(x - hw) };
+    ublas::vector<double> grad_x_sub_ha{ calc_gradients(x - ha) };
+    ublas::vector<double> grad_x_sub_hb{ calc_gradients(x - hb) };
+    ublas::vector<double> grad_x_sub_hmu{ calc_gradients(x - hmu) };
 
     double dw2{ (grad_x_add_hw(0) - grad_x_sub_hw(0)) / (4.0 * inc(0)) 
         + (grad_x_add_hw(0) - grad_x_sub_hw(0)) / (4.0 * inc(0)) };
@@ -177,7 +177,7 @@ ublas::matrix<double> Gaussian::calcNumHessian(ublas::vector<double> const& x) {
     return matrixOperations::matrix_inv(Hessian);
 }
 
-double Gaussian::calcStepSize(
+double Gaussian::calc_step_size(
     ublas::vector<double> const& x, 
     ublas::vector<double> const& d
 ) {
@@ -235,7 +235,7 @@ ublas::vector<double> Gaussian::derivative_b(ublas::vector<double> const& x) {
     inner_db(0) = 0;
 
     for (size_t i{ 1 }, n{ inner_db.size() }; i < n; ++i) {
-        inner_db(i) = m_GARCH_vec(i - 1) + x(2) * inner_db(i - 1);
+        inner_db(i) = m_garch_vec(i - 1) + x(2) * inner_db(i - 1);
     }
 
     return inner_db;

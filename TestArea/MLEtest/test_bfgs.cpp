@@ -12,8 +12,9 @@
 
 #include <iostream>
 #include <vector>
-
 #include <chrono>
+#include <thread>
+#include <future>
 
 typedef std::chrono::high_resolution_clock Clock;
 using namespace boost::numeric;
@@ -61,15 +62,20 @@ int main() {
     std::vector<ublas::vector<double>> OptParamsAll(0);
 
     // Optimize parameters for all riskfactors
-    int nSolutions{ 100 }; // 2
+    int nSolutions{ 500 }; // 2
     int max_iter{ 100 };
     double epsilon{ pow(10, -7) };
 
     for (size_t i{ 0 }; i < nRiskfactors; ++i) {
         ublas::matrix_column<ublas::matrix<double>> xi{ hist_riskfactors, i }; // Get risk factor nr i.
 
-        ublas::vector<double> optGaussian_xi{ bfgs::run_bfgs_gaussian(nSolutions, xi, max_iter, epsilon) };
-        ublas::vector<double> optStudent_xi{ bfgs::run_bfgs_t(nSolutions, xi, max_iter, epsilon) };
+        //ublas::vector<double> optGaussian_xi{ bfgs::run_bfgs_gaussian(nSolutions, xi, max_iter, epsilon) };
+        //ublas::vector<double> optStudent_xi{ bfgs::run_bfgs_t(nSolutions, xi, max_iter, epsilon) };
+        auto future_gaussian_xi{ std::async(bfgs::run_bfgs_gaussian, nSolutions, xi, max_iter, epsilon) };
+        auto future_student_xi{ std::async(bfgs::run_bfgs_t, nSolutions, xi, max_iter, epsilon) };
+
+        ublas::vector<double> optGaussian_xi{ future_gaussian_xi.get() };
+        ublas::vector<double> optStudent_xi{ future_student_xi.get() };
 
         //Get uniform Timeseries
         if (optGaussian_xi(4) < optStudent_xi(5)) {    // Choose Gaussian marginal dist
@@ -90,8 +96,15 @@ int main() {
     Gaussian_Copula distG(U);
     Gaussian_Copula* gaussianC{ &distG };
 
-    ublas::vector<double> t_copula_results{ bfgs::run_bfgs_t_copula(10, TC, max_iter, epsilon) };
-    ublas::vector<double> norm_copula_results{ bfgs::run_bfgs_gaussian_copula(10, gaussianC, max_iter, epsilon) };
+    int n_copula_solutions{ 500 };
+    //ublas::vector<double> t_copula_results{ bfgs::run_bfgs_t_copula(n_copula_solutions, TC, max_iter, epsilon) };
+    //ublas::vector<double> norm_copula_results{ bfgs::run_bfgs_gaussian_copula(n_copula_solutions, gaussianC, max_iter, epsilon) };
+
+    auto future_student_copula{ std::async(bfgs::run_bfgs_t_copula, n_copula_solutions, TC, max_iter, epsilon) };
+    auto future_gaussian_copula{ std::async(bfgs::run_bfgs_gaussian_copula, n_copula_solutions, gaussianC, max_iter, epsilon) };
+
+    ublas::vector<double> t_copula_results{ future_student_copula.get() };
+    ublas::vector<double> norm_copula_results{ future_gaussian_copula.get() };
 
     std::cout << "OptParams first eigenvector = " << OptParamsAll[0] << std::endl;
     std::cout << "OptParams second eigenvector = " << OptParamsAll[1] << std::endl;

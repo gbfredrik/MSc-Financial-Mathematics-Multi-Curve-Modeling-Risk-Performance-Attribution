@@ -43,26 +43,26 @@ ublas::vector<double> bfgs::minimize(
     //Init hessian inverse matrix
     ublas::identity_matrix<double> I(n);
 
-    gradient_vec = dist->calcGradients(x);
+    gradient_vec = dist->calc_gradients(x);
 
     while (ublas::norm_2(gradient_vec) > epsilon && k < max_iter) {
-        //gradient_vec = dist->calcGradients(x);
+        //gradient_vec = dist->calc_gradients(x);
         d = -prod(H_inv, gradient_vec);
-        alpha = dist->calcStepSize(x, d);
+        alpha = dist->calc_step_size(x, d);
         s = alpha * d;
         x_new = x + s;
         //x_new = x + alpha * d;
         //std::cout << std::setprecision(16) << "Nya s   = " << s << std::endl;
         //std::cout << std::setprecision(16) << "Gamla s = " << x_new - x << std::endl << std::endl;
 
-        ublas::vector<double> gradient_vec_new{ dist->calcGradients(x_new) };
+        ublas::vector<double> gradient_vec_new{ dist->calc_gradients(x_new) };
         y = gradient_vec_new - gradient_vec;
         //s = x_new - x; // Gammal lösning men verkar sämre
         scale_H = inner_prod(y, s);
         l = 1.0 / scale_H;
 
         if (scale_H == 0) {
-            std::cout << "Breaking since H has invalid values.\n\n";
+            //std::cout << "Breaking since H has invalid values.\n\n";
             break;
         }
 
@@ -135,7 +135,7 @@ ublas::vector<double> bfgs::run_bfgs_gaussian(size_t const n, ublas::vector<doub
     }
 
     //Get smallest loglikelihood value and corresponding parameters
-    int index{ std::min_element(FV.begin(), FV.end()) - FV.begin() };
+    size_t index{ static_cast<size_t>(std::min_element(FV.begin(), FV.end()) - FV.begin()) };
     double smallest{ FV(index) };
 
     std::cout << "All FV:S  : " << FV << std::endl;
@@ -177,7 +177,7 @@ ublas::vector<double> bfgs::run_bfgs_t(size_t const n, ublas::vector<double> con
     }
 
     //Get smallest loglikelihood value and corresponding parameters
-    int index{ std::min_element(FV.begin(), FV.end()) - FV.begin() };
+    size_t index{ static_cast<size_t>(std::min_element(FV.begin(), FV.end()) - FV.begin()) };
     double smallest{ FV(index) };
 
     std::cout << "All FV:S Student t: " << FV << std::endl;
@@ -215,7 +215,7 @@ ublas::vector<double> bfgs::run_bfgs_gaussian_copula(size_t const n, Gaussian_Co
     }
 
     //Get smallest loglikelihood value and corresponding parameters
-    int index{ std::min_element(FV.begin(), FV.end()) - FV.begin() };
+    size_t index{ static_cast<size_t>(std::min_element(FV.begin(), FV.end()) - FV.begin()) };
     double smallest{ FV(index) };
 
     std::cout << "All FV:S  : " << FV << std::endl;
@@ -253,7 +253,7 @@ ublas::vector<double> bfgs::run_bfgs_t_copula(size_t const n, T_Copula* distribu
     }
 
     //Get smallest loglikelihood value and corresponding parameters
-    int index{ std::min_element(FV.begin(), FV.end()) - FV.begin() };
+    size_t index{ static_cast<size_t>(std::min_element(FV.begin(), FV.end()) - FV.begin()) };
     double smallest{ FV(index) };
 
     std::cout << "All FV:S  : " << FV << std::endl;
@@ -288,7 +288,7 @@ ublas::vector<double> bfgs::garch_vec(ublas::vector<double> const& time_series, 
 }
 
 ublas::matrix<double> bfgs::gen_start_params(size_t const n, std::string dist) { // Todo: Split into gen_start_t and gen_start_normal
-    int nParams{ 0 };
+    size_t nParams{ 0 };
     if (dist == "normal") {
         nParams = 4;
     }

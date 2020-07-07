@@ -43,16 +43,18 @@ BOOL __stdcall run_all_multiXL(
 	std::vector<CurveCollection> tenors(count_tenor);
 
     // Setup and read files
-	rf.filename = "fHist3650";
+	rf.filename = "fHist3650.csv";
+    rf.k = 6;
 	for (CurveCollection& cc : tenors) {
-		cc.filename = "piHist3650";
+		cc.filename = "piHist3650.csv";
+        cc.k = 6;
 	}
 
 	try {
 		// Read
-		rf.m_A = read_csv_matrix("fHist3650.csv"); // Todo: replace w/ rf.filename
+		rf.m_A = read_csv_matrix(rf.filename); // Todo: replace w/ rf.filename
 		for (CurveCollection& cc : tenors) {
-			cc.m_A = read_csv_matrix("piHist3650.csv"); // Todo: replace w/ cc.filename
+			cc.m_A = read_csv_matrix(cc.filename); // Todo: replace w/ cc.filename
 		}
 	} catch (std::exception const&) {
 		return -1;
@@ -65,12 +67,22 @@ BOOL __stdcall run_all_multiXL(
 		cc.m_A_trunc.resize(cc.m_A_trunc.size1(), curve_length);
 	}
 
-	int k{ 6 };
-	placeholder_eigen(rf, eigen_algorithm, eval_eigen, k);
+	// Risk factor calculation
+	placeholder_eigen(rf, eigen_algorithm, eval_eigen, rf.k);
     for (CurveCollection& cc : tenors) {
-        placeholder_eigen(cc, eigen_algorithm, eval_eigen, k);
+        placeholder_eigen(cc, eigen_algorithm, eval_eigen, cc.k);
     }
 
+    // Parameter estimation
+
+
+    // Risk measurement
+
+
+    // Backtesting
+
+
+    // Save results
 
 
 	return status;
@@ -194,5 +206,3 @@ void placeholder_eigen(
         write_csv_vector(curve_collection.v_Lambda, "eigval_" + curve_collection.filename + ".csv");
     }
 }
-
-

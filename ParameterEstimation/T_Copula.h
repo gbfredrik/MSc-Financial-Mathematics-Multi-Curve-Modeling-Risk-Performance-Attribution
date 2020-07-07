@@ -10,16 +10,16 @@ public:
     T_Copula(boost::numeric::ublas::matrix<double> series);
 
     double function_value(boost::numeric::ublas::vector<double> const& x);
-    boost::numeric::ublas::vector<double> calcGradients(boost::numeric::ublas::vector<double> const& x);
-    boost::numeric::ublas::vector<double> calcNumGradients(boost::numeric::ublas::vector<double> const& x);
-    double calcStepSize(
+    boost::numeric::ublas::vector<double> calc_gradients(boost::numeric::ublas::vector<double> const& x);
+    boost::numeric::ublas::vector<double> calc_num_gradients(boost::numeric::ublas::vector<double> const& x);
+    double calc_step_size(
         boost::numeric::ublas::vector<double> const& x,
         boost::numeric::ublas::vector<double> const& d
     );
 
 private:
-    boost::numeric::ublas::matrix<double> buildP(boost::numeric::ublas::vector<double> const& x);
-    boost::numeric::ublas::vector<double> getElements(boost::numeric::ublas::matrix<double> const& matrix);
+    boost::numeric::ublas::matrix<double> build_p(boost::numeric::ublas::vector<double> const& x);
+    boost::numeric::ublas::vector<double> get_elements(boost::numeric::ublas::matrix<double> const& matrix);
 
     double dGamma(double const t);
 };

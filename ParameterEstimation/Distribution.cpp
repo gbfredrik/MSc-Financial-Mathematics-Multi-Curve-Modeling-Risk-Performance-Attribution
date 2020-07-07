@@ -15,13 +15,13 @@ Distribution::Distribution(ublas::matrix<double> series)
 	time_series = x;
 }
 
-ublas::matrix<double> Distribution::calcNumHessian(ublas::vector<double> const& /*x*/) {
+ublas::matrix<double> Distribution::calc_num_hessian(ublas::vector<double> const& /*x*/) {
     ublas::matrix<double> v(0, 0);
 
 	return v;
 }
 
-ublas::vector<double> Distribution::calcNumGradients(ublas::vector<double> const& x) {
+ublas::vector<double> Distribution::calc_num_gradients(ublas::vector<double> const& x) {
 	double increment{ 0.00001 };
     ublas::vector<double> num_gradients(4);
     ublas::vector<double> x_0diff(x);
@@ -36,7 +36,7 @@ ublas::vector<double> Distribution::calcNumGradients(ublas::vector<double> const
 	return num_gradients;
 }
 
-ublas::vector<double> Distribution::calcGradients(ublas::vector<double> const& x) {
+ublas::vector<double> Distribution::calc_gradients(ublas::vector<double> const& x) {
     ublas::vector<double> gradients(2);
 	gradients(0) = 2 * (200 * pow(x(0), 3) - 200 * x(0) * x(1) + x(0) - 1);
 	gradients(1) = 200 * (x(1) - pow(x(0), 2));
@@ -48,7 +48,7 @@ double Distribution::function_value(ublas::vector<double> const& x) {
 	return pow(1 - x(0), 2) + 100 * pow(x(1) - x(0) * x(0), 2);
 }
 
-double Distribution::calcStepSize(
+double Distribution::calc_step_size(
     ublas::vector<double> const& x, 
     ublas::vector<double> const& d
 ) {

@@ -8,17 +8,17 @@ class Student_t : public Distribution {
 public:
     Student_t(boost::numeric::ublas::matrix<double> series);
 
-    void update_GARCH_vec(boost::numeric::ublas::vector<double> const& x);
+    void update_garch_vec(boost::numeric::ublas::vector<double> const& x);
     double function_value(boost::numeric::ublas::vector<double> const& x);
-    boost::numeric::ublas::vector<double> calcGradients(boost::numeric::ublas::vector<double> const& x);
-    boost::numeric::ublas::vector<double> calcNumGradients(boost::numeric::ublas::vector<double> const& x);
-    double calcStepSize(
+    boost::numeric::ublas::vector<double> calc_gradients(boost::numeric::ublas::vector<double> const& x);
+    boost::numeric::ublas::vector<double> calc_num_gradients(boost::numeric::ublas::vector<double> const& x);
+    double calc_step_size(
         boost::numeric::ublas::vector<double> const& x, 
         boost::numeric::ublas::vector<double> const& d
     );
 
 private:
-    boost::numeric::ublas::vector<double> m_GARCH_vec;
+    boost::numeric::ublas::vector<double> m_garch_vec;
     boost::numeric::ublas::vector<double> time_series;
 
     boost::numeric::ublas::vector<double> derivative_w(boost::numeric::ublas::vector<double> const& x);
