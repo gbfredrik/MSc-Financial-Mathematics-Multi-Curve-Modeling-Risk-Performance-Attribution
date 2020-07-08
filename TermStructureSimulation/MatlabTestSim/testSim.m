@@ -3,8 +3,6 @@ load('10YrCurves.mat')
 %load('fHist.mat')
 %load('piHist.mat')
 
-
-
 %% Simulate curves - All arguments
 startDay = 1;
 endDay = 3400;
@@ -12,8 +10,8 @@ endDay = 3400;
 DZero = fAll(2:end-1000,:) - fAll(1:end-1001,:);
 DTau = piAll(2:end-1000,:) - piAll(1:end-1001,:);
 
-kZero = 6;
-kTau = 6;
+kZero = 3;
+kTau = 3;
 
 CZero = cov(DZero);
 CTau = cov(DTau);
@@ -28,7 +26,7 @@ E.Zero = V(:,ind);
 E.Tau = V(:,ind);
 
 
-d = 1;
+d = 10;
 N = 2000;
 
 marginalGauss = {};
@@ -132,8 +130,8 @@ kappa = zeros(2, 1);
 %   5 - alpha
 %   6 - beta
 %   7 - hist
-%   8 - marginal     (gaussian or t)
-%   9 - copula       (gaussian or t)
+%   8 - marginal     (normal or t)
+%   9 - copula       (normal or t)
 %   10 - varRedType  (lhsd or none)
 %   11 - d
 %   12 - N
@@ -145,18 +143,18 @@ kappa = zeros(2, 1);
 %   17 - dfC
 %   18 - dfM
 
-%for i = 1:100
+for i = 1:2
 %  
-%tic
-%[fZeroOutGauss, fTauOutGauss, yee] = simMultipleYield(E, rhoGauss, muGauss, omegaGauss, alphaGauss, betaGauss, hist, ...
-%    marginalGauss, copulaGauss, varRedType, d, N, fRes, gammaGauss, kappa, xiHat, dfC, dfM);
+tic
+[fZeroOutGauss, fTauOutGauss] = simMultipleYield(E, rhoGauss, muGauss, omegaGauss, alphaGauss, betaGauss, hist, ...
+    marginalGauss, copulaGauss, varRedType, d, N, fRes, gammaGauss, kappa, xiHat, dfC, dfM);
 %tid = toc
 %clear simMultipleYield.mexw64
 %pause(0.01);
-tic
-[fZeroOutT, fTauOutT] = simMultipleYield(E, rhoT, muT, omegaT, alphaT, betaT, hist, ...
-    marginalT, copulaT, varRedType, d, N, fRes, gammaGauss, kappa, xiHat, dfC, dfM);
-tid = toc
+%tic
+%[fZeroOutT, fTauOutT] = simMultipleYield(E, rhoT, muT, omegaT, alphaT, betaT, hist, ...
+%    marginalT, copulaT, varRedType, d, N, fRes, gammaGauss, kappa, xiHat, dfC, dfM);
+%tid = toc
 
 
 T = 1:3650;
@@ -164,8 +162,8 @@ T = 1:3650;
 %subplot(1,2,1);
 %plot(T, fZeroOutGauss', T, fTauOutGauss')
 %subplot(1,2,2);
-plot(T, fZeroOutT')
-%pause(0.01);
+plot(T, fZeroOutGauss')
+pause(0.01);
 
 
 %figure;
@@ -173,8 +171,8 @@ plot(T, fZeroOutT')
  
 %mean(test,2)
 clear simMultipleYield.mexw64
-%pause(0.01);
-%end
+pause(0.01);
+end
 %mex ../simMultipleYield.cpp ../MultipleYieldSim.cpp ../varRed.cpp ../unfGen.cpp ../../Mathlibrary/statisticsOperations.cpp ../../Mathlibrary/matrixOperations.cpp ../../Mathlibrary/rvSim.cpp -IX:/boost_1_72_0 -IX:\exjobb\eigen-eigen-323c052e1731
 
 

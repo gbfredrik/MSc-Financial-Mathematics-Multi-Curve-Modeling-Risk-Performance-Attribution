@@ -45,7 +45,7 @@ matrix<double> unfGen::TC_sim(matrix<double> const& rho, size_t N, vector<double
 	L = matrixOperations::chol(rho);
 
 	// Generate i.i.d. standard normal random variables
-	matrix<double> X(N, k);
+	matrix<double> X(k, N);
 	X = rvSim::gen_normal(k, N);
 	
 	// Generate Correlated Gaussian samples
@@ -76,8 +76,6 @@ matrix<double> unfGen::TC_sim(matrix<double> const& rho, size_t N, vector<double
 	return U;
 
 }
-
-
 
 matrix<double> unfGen::GC_sim(matrix<double> const& rho, size_t N) {
 
