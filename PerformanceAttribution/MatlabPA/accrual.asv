@@ -1,0 +1,6 @@
+function [accrualFloat, accrualFix] = accrual(liborFixing, nextFix, dcf)
+
+accrualFloat = liborFixing * dcf * (1 - fracFloat);
+
+
+end

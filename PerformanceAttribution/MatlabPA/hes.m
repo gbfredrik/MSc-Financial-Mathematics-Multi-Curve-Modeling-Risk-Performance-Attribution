@@ -1,4 +1,4 @@
-function [H] = hes(N, y, startdate, floatCashFlowsUnknown, fixCashFlows, deltaTj, aZero, aPi, r, pi, floatcf, floatCashFlowsKnown)
+function [H] = hes(N, y, startdate, floatCashFlowsUnknown, fixCashFlows, deltaTj, aZero, aPi, r, pi, floatcf, floatCashFlowsKnown, ropFix)
 
 numFix = length(fixCashFlows);
 numUnknownFloat = length(floatCashFlowsUnknown);
@@ -32,7 +32,9 @@ for i = 1:numUnknownFloat - 1
         * exp(startdate/365 * r(startdate + 1) - floatCashFlowsUnknown(i + 1)/365 * r(floatCashFlowsUnknown(i + 1) + 1))');
 end
 
-
-H = float - fix;
-
+if ropFix == 'r'
+    H = fix - float;
+elseif ropFix == 'p'
+    H = float - fix;
+end
 end

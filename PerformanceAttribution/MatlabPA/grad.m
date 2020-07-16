@@ -1,4 +1,4 @@
-function [g] = grad(N, y, startdate, floatCashFlowsUnknown, fixCashFlows, deltaTj, aZero, aPi, r, pi, floatcf, floatCashFlowsKnown)
+function [g] = grad(N, y, startdate, floatCashFlowsUnknown, fixCashFlows, deltaTj, aZero, aPi, r, pi, floatcf, floatCashFlowsKnown, ropFix)
 
 
 numFix = length(fixCashFlows);
@@ -30,6 +30,9 @@ for i = 1:numUnknownFloat - 1
 end
 
 
-g = float - fix;
-
+if ropFix == 'r'
+    g = fix - float;
+elseif ropFix == 'p'
+    g = float - fix;
+end
 end
