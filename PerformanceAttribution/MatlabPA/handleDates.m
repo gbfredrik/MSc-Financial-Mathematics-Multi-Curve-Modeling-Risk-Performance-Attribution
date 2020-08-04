@@ -1,136 +1,97 @@
-function [floatcf, floatCashFlowsUnknown, floatCashFlowsKnown, fixCashFlows, Dt, deltaTj, cash, ttValueDate, liborFixing, blomvallFixing, dt] = ...
-    handleDates(deltaTj, N, yield, floatcf, times, j, fixingDate, floatCashFlowsUnknown, ...
-    floatCashFlowsKnown, fixCashFlows, r, pi, ropFix, libor, ttValueDate, dcIbor, dcFix, liborFixing, blomvallFixing, dt)
+function [floatCashFlows, fixCashFlows, daysToNextFloat, daysToNextFix, ttValueDate, dtFixNext, dtFloat, liborFixing, blomvallFixing, Dt, nextFix, workdaysToFloatPayment, last, workdaysToFixPayment, liborFixingPrev, dtFix] = ...
+            handleDates(N, yield, times, j, fixingDate, floatCashFlows, fixCashFlows, daysToNextFloat, daysToNextFix, ...
+            r, pi, ropFix, libor, ttValueDate, dcIbor, dcFix, liborFixing, blomvallFixing, dtFixNext, dtFloat, nextFix, last, liborFixingPrev, dtFix)
+
 
 %Decrease time to value date with one day
 dateDiff = times(j) - times(j - 1);
 ttValueDate = max(0, ttValueDate - dateDiff);
 
 %Check if two (fixingDate) days away from float cashflow
-floatCashKnownTemp = floatCashFlowsKnown;
+daysToNextFloatTemp = daysToNextFloat;
 workdaysToFloatPayment = 0;
 i = j;
-while floatCashKnownTemp >= fixingDate
+while daysToNextFloatTemp >= 0
     dateDiff = times(i) - times(i - 1);
-    floatCashKnownTemp = floatCashKnownTemp - dateDiff;
+    daysToNextFloatTemp = daysToNextFloatTemp - dateDiff;
+    if daysToNextFloatTemp <= 0
+        break
+    end
     workdaysToFloatPayment = workdaysToFloatPayment + 1;
     i = i + 1;
-    if workdaysToFloatPayment > 2
+    if workdaysToFloatPayment > 4
         break
     end
 end
 
 %Check if two (fixingDate) days away from fix cashflow
-fixCashTemp = fixCashFlows;
+daysToNextFixTemp = daysToNextFix;
 workdaysToFixPayment = 0;
 i = j;
-while fixCashTemp >= fixingDate
+while daysToNextFixTemp >= 0
     dateDiff = times(i) - times(i - 1);
-    fixCashTemp = fixCashTemp - dateDiff;
+    daysToNextFixTemp = daysToNextFixTemp - dateDiff;
+    if daysToNextFixTemp <= 0
+        break
+    end
     workdaysToFixPayment = workdaysToFixPayment + 1;
     i = i + 1;
-    if workdaysToFixPayment > 2
+    if workdaysToFixPayment > 4
         break
     end
 end
 
 %Decrease days to cashflows
 dateDiff = times(j) - times(j-1);
-floatCashFlowsUnknown = floatCashFlowsUnknown - dateDiff;
-floatCashFlowsKnown = floatCashFlowsKnown - dateDiff;
+floatCashFlows = floatCashFlows - dateDiff;
 fixCashFlows = fixCashFlows - dateDiff;
-
-
+daysToNextFloat = daysToNextFloat - dateDiff;
+daysToNextFix = daysToNextFix - dateDiff;
 
 %Case 1: day 0 for a contract is handled separately in main function
 
 %Case 2: day when a floating coupon is fixed
-if ((workdaysToFloatPayment == fixingDate) && (length(floatCashFlowsUnknown) > 1))  
-   
-   floatCashFlowsKnown = [floatCashFlowsKnown, floatCashFlowsUnknown(2)]; %New floating cash flow is determined
-   dt = [dt, handleDaycount(dcIbor, floatCashFlowsKnown(2))];
-   liborFixing = N * dt(2) * libor(j); 
-   blomvallFixing = N * dt(2) * (r(floatCashFlowsKnown(2)+1) + pi(floatCashFlowsKnown(2) + 1));
-   floatcf = [floatcf, blomvallFixing]; %Set cash flow size
-   floatCashFlowsUnknown = floatCashFlowsUnknown(2:end); %Reduce number of unknown cash flows
+if ((workdaysToFloatPayment == fixingDate) && (length(floatCashFlows) > 1)) && (workdaysToFixPayment > fixingDate)   
+
+   dtFloat = handleDaycount(dcIbor, floatCashFlows(2));
+   liborFixingPrev = liborFixing;
+   liborFixing = N * dtFloat * libor(j);
+   %blomvallFixing = N * dtFloat * (r(daysToNextFloat + 1) + pi(daysToNextFloat + 1))
+   blomvallFixing = N * dtFloat * (r(floatCashFlows(2) + 1) + pi(floatCashFlows(2) + 1));
    
    if ropFix == 'r'
-        Dt = -(liborFixing - blomvallFixing) %Difference between Blomvall and actual cash flow
+        Dt = -(blomvallFixing - liborFixing); %Difference between Blomvall and actual cash flow
    elseif ropFix == 'p'
-        Dt = liborFixing - blomvallFixing; %Difference between Blomvall and actual cash flow
+        Dt = blomvallFixing - liborFixing; %Difference between Blomvall and actual cash flow
    end
-   
-   cash = 0; %No payout on these dates
-   
-%Case 3: date of float cash flow
-elseif (((floatCashFlowsKnown(1) == 0) && (fixCashFlows(1) > 0) && length(floatCashFlowsKnown) > 1))
-    
-    %floatCashFlowsKnown = floatCashFlowsKnown(2); %Known float cash flows has decreased
-    %floatcf = floatcf(2); 
-    
-    %Cash is payed
-    %if ropFix == 'r'
-    %    cash = -floatcf(1); 
-    %elseif ropFix == 'p'
-    %    cash = floatcf(1);   
-    %end
-    cash = 0;
-    dt = dt(2);
-    Dt = 0; %No fixing difference on these dates
-    
-elseif (((floatCashFlowsKnown(1) < 0) && (fixCashFlows(1) > 0) && length(floatCashFlowsKnown) > 1))
-    
-    floatCashFlowsKnown = floatCashFlowsKnown(2); %Known float cash flows has decreased
-    floatcf = floatcf(2); 
-    cash = 0;
+ 
+elseif ((workdaysToFloatPayment == 0) && (workdaysToFixPayment == 0) && (length(floatCashFlows) == 1))
+
+    last = 1;
     Dt = 0;
-    
+
 % case 4: date of fix and float cash flow
-elseif ((floatCashFlowsKnown(1) == 0) && (fixCashFlows(1) == 0) && (length(floatCashFlowsKnown) == 1))
-    
-    %Do if contract doesn't mature
-    %if length(floatCashFlowsUnknown) > 1
-        
-    %    floatCashFlowsKnown = floatCashFlowsKnown(2); %Known float cash flows has decreased
-    %    floatcf = floatcf(2);
-    %    fixCashFlows = fixCashFlows(2:end); %Known fix cash flows has decreased
+elseif ((workdaysToFloatPayment == fixingDate) && (workdaysToFixPayment == fixingDate) && (length(floatCashFlows) > 1))
+       
+   dtFloat = handleDaycount(dcIbor, floatCashFlows(2)); %ny
+   liborFixingPrev = liborFixing;
+   liborFixing = N * dtFloat * libor(j);
 
-    %end
+   blomvallFixing = N * dtFloat * (r(floatCashFlows(2) + 1) + pi(floatCashFlows(2) + 1));
+   
+    nextFix = N * yield * dtFix(2); %ny
     
-    %Cash payout is the difference in floating and fix
-    if ropFix == 'r'
-        cash = N * yield - floatcf(1);
-    elseif ropFix == 'p'
-        cash = -N * yield + floatcf(1);
-    end
-    
-    Dt = 0; %No fixing difference on these dates
-    
-elseif ((floatCashFlowsKnown(1) < 0) && (fixCashFlows(1) < 0))
-    
-    if length(floatCashFlowsUnknown) > 1
-        
-        floatCashFlowsKnown = floatCashFlowsKnown(2); %Known float cash flows has decreased
-        floatcf = floatcf(2);
-        fixCashFlows = fixCashFlows(2:end); %Known fix cash flows has decreased
-
-    end  
-    
-    cash = 0;
-    Dt = 0;
+   if ropFix == 'r'
+        Dt = -(blomvallFixing - liborFixing); %Difference between Blomvall and actual cash flow
+   elseif ropFix == 'p'
+        Dt = blomvallFixing - liborFixing; %Difference between Blomvall and actual cash flow
+   end
     
 %If regular day
 else
 
-    cash = 0;
     Dt = 0;
-    
+
 end
-%Update fix leg dt
-deltaTj(1) = handleDaycount(dcFix, fixCashFlows(1)-ttValueDate);
-if length(fixCashFlows) > 1
-    for k = 2:length(fixCashFlows) - 1
-        deltaTj(k) = handleDaycount(dcFix, fixCashFlows(k+1)-fixCashFlows(k));
-    end
-end
+
 end

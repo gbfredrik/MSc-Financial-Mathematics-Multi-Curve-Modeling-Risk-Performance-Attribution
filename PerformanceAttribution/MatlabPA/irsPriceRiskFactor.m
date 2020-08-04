@@ -1,38 +1,35 @@
-function [P] = irsPriceRiskFactor(N, y, ttValueDate, floatCashFlowsUnknown, fixCashFlows, ...
-    deltaTj, aZero, aPi, XiZero, XiPi, floatcf, floatCashFlowsKnown, ropFix)
+function [P] = irsPriceRiskFactor(N, y, ttValueDate, floatCashFlows, fixCashFlows, dtFix, aZero, aPi, XiZero, XiPi, ropFix, nextFix, blomvallFixing, daysToNextFix, daysToNextFloat)
 
 numFix = length(fixCashFlows);
-numUnknownFloat = length(floatCashFlowsUnknown);
-numKnownFloat = length(floatCashFlowsKnown);
+numFloat = length(floatCashFlows);
 
-%* deltaTj(i)
+
 %Calc fix leg
-fix = 0;
-for i = 1:numFix
-    fix = fix + N * y  * exp(ttValueDate/365 * aZero(ttValueDate + 1,:) * XiZero ...
+fix = nextFix * exp(ttValueDate/365 * aZero(ttValueDate + 1,:) * XiZero ...
+        - daysToNextFix/365 * aZero(daysToNextFix + 1,:) * XiZero);
+    
+for i = 2:numFix
+    fix = fix + N * y * dtFix(i) * exp(ttValueDate/365 * aZero(ttValueDate + 1,:) * XiZero ...
         - fixCashFlows(i)/365 * aZero(fixCashFlows(i) + 1,:) * XiZero)';
 end
 
 
 %Calc float leg
-float = 0;
-for i = 1:numKnownFloat
-    float = float + floatcf(i) * exp(ttValueDate/365 * aZero(ttValueDate + 1,:) * XiZero ...
-        - floatCashFlowsKnown(i)/365 * aZero(floatCashFlowsKnown(i) + 1,:) * XiZero)';
-end
-
-for i = 1:numUnknownFloat - 1
-    float = float + N * (exp(floatCashFlowsUnknown(i + 1)/365 * (aPi(floatCashFlowsUnknown(i + 1) + 1,:) * XiPi) ...
-        - floatCashFlowsUnknown(i)/365 * (aZero(floatCashFlowsUnknown(i) + 1,:) * XiZero + aPi(floatCashFlowsUnknown(i) + 1,:) * XiPi)...
+float = blomvallFixing * exp(ttValueDate/365 * aZero(ttValueDate + 1,:) * XiZero ...
+        - daysToNextFloat/365 * aZero(daysToNextFloat + 1,:) * XiZero);
+    
+for i = 1:numFloat - 1
+    float = float + N * (exp(floatCashFlows(i + 1)/365 * (aPi(floatCashFlows(i + 1) + 1,:) * XiPi) ...
+        - floatCashFlows(i)/365 * (aZero(floatCashFlows(i) + 1,:) * XiZero + aPi(floatCashFlows(i) + 1,:) * XiPi)...
         + ttValueDate/365 * aZero(ttValueDate + 1,:) * XiZero)' ...
         - exp(ttValueDate/365 * aZero(ttValueDate + 1,:) * XiZero ...
-        - floatCashFlowsUnknown(i + 1)/365 * aZero(floatCashFlowsUnknown(i + 1) + 1,:) * XiZero)');
+        - floatCashFlows(i + 1)/365 * aZero(floatCashFlows(i + 1) + 1,:) * XiZero)');
 end
 
 if ropFix == 'r'
-    P = float - fix;
-elseif ropFix == 'p'
     P = fix - float;
+elseif ropFix == 'p'
+    P = float - fix;
 end
 
 end

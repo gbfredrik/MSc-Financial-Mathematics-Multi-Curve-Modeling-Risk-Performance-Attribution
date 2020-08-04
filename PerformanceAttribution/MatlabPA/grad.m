@@ -1,32 +1,30 @@
-function [g] = grad(N, y, startdate, floatCashFlowsUnknown, fixCashFlows, deltaTj, aZero, aPi, r, pi, floatcf, floatCashFlowsKnown, ropFix)
+function [g] = grad(N, y, ttValueDate, fixCashFlows, deltaTj, aZero, aPi, r, pi, floatCashFlows, ropFix, nextFix, blomvallFixing, daysToNextFix, daysToNextFloat)
 
 
 numFix = length(fixCashFlows);
-numUnknownFloat = length(floatCashFlowsUnknown);
-numKnownFloat = length(floatCashFlowsKnown);
+numFloat = length(floatCashFlows);
 
-fix = 0;
+
+fix = nextFix * (ttValueDate/365 * aZero(ttValueDate + 1,:) - daysToNextFix/365 * aZero(daysToNextFix + 1,:))' ...
+        * exp(ttValueDate/365 * r(ttValueDate + 1) - daysToNextFix/365 * r(daysToNextFix + 1))';
+
 % Calc fix leg
 for i = 1:numFix
-    fix = fix + deltaTj(i) * (startdate/365 * aZero(startdate + 1,:) - fixCashFlows(i)/365 * aZero(fixCashFlows(i) + 1,:))' ...
-        * exp(startdate/365 * r(startdate + 1) - fixCashFlows(i)/365 * r(fixCashFlows(i) + 1))';
+    fix = fix + N * y * deltaTj(i) * (ttValueDate/365 * aZero(ttValueDate + 1,:) - fixCashFlows(i)/365 * aZero(fixCashFlows(i) + 1,:))' ...
+        * exp(ttValueDate/365 * r(ttValueDate + 1) - fixCashFlows(i)/365 * r(fixCashFlows(i) + 1))';
 end
-fix = N * y * fix;
 
-% Calc float leg
-float = 0;
-for i = 1:numKnownFloat
-    float = float + floatcf(i) * (startdate/365 * aZero(startdate + 1,:) - floatCashFlowsKnown(i)/365 * aZero(floatCashFlowsKnown(i) + 1,:))' ...
-        * exp(startdate/365 * r(startdate + 1) - floatCashFlowsKnown(i)/365 * r(floatCashFlowsKnown(i) + 1))';
-    
-end
-for i = 1:numUnknownFloat - 1
-    float = float + N * ((floatCashFlowsUnknown(i + 1)/365 * aPi(floatCashFlowsUnknown(i + 1) + 1,:) - floatCashFlowsUnknown(i)/365 * (aZero(floatCashFlowsUnknown(i) + 1,:) + aPi(floatCashFlowsUnknown(i) + 1,:)) ...
-        + startdate/365 * aZero(startdate + 1,:))' ...
-        * exp(floatCashFlowsUnknown(i + 1)/365 * pi(floatCashFlowsUnknown(i + 1) + 1) - floatCashFlowsUnknown(i)/365 * (r(floatCashFlowsUnknown(i) + 1) + pi(floatCashFlowsUnknown(i) + 1)) ...
-        + startdate/365 * r(startdate + 1))' ...
-        - (startdate/365 * aZero(startdate + 1,:) - floatCashFlowsUnknown(i + 1)/365 * aZero(floatCashFlowsUnknown(i + 1) + 1,:))' ...
-        * exp(startdate/365 * r(startdate + 1) - floatCashFlowsUnknown(i + 1)/365 * r(floatCashFlowsUnknown(i + 1) + 1))');
+
+float = blomvallFixing * (ttValueDate/365 * aZero(ttValueDate + 1,:) - daysToNextFloat/365 * aZero(daysToNextFloat + 1,:))' ...
+        * exp(ttValueDate/365 * r(ttValueDate + 1) - daysToNextFloat/365 * r(daysToNextFloat + 1))';
+
+for i = 1:numFloat - 1
+    float = float + N * ((floatCashFlows(i + 1)/365 * aPi(floatCashFlows(i + 1) + 1,:) - floatCashFlows(i)/365 * (aZero(floatCashFlows(i) + 1,:) + aPi(floatCashFlows(i) + 1,:)) ...
+        + ttValueDate/365 * aZero(ttValueDate + 1,:))' ...
+        * exp(floatCashFlows(i + 1)/365 * pi(floatCashFlows(i + 1) + 1) - floatCashFlows(i)/365 * (r(floatCashFlows(i) + 1) + pi(floatCashFlows(i) + 1)) ...
+        + ttValueDate/365 * r(ttValueDate + 1))' ...
+        - (ttValueDate/365 * aZero(ttValueDate + 1,:) - floatCashFlows(i + 1)/365 * aZero(floatCashFlows(i + 1) + 1,:))' ...
+        * exp(ttValueDate/365 * r(ttValueDate + 1) - floatCashFlows(i + 1)/365 * r(floatCashFlows(i + 1) + 1))');
 end
 
 
@@ -35,4 +33,5 @@ if ropFix == 'r'
 elseif ropFix == 'p'
     g = float - fix;
 end
+
 end

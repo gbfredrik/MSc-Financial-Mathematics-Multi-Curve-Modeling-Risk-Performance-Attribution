@@ -23,7 +23,7 @@ for i = 1:numUnknownFloat-1
 end
 
 if ropFix == 'r'
-    P = float - fix;
+    P = fix - float;
 elseif ropFix == 'p'
     P = float - fix;
 end
