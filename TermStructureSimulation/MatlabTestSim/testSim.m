@@ -26,7 +26,7 @@ E.Zero = V(:,ind);
 E.Tau = V(:,ind);
 
 
-d = 10;
+d = 1;
 N = 2000;
 
 marginalGauss = {};
@@ -143,7 +143,7 @@ kappa = zeros(2, 1);
 %   17 - dfC
 %   18 - dfM
 
-for i = 1:2
+for i = 1:10
 %  
 tic
 [fZeroOutGauss, fTauOutGauss] = simMultipleYield(E, rhoGauss, muGauss, omegaGauss, alphaGauss, betaGauss, hist, ...
@@ -154,25 +154,29 @@ tic
 %tic
 %[fZeroOutT, fTauOutT] = simMultipleYield(E, rhoT, muT, omegaT, alphaT, betaT, hist, ...
 %    marginalT, copulaT, varRedType, d, N, fRes, gammaGauss, kappa, xiHat, dfC, dfM);
-%tid = toc
+tid = toc
 
 
 T = 1:3650;
 
+figure(1)
 %subplot(1,2,1);
 %plot(T, fZeroOutGauss', T, fTauOutGauss')
 %subplot(1,2,2);
 plot(T, fZeroOutGauss')
-pause(0.01);
+%pause(0.01);
 
 
 %figure;
 %plot(T, fTauOut')
  
 %mean(test,2)
-clear simMultipleYield.mexw64
 pause(0.01);
 end
+clear simMultipleYield.mexw64
+
 %mex ../simMultipleYield.cpp ../MultipleYieldSim.cpp ../varRed.cpp ../unfGen.cpp ../../Mathlibrary/statisticsOperations.cpp ../../Mathlibrary/matrixOperations.cpp ../../Mathlibrary/rvSim.cpp -IX:/boost_1_72_0 -IX:\exjobb\eigen-eigen-323c052e1731
 
+%mex ../simMultipleYield.cpp ../MultipleYieldSim.cpp ../varRed.cpp ../unfGen.cpp ../../Mathlibrary/statisticsOperations.cpp ../../Mathlibrary/matrixOperations.cpp ../../Mathlibrary/rvSim.cpp -IX:\Documents\MSc Git\MScCurveModeling\Dependencies\boost_1_72_0 -IX:\Documents\MSc Git\MScCurveModeling\Dependencies\eigen-3.3.7
+%mex ../simMultipleYield.cpp ../MultipleYieldSim.cpp ../varRed.cpp ../unfGen.cpp ../../Mathlibrary/statisticsOperations.cpp ../../Mathlibrary/matrixOperations.cpp ../../Mathlibrary/rvSim.cpp -I..\..\Dependencies\boost_1_72_0 -I..\..\Dependencies\eigen-3.3.7
 

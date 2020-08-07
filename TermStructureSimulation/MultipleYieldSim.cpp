@@ -154,9 +154,15 @@ void MultipleYieldSim::simMultipleDaily(vector<matrix<double>> const& E, vector<
 /*
 	Function to simulate d days ahead 1 time each.
 */
-void MultipleYieldSim::simSingleMultipleDaily(vector<matrix<double>> const& E, vector<matrix<double>> const& eps, int M, int N,
-	
-	vector<matrix<double>>& fRes, vector<matrix<double>>& histPrevSim, vector<matrix<double>>& histPrevPrevSim) {
+void MultipleYieldSim::simSingleMultipleDaily(
+    vector<matrix<double>> const& E, 
+    vector<matrix<double>> const& eps, 
+    int M, 
+    int N,
+	vector<matrix<double>>& fRes, 
+    vector<matrix<double>>& histPrevSim, 
+    vector<matrix<double>>& histPrevPrevSim
+) {
 	size_t n = E(0).size1();
 	matrix<double> pi(n, M - 1);
 
@@ -170,8 +176,7 @@ void MultipleYieldSim::simSingleMultipleDaily(vector<matrix<double>> const& E, v
 				column(histPrevPrevSim(k), i) = column(fRes(k), i);
 				column(fRes(k), i) = column(fRes(k), i) + prod(E(k), column(eps(k), i)); // +prod(E(k)(), (kappa(k) * (xiHat(k) - ) + eps(k)(i, j)); // Simulate risk-free curve
 				column(histPrevSim(k), i) = column(fRes(k), i);
-			}
-			else {
+			} else {
 				column(histPrevPrevSim(k), i) = column(fRes(k), i) - column(fRes(0), k);
 				column(fRes(k), i) = column(fRes(k - 1), i) + column(pi, k - 1) + prod(E(k), column(eps(k), i)); //+ kappa(k) * (xiHat(k) - ) + eps(k)(i, j); // Simulate tenor curves
 				column(histPrevSim(k), i) = column(fRes(k), i) - column(fRes(0), k);
@@ -179,7 +184,3 @@ void MultipleYieldSim::simSingleMultipleDaily(vector<matrix<double>> const& E, v
 		}
 	}
 }
-
-
-
-
