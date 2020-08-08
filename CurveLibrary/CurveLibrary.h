@@ -8,7 +8,9 @@
 
 LONG __stdcall testXL(int x, int& y);
 
-BOOL __stdcall run_all_multiXL(
+BOOL __stdcall generate_multi_risk_factorsXL(
+    char const* _file_path,
+    char const* _file_names,
 	int const eigen_algorithm,
 	bool const eval_eigen,
 	double* return_norm_errors,
@@ -26,6 +28,5 @@ void placeholder_eigen(
 	CurveCollection& curve_collection,
 	int const eigen_algorithm,
 	bool const eval_eigen,
-	int const k,
     bool const save = false
 );

@@ -1,0 +1,15 @@
+table_data = readtable("PCA_Validation_Data.csv");
+num_data = table2array(table_data);
+
+%%
+clearvars  -except num_data
+D = diff(num_data); % == num_data(2:end,:)-num_data(1:end-1,:)
+C = cov(D);
+[U1, Sigma1, V1] = svd(D./sqrt(8));
+[U, Sigma, V2] = svd(D);
+(Sigma./sqrt(8)).^2
+
+[E, D] = eigs(C, 5);
+
+%Sigma.^2
+%D
