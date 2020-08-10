@@ -1,12 +1,16 @@
 close all;
 clear;
 figwaitbar = waitbar(0, 'Progress');
+
+% Variables to save
+tradeDatesAll = [];
+fDatesAll = [];
+TAll = [];
 fAll = [];
 piAll = [];
+zAll = [];
 
 measurementPath = '.\measurement';
-% measurementPath = '/home/jorbl45/axel/jorbl45/prog/XiFinPortfolio/matlab/measurement';
-
 addpath(measurementPath)
 
 c = 7;
@@ -94,7 +98,7 @@ isHoliday = mexPortfolio('isHoliday', onCal, floor(times), floor(times)); % Note
 times(isHoliday==1) = []; % Removes all holidays
 %%
 % for k=length(times):length(times)
-for k=1:length(times)
+for k=1:5%length(times)
   tradeDate = floor(times(k));
 %   datestr(tradeDate)
 
@@ -201,7 +205,7 @@ for k=1:length(times)
 	mu = 1.0;
 	nIterations = 200;
   iterationPrint = 0; %true; % Default från Jörgen är 1
-	checkKKT = 0; %true; % Default från Jörgen är 1
+	checkKKT = 1; %true; % Default från Jörgen är 1
 	precision = 1E-6;
 	precisionEq = 1E-10;
 	precisionKKT = 1E-10;
@@ -262,12 +266,16 @@ for k=1:length(times)
 %   end
   
   %pause(0.01);
-  fAll = [fAll; f(1:3650)'];
-  piAll = [piAll; pi(1:3650)'];
+  tradeDatesAll = [tradeDatesAll tradeDate];
+  fDatesAll = [fDatesAll; [fDates zeros(1,3665-nF-1)]];
+  TAll = [TAll; [T zeros(1,3665-nF-1)]];
+  fAll = [fAll; [f; zeros(3665-nF,1)]'];
+  piAll = [piAll; [pi; zeros(3665-nF,1)]'];
+  zAll = [zAll; [z; 100*ones(50 - length(z),1)]'];
   
   waitbar(k/length(times), figwaitbar, sprintf('Progress: k = %i / %i', k, length(times)))
 end
-
+%clearvars -except measurementPath currency tradeDatesAll fDatesAll TAll fAll piAll zAll
 save(strcat(currency, '_10YrCurves.mat'))
 
 %rmpath(measurementPath)
