@@ -2,7 +2,12 @@ close all;
 clear;
 figwaitbar = waitbar(0, 'Progress');
 
+% Set file name
+dataPath = '../../Data/';
+fileName = 'EUR';
+
 % Variables to save
+
 tradeDatesAll = [];
 fDatesAll = [];
 TAll = [];
@@ -13,7 +18,7 @@ zAll = [];
 measurementPath = '.\measurement';
 addpath(measurementPath)
 
-c = 7;
+c = 2;
 if (c==1) % CHF
   currency = 'CHF'; cal = 'SWI'; currencyTimeZone = 'Europe/Paris';
   iborName = 'LIBORCHF3M'; iborCal = 'SWI,UKG'; iborCalFixing = 'UKG'; tenorIRS = '6M'; iborTimeZone = 'Europe/London'; settlementLagIRS = 2; irsBDC = 'M'; iborDCC = 'MMA0';
@@ -65,21 +70,24 @@ elseif (c==7) % USD
   oisStructure = 'PAID:FIXED LBOTH SETTLE:2WD FRQ:1 CCM:MMA0 DMC:FOL EMC:SAME CFADJ:NO REFDATE:MATURITY CLDR:USA PDELAY:2 LFLOAT IDX:OFFER'; % 
   timeToMaturityFRA = '3X6'; fraDCC = 'MMA0';
 end
-fileName = currency;
 
-[pl, ric, times, assetID, assetType, assetTenor, iborTenor, currencies] = populatePortfolioWithData(fileName, currency, currencyTimeZone, onTimeZone);
+[pl, ric, times, assetID, assetType, assetTenor, iborTenor, currencies] = populatePortfolioWithData(strcat(dataPath, fileName), currency, currencyTimeZone, onTimeZone);
 
 indOIS = find(strcmp(tenorON, assetTenor));
 indFRA = find(strcmp(tenorIRS, assetTenor) &  pl.atFRAG == assetType{1});
 indIRS = find(strcmp(tenorIRS, assetTenor) &  pl.atIRSG == assetType{1});
 indIBOR = find(strcmp(tenorIRS, iborTenor));
 %%
-if (c==6)
-  indOIS = indOIS(1:14); % Only keep up to two years (currently to slow solver)
-  indIRS = indIRS(1:2);    % Only keep up to two years (currently to slow solver)
+if (c==2) % OK
+    %indOIS = indOIS(1:27);
+    %indIRS = [];%indIRS(1:11);
+    %indFRA = [];
+elseif (c==6)
+  indOIS = indOIS(1:14); % TODO
+  indIRS = indIRS(1:2); % TODO
 elseif (c==7)
-  indOIS = indOIS(1:24); % Only keep up to two years (currently to slow solver)
-  indIRS = indIRS(1:9);    % Only keep up to two years (currently to slow solver)
+  indOIS = indOIS(1:24); % TODO
+  indIRS = indIRS(1:9); % TODO
 end
 % % Small test example
 % indOIS = indOIS(3); 
@@ -91,14 +99,14 @@ cashDCC = 'MMA0';
 cashFrq = '1D';
 cashEom = 'S';
 cashBDC = 'F';
-irStartDate = datenum(2005,01,1);
+irStartDate = datenum(2005,01,01);
 cashID = mexPortfolio('createCash', currency, accountName, cashDCC, cashFrq, cashEom, cashBDC, cal, irStartDate);
 
 isHoliday = mexPortfolio('isHoliday', onCal, floor(times), floor(times)); % Note that projected holidays may change over time (holidays are added and removed, hence the date when the calendar is defined is important)
 times(isHoliday==1) = []; % Removes all holidays
 %%
 % for k=length(times):length(times)
-for k=1:5%length(times)
+for k=1:length(times)
   tradeDate = floor(times(k));
 %   datestr(tradeDate)
 
@@ -276,6 +284,6 @@ for k=1:5%length(times)
   waitbar(k/length(times), figwaitbar, sprintf('Progress: k = %i / %i', k, length(times)))
 end
 %clearvars -except measurementPath currency tradeDatesAll fDatesAll TAll fAll piAll zAll
-save(strcat(currency, '_10YrCurves.mat'))
+save(strcat(fileName, '_10YrCurves.mat'))
 
 %rmpath(measurementPath)

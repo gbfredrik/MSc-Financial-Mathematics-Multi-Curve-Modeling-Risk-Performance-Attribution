@@ -1,11 +1,12 @@
 % function createMatFromExcel(fileName)
 % fileName = 'CHF.xlsx';
-% fileName = 'EUR.xls';
+ fileName = 'EUR.xlsx';
 % fileName = 'GBP.xlsx';
 % fileName = 'JPY.xlsx';
 % fileName = 'KRW.xlsx';
 % fileName = 'SEK.xlsx';
-fileName = 'EUR.xlsx';
+%fileName = "../../../Data/EUR_IS.xlsx";
+fileNameMatlab = "EUR_TEST";
 
 [type, sheetNames]=xlsfinfo(fileName);
 
@@ -41,8 +42,6 @@ for k = 1:length(sheetNames)
   i = i+1;
 end
 
-k = strfind(fileName, '.');
-fileNameMatlab = fileName(1:k(end)-1);
 
 save(fileNameMatlab, 'sheet', 'ric', 'dates', 'data');
 
