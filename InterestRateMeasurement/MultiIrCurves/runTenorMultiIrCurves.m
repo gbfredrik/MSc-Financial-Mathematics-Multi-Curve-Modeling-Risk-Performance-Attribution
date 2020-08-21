@@ -253,40 +253,40 @@ for k=1:length(times)
     pi = u(nF+1:end);
     
     %% ---
-    %   instrT = zeros(size(z));
-    %   instrf = zeros(size(z));
-    %   for i=1:length(instrID)
-    %     at = mexPortfolio('assetType', instrID(i));
-    %     n = instr.maturityDate(i)-tradeDate;
-    %     instrT(i) = T(n);
-    %     if (at == pl.atOIS)
-    %       instrf(i) = f(n);
-    %     elseif (at == pl.atDeposit || at == pl.atFRA || at == pl.atIRS)
-    %       % instrf(i) = pi(n);
-    %       instrf(i) = f(n) + pi(n);
-    %     end
-    %   end
-    %
-    %   %plot(T(1:end-1), f, T(1:end-1), pi, instrT, instrf+z, 'o
-    %   curve_fig = figure();
-    %   plot(T(1:end-1), f*100, T(1:end-1), (f+pi)*100, instrT, (instrf+z)*100, 'gx');
-    %   [~, eInd] = sort(abs(z), 1, 'descend');
-    %   for j = 1:min(3,length(eInd))
-    %     %text(instrT(eInd(j))+0.1, instrf(eInd(j)) + z(eInd(j)), instr.assetRIC(eInd(j)));
-    %   end
-    %   %title(datestr(times(k)));
-    %   legend(tenorON, tenorIRS, 'Quoted prices', 'Location', 'SouthEast')
-    %   xlabel('Time [years]')
-    %   ylabel('Forward rate [%]')
-    %   exportgraphics(curve_fig, sprintf('Figures/%s_%i.png', fileName, k));
-    %
-    %   fprintf('\nGraphed trade date: \n')
-    %   disp(datestr(tradeDate))
-    %
-    %   for j=1:length(instrID)
-    % %     [timeData, data] = mexPortfolio('getValues', instrID(j), times(k), currencyTermTimeZone, {'BID', 'ASK'});
-    %     fprintf('%3d %18s %12s %9f %9f\n',j,instr.assetRIC{j}, datestr(instr.maturityDate(j)), instr.data{j}.price(3), z(j));
-    %   end
+%       instrT = zeros(size(z));
+%       instrf = zeros(size(z));
+%       for i=1:length(instrID)
+%         at = mexPortfolio('assetType', instrID(i));
+%         n = instr.maturityDate(i)-tradeDate;
+%         instrT(i) = T(n);
+%         if (at == pl.atOIS)
+%           instrf(i) = f(n);
+%         elseif (at == pl.atDeposit || at == pl.atFRA || at == pl.atIRS)
+%           % instrf(i) = pi(n);
+%           instrf(i) = f(n) + pi(n);
+%         end
+%       end
+%     
+%       %plot(T(1:end-1), f, T(1:end-1), pi, instrT, instrf+z, 'o
+%       curve_fig = figure();
+%       plot(T(1:end-1), f*100, T(1:end-1), (f+pi)*100, instrT, (instrf+z)*100, 'gx');
+%       [~, eInd] = sort(abs(z), 1, 'descend');
+%       for j = 1:min(3,length(eInd))
+%         %text(instrT(eInd(j))+0.1, instrf(eInd(j)) + z(eInd(j)), instr.assetRIC(eInd(j)));
+%       end
+%       %title(datestr(times(k)));
+%       legend(tenorON, tenorIRS, 'Quoted prices', 'Location', 'SouthEast')
+%       xlabel('Time [years]')
+%       ylabel('Forward rate [%]')
+%       exportgraphics(curve_fig, sprintf('Figures/%s_%i.png', fileName, k));
+%     
+%       fprintf('\nGraphed trade date: \n')
+%       disp(datestr(tradeDate))
+%     
+%       for j=1:length(instrID)
+%     %     [timeData, data] = mexPortfolio('getValues', instrID(j), times(k), currencyTermTimeZone, {'BID', 'ASK'});
+%         fprintf('%3d %18s %12s %9f %9f\n',j,instr.assetRIC{j}, datestr(instr.maturityDate(j)), instr.data{j}.price(3), z(j));
+%       end
     %% ---
     %pause(0.01);
     tradeDatesAll = [tradeDatesAll tradeDate];
@@ -299,8 +299,8 @@ for k=1:length(times)
     waitbar(k/length(times), figwaitbar, sprintf('Progress: k = %i / %i', k, length(times)))
 end
 
-clearvars -except measurementPath currency fileName tradeDatesAll fDatesAll TAll fAll piAll zAll curve_fig
-save(strcat(fileName, '_10YrCurves.mat'))
+%clearvars -except measurementPath currency fileName tradeDatesAll fDatesAll TAll fAll piAll zAll curve_fig
+%save(strcat(fileName, '_10YrCurves.mat'))
 
 %rmpath(measurementPath)
 %%
@@ -320,9 +320,17 @@ save(strcat(fileName, '_10YrCurves.mat'))
 
 
 % EUR_IS
-%...
+% A-okay
 
 
 
 %%
-% exportgraphics(curve_fig, sprintf('Figures/%s_OS_%i.png', currency, k));
+% exportgraphics(curve_fig, sprintf('Figures/%s_%i.png', fileName, k));
+% for k=1:1537
+%     plot(fDatesAll(k, 1:3654), fAll(k,1:3654)', fDatesAll(k, 1:3654), fAll(k,1:3654)' + piAll(k,1:3654)')
+%     title(k)
+%     %disp(k)
+%     pause(0.03)
+% end
+% % plot(fAll(410:425,:)')
+%%

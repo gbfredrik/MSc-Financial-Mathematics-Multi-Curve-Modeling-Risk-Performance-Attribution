@@ -422,3 +422,4 @@ MigrationBackup/
 TermStructureSimulation/MatlabTestSim/JBfiler/
 Dependencies/*
 !Dependencies/README.md
+Data/Curves/*
