@@ -299,8 +299,8 @@ for k=1:length(times)
     waitbar(k/length(times), figwaitbar, sprintf('Progress: k = %i / %i', k, length(times)))
 end
 
-%clearvars -except measurementPath currency fileName tradeDatesAll fDatesAll TAll fAll piAll zAll curve_fig
-%save(strcat(fileName, '_10YrCurves.mat'))
+clearvars -except measurementPath currency fileName tradeDatesAll fDatesAll TAll fAll piAll zAll curve_fig
+save(strcat(fileName, '_10YrCurves.mat'))
 
 %rmpath(measurementPath)
 %%
