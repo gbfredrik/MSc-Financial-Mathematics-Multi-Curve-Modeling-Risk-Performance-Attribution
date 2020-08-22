@@ -1,0 +1,123 @@
+%% Read data
+dirtyData = xlsread('../measurement/EUR.xlsx', 'ASKDIRTY', "B2:AV2241");
+dirtyDataAdditional = xlsread('../measurement/EUR.xlsx', 'askAdditional', "B2:AV2505");
+cleanPeriodDates = table2array(readtable('../measurement/EUR.xlsx', 'Sheet', 'ASKDIRTY', 'Range', "A1:A2241"));
+%cleanPeriodDates = cleanPeriodDates(2:end);
+additionalPeriodDates = table2array(readtable('../measurement/EUR.xlsx', 'Sheet', 'askAdditional', 'Range', "A1:A2505"));
+%additionalPeriodDates = additionalPeriodDates(2:end);
+%% Get candidates
+diffs = dirtyData(2:end,:) - dirtyData(1:end-1,:);
+diffsAdditional = dirtyDataAdditional(2:end,:) - dirtyDataAdditional(1:end-1,:);
+diffs(isnan(diffs))=0;
+diffsAdditional(isnan(diffsAdditional))=0;
+
+
+%%
+%vars = { 'candidateDates', 'candidateDatesAdditional', 'candidates', 'candidatesAdditional', 'row', 'rowAdditional', 'count', 'countTest' };
+for i = 1:size(diffs, 2)
+
+    currInstr = diffs(:,i);
+    count = 1;
+    for j = 1:size(diffs,1)
+        if diffs(j,i) ~= 0
+            candidates(count,1) = currInstr(j,1);
+            row(count,1) = j;
+            candidateDates(count, 1) = cleanPeriodDates(j, 1); 
+            count = count + 1;
+        end
+    end  
+    
+    count = 1;
+    currInstr = diffsAdditional(:,i);
+    for j = 1:size(diffsAdditional, 1)
+        if diffsAdditional(j,i) ~= 0
+            candidatesAdditional(count,1) = currInstr(j,1);
+            rowAdditional(count,1) = j;
+            candidateDatesAdditional(count, 1) = additionalPeriodDates(j, 1);
+            count = count + 1;
+        end
+    end
+    
+    
+    meanDiff = mean(candidates);
+    countTest = 0;
+
+    
+    for j = 1:size(candidates, 1) - 1
+        [startIndex, endIndex] = getWindow(row, cleanPeriodDates, candidateDatesAdditional, j);
+        M = size(candidatesAdditional(startIndex:endIndex, 1), 1);
+        sigma = calcSigma(candidatesAdditional(startIndex:endIndex, 1), M, meanDiff);
+       
+        if candidates(j) > meanDiff
+            prob1 = normcdf(candidates(j), meanDiff, sigma, 'upper');
+        else
+            prob1 = normcdf(candidates(j), meanDiff, sigma);
+        end
+        
+        if candidates(j+1) > meanDiff
+            prob2 = normcdf(candidates(j+1), meanDiff, sigma, 'upper');
+        else
+            prob2 = normcdf(candidates(j+1), meanDiff, sigma);
+        end
+                
+        if prob1 < 10^(-4) && prob2 < 10^(-4) && ...
+                sign(candidates(j)) ~= sign(candidates(j+1))
+           countTest = countTest + 1
+           
+           removeVec(j, i) = row(j);
+           
+        end
+        
+
+        %clear(vars{:})
+        j
+    end
+    clear('candidates')
+    clear('candidatesAdditional')
+    clear('candidateDates');
+    clear('candidateDatesAdditional');
+    clear('row')
+    clear('rowAdditional')
+    i
+end
+
+
+%%
+
+%dirtyData = xlsread('../measurement/EUR.xlsx', 'ASKDIRTY', "B2:AV1956");
+%load('removeVecAskEurOOS')
+for i = 1:size(removeVec,1)
+   for j = 1:size(removeVec,2)
+        if(removeVec(i,j) ~= 0)
+           dirtyData(removeVec(i,j)+1,j) =  NaN;
+           i
+           j
+        end
+   end
+end
+
+fraRem = 0;
+swapRem = 0;
+oisRem = 0;
+for i = 1:size(removeVec,1)
+   for j = 1:size(removeVec,2)
+        if(removeVec(i,j) ~= 0)
+            if  j < 28  
+                oisRem = oisRem + 1;
+            elseif (j >= 28 && j < 36)
+                fraRem = fraRem + 1;
+            else
+                swapRem = swapRem + 1;
+            end
+        end
+   end
+end
+
+%% Write Data
+xlswrite('../measurement/EUR.xlsx', dirtyData, 'ASKOOS', "B2:AV2241")
+
+
+
+
+
+
