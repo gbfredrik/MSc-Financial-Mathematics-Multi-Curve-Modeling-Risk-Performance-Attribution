@@ -1,39 +1,79 @@
 %% Get data
-load('Data/fHist.mat')
-load('Data/piHist.mat')
-load('Data/times.mat')
-load('Data/yield.mat')
-load('Data/libor.mat')
-fHistOOS = fAll(1:2757,:);   %2012-04-02          - 2016-03-03 (friday)
-fHistIS = fAll(2758:end,:);     %2016-03-07 (monday) - 2018-12-11
-piHistOOS = piAll(1:2757,:); %2012-04-02          - 2016-03-03 (friday)
-piHistIS = piAll(2758:end,:);   %2016-03-07 (monday) - 2018-12-11
-libor = libor(2826:end,:) / 100;
+load('Data/EUR_IS_10YrCurves.mat')
+fAll_IS = fAll(:,1:3656);
+piAll_IS = piAll(:,1:3656);
+fDates_IS = fDatesAll;
+tradeDates_IS = tradeDatesAll;
+load('Data/EUR_OOS_10YrCurves_Cleaned.mat')
+fAll_OOS = fAll(:,1:3656);
+piAll_OOS = piAll(:,1:3656);
+fDates_OOS = fDatesAll;
+tradeDates_OOS = tradeDatesAll;
+
+for i = 1:1537
+    if fAll_IS(i,3656) == 0
+        fAll_IS(i,3656) = fAll_IS(i,3655);
+    end
+    if piAll_IS(i,3656) == 0
+        piAll_IS(i,3656) = piAll_IS(i,3655);
+    end    
+end
+for i = 1:2193
+    if fAll_OOS(i,3656) == 0
+        fAll_OOS(i,3656) = fAll_OOS(i,3655);
+    end
+    if piAll_OOS(i,3656) == 0
+        piAll_OOS(i,3656) = piAll_OOS(i,3655);
+    end    
+end
+
+clearvars -except fAll_IS piAll_IS fDates_IS tradeDates_IS fAll_OOS piAll_OOS fDates_OOS tradeDates_OOS
+
+ibor = xlsread('Data/EUR_OOS.xlsx', 'IBOROOS', 'C2:C2194') / 100;
+iborDates = datenum(table2array(readtable('Data/EUR_OOS.xlsx', 'Sheet', 'IBOROOS', 'Range', "A1:A2194")));
+
 floatCashFlows = {};
 fixCashFlows = {};
 yield = [];
 N = [];
 contractDays = [];
-loop = 'A':'D';
+loop = 'J':'J';
 for i = 1:length(loop)
     currColumn = strcat(loop(i), ':', loop(i));
-    floatCashFlows = [floatCashFlows, xlsread('Data/PortfolioData.xlsx', 'Float Cashflows', currColumn)];
-    fixCashFlows = [fixCashFlows, xlsread('Data/PortfolioData.xlsx', 'Fix Cashflows', currColumn)];
-    yield = [yield, xlsread('Data/PortfolioData.xlsx', 'Yield', currColumn)];
-    N = [yield, xlsread('Data/PortfolioData.xlsx', 'Nominal', currColumn)];
-    contractDays = [contractDays, xlsread('Data/PortfolioData.xlsx', 'ContractDays', currColumn)];
+    floatCashFlows = [floatCashFlows, rmmissing(table2array(readtable('Data/PortfolioData.xlsx', 'Sheet', 'Float Cashflows EUR', 'Range', currColumn)))];
+    fixCashFlows = [fixCashFlows, rmmissing(table2array(readtable('Data/PortfolioData.xlsx', 'Sheet', 'Fix Cashflows EUR', 'Range', currColumn)))];
+    yield = [yield, rmmissing(table2array(readtable('Data/PortfolioData.xlsx', 'Sheet', 'Yield EUR', 'Range', currColumn))) / 100];
+    N = [N, rmmissing(table2array(readtable('Data/PortfolioData.xlsx', 'Sheet', 'Nominal', 'Range', currColumn)))];
+    %contractDays = [contractDays, xlsread('Data/PortfolioData.xlsx', 'ContractDays EUR', currColumn)];
 end
-n = size(fHistIS, 2);
+
+for i = 1:length(N)
+    j = 2;
+    numDays = floatCashFlows{i}(end);
+    %contractDays(i) = -floatCashFlows{i}(1);
+    contractDays(i) = -2;
+    while numDays > 0
+        if j == 2193
+           break 
+        end
+        dateDiff = tradeDates_OOS(j) - tradeDates_OOS(j-1);
+        numDays = numDays - dateDiff;
+        contractDays(i) = contractDays(i) + 1;
+        j = j + 1;
+    end
+end
+
+n = size(fAll_OOS, 2);
 A = intMatrix(n);
-f = fHistIS';
-pi = piHistIS';
+f = fAll_OOS';
+pi = piAll_OOS';
 r = A * f;
 piSpot = A * pi;
-times = times(2758:end);
+times = tradeDates_OOS';
 
 %Calculate eigenvector matrices
-DZero = fHistOOS(2:end,:) - fHistOOS(1:end-1,:);
-DPi =  piHistOOS(2:end,:) - piHistOOS(1:end-1,:);
+DZero = fAll_IS(2:end,:) - fAll_IS(1:end-1,:);
+DPi =  piAll_IS(2:end,:) - piAll_IS(1:end-1,:);
 CZero = cov(DZero);
 CPi = cov(DPi);
 kZero = size(CZero, 1);
@@ -53,8 +93,10 @@ aPi = [zeros(n, n), A*EPi];
 aZero_k = [A*EZero_k, zeros(n, kPi)]; 
 aPi_k = [zeros(n, kZero), A*EPi_k];
 
+clearvars loop currColumn dateDiff i j loop numDays DZero DPi CZero CPi V D e ind
+
 %% Set variables
-ropFix(1) = 'r';
+ropFix(1) = 'p';
 ropFix(2) = 'p';
 ropFix(3) = 'r';
 ropFix(4) = 'r';
@@ -62,30 +104,40 @@ dcIbor = 'act/360';
 dcFix = 'act/360';
 fixingDate = 2;
 %%
+epsP = {};
+epsI = {};
+epsA = {};
+sumRiskFactors = {};
+carry = {};
+NPV = {};
+Dt = {};
+accrualCumulative = {};
 
+for i = length(N)
+    epsP = [epsP, zeros(contractDays(i), 1)];
+    epsI = [epsI, zeros(contractDays(i), 1)];
+    epsA = [epsA, zeros(contractDays(i), 1)];
+    sumRiskFactors = [sumRiskFactors, zeros(contractDays(i), 1)];
+    carry = [carry, zeros(contractDays(i), 1)];
+    NPV = [NPV, zeros(contractDays(i), 1)];
+    Dt = [Dt, zeros(contractDays(i), 1)];
+    accrualCumulative = [accrualCumulative, zeros(contractDays(i), 1)]; 
+end
 
-
-epsP = { zeros(contractDays(1), 1), zeros(contractDays(2), 1), zeros(contractDays(3), 1), zeros(contractDays(4), 1) };
-epsI = { zeros(contractDays(1), 1), zeros(contractDays(2), 1), zeros(contractDays(3), 1), zeros(contractDays(4), 1) };
-epsA = { zeros(contractDays(1), 1), zeros(contractDays(2), 1), zeros(contractDays(3), 1), zeros(contractDays(4), 1) };
-sumRiskFactors = { zeros(contractDays(1), 1), zeros(contractDays(2), 1), zeros(contractDays(3), 1), zeros(contractDays(4), 1) };
-carry = { zeros(contractDays(1), 1), zeros(contractDays(2), 1), zeros(contractDays(3), 1), zeros(contractDays(4), 1) };
-NPV = { zeros(contractDays(1), 1), zeros(contractDays(2), 1), zeros(contractDays(3), 1), zeros(contractDays(4), 1) };
-Dt = { zeros(contractDays(1), 1), zeros(contractDays(2), 1), zeros(contractDays(3), 1), zeros(contractDays(4), 1) };
-accrualCumulative = { zeros(contractDays(1), 1), zeros(contractDays(2), 1), zeros(contractDays(3), 1), zeros(contractDays(4), 1) };
 %% Performance attribution for 1 year IRS
-numContracts = 4;
-%Loop over all contrac+ts
-for i = 1:numContracts
+%numContracts = 4;
+%Loop over all contracts
+for i = 1:length(N)
 
     workdaysToFixPayment = 1;
     workdaysToFloatPayment = 1;
     
-    ttValueDate = fixingDate;   
+    %ttValueDate = floatCashFlows{i}(1);   
+    ttValueDate = 2;  
     nextFix = 0;
     liborFixingPrev = 0;
     %Instantiate cash flows
-    floatCashFlowsCurr = floatCashFlows{i};  %All unknown floating cash flows
+    floatCashFlowsCurr = floatCashFlows{i};     %All unknown floating cash flows
     fixCashFlowsCurr = fixCashFlows{i};         %All fix cash flows
     daysToNextFloat = floatCashFlowsCurr(1);
     daysToNextFix = fixCashFlowsCurr(1);
@@ -101,12 +153,14 @@ for i = 1:numContracts
         %Handle the initial contract day when the price is determined
         if j == 1
             
+            iborCurr = ibor(1);
+            
             %The first floating cash flow is fixed according to Blomvall
             dtFloat = handleDaycount(dcIbor, daysToNextFloat - ttValueDate);
                
             %The first floating cash flow is fixed
             blomvallFixing = N(i) * dtFloat * (r(daysToNextFloat+1) + pi(daysToNextFloat + 1));
-            liborFixing = N(i) * dtFloat * libor(j,2);
+            liborFixing = N(i) * dtFloat * iborCurr;
             %Dt is the difference in Libor and Blomvall model
             if ropFix(i) == 'r'
                  Dt{i}(j, 1) = -(blomvallFixing - liborFixing); %Difference between Blomvall and actual cash flow
@@ -151,11 +205,13 @@ for i = 1:numContracts
             
         else
             
+            iborCurr = getIbor(ibor, iborDates, fDates_OOS(j));
+            
             wdToFloatPrev = workdaysToFloatPayment;
             wdToFixPrev = workdaysToFixPayment;
             %Change dates and handle cash flows
             [floatCashFlowsCurr, fixCashFlowsCurr, daysToNextFloat, daysToNextFix, ttValueDate, dtFixNext, dtFloat, liborFixing, blomvallFixing, Dt{i}(j,1), nextFix, workdaysToFloatPayment, last, workdaysToFixPayment, liborFixingPrev, dtFix] = ...
-                handleDates(N(i), yield(i), times, j, fixingDate, floatCashFlowsCurr, fixCashFlowsCurr, daysToNextFloat, daysToNextFix, r(:,j), pi(:,j), ropFix(i), libor(:,2), ...
+                handleDates(N(i), yield(i), times, j, fixingDate, floatCashFlowsCurr, fixCashFlowsCurr, daysToNextFloat, daysToNextFix, r(:,j), pi(:,j), ropFix(i), iborCurr, ...
                 ttValueDate, dcIbor, dcFix, liborFixing, blomvallFixing, dtFixNext, dtFloat, nextFix, last, liborFixingPrev, dtFix);
             
             
@@ -254,15 +310,15 @@ end
 
 %%
 
-    totNPV = zeros(504, 1);
-    totEpsA = zeros(504, 1);
-    totEpsI = zeros(504, 1);
-    totEpsP = zeros(504, 1);
-    totCarry = zeros(504, 1);
-    totSumRiskFactors = zeros(504, 1);
+    totNPV = zeros(2189, 1);
+    totEpsA = zeros(2189, 1);
+    totEpsI = zeros(2189, 1);
+    totEpsP = zeros(2189, 1);
+    totCarry = zeros(2189, 1);
+    totSumRiskFactors = zeros(2189, 1);
     
-for i = 1:numContracts
-    for j = 1:min(length(NPV{i}), 504)
+for i = 1:length(N)
+    for j = 1:min(length(NPV{i}), 2189)
         totNPV(j, 1) = totNPV(j) + NPV{i}(j);
         totEpsA(j, 1) = totEpsA(j) + epsA{i}(j);
         totEpsI(j, 1) = totEpsI(j) + epsI{i}(j);
@@ -280,7 +336,7 @@ cEpsP = cumsum(totEpsP(:, 1));
 cCarry = cumsum(totCarry(:, 1));
 cSumRiskFactors = cumsum(totSumRiskFactors(:, 1));
 
-T = 1:504;
+T = 1:2189;
 plot(T, cNPV(:,1), T, cSumRiskFactors(:, 1), T, cEpsA(:, 1), T, cEpsI(:, 1), T, cEpsP(:, 1), T, cCarry(:, 1));
 
 %figure(1);

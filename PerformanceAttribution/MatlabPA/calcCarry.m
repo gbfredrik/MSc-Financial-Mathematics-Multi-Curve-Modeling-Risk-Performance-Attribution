@@ -2,7 +2,7 @@ function [carry] = calcCarry(currPricePrevRiskFactor, prevPrice, workdaysToFloat
 
 
 
-if workdaysToFloatPayment == 0 && workdaysToFixPayment ~= 0 && last == 0 && ropFix == 'p'
+if workdaysToFloatPayment == 0 && workdaysToFixPayment ~= 0 && last == 0 && ropFix == 'p' 
     carry = currPricePrevRiskFactor - prevPrice + liborFixingPrev; 
 elseif workdaysToFloatPayment == 0 && workdaysToFixPayment ~= 0 && last == 0 && ropFix == 'r'
     carry = currPricePrevRiskFactor - prevPrice - liborFixingPrev;% 

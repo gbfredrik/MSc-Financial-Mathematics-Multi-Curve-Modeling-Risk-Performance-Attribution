@@ -1,6 +1,6 @@
 function [floatCashFlows, fixCashFlows, daysToNextFloat, daysToNextFix, ttValueDate, dtFixNext, dtFloat, liborFixing, blomvallFixing, Dt, nextFix, workdaysToFloatPayment, last, workdaysToFixPayment, liborFixingPrev, dtFix] = ...
             handleDates(N, yield, times, j, fixingDate, floatCashFlows, fixCashFlows, daysToNextFloat, daysToNextFix, ...
-            r, pi, ropFix, libor, ttValueDate, dcIbor, dcFix, liborFixing, blomvallFixing, dtFixNext, dtFloat, nextFix, last, liborFixingPrev, dtFix)
+            r, pi, ropFix, liborCurr, ttValueDate, dcIbor, dcFix, liborFixing, blomvallFixing, dtFixNext, dtFloat, nextFix, last, liborFixingPrev, dtFix)
 
 
 %Decrease time to value date with one day
@@ -55,7 +55,7 @@ if ((workdaysToFloatPayment == fixingDate) && (length(floatCashFlows) > 1)) && (
 
    dtFloat = handleDaycount(dcIbor, floatCashFlows(2));
    liborFixingPrev = liborFixing;
-   liborFixing = N * dtFloat * libor(j);
+   liborFixing = N * dtFloat * liborCurr;
    %blomvallFixing = N * dtFloat * (r(daysToNextFloat + 1) + pi(daysToNextFloat + 1))
    blomvallFixing = N * dtFloat * (r(floatCashFlows(2) + 1) + pi(floatCashFlows(2) + 1));
    
@@ -75,7 +75,7 @@ elseif ((workdaysToFloatPayment == fixingDate) && (workdaysToFixPayment == fixin
        
    dtFloat = handleDaycount(dcIbor, floatCashFlows(2)); %ny
    liborFixingPrev = liborFixing;
-   liborFixing = N * dtFloat * libor(j);
+   liborFixing = N * dtFloat * liborCurr;
 
    blomvallFixing = N * dtFloat * (r(floatCashFlows(2) + 1) + pi(floatCashFlows(2) + 1));
    
