@@ -142,12 +142,6 @@ void mexFunction(int nlhs, mxArray* plhs[],
 		fResMex(i) = mxGetPr(plhs[i]);
 	}
 	
-	/*
-	double* randomMex;
-	plhs[2] = mxCreateDoubleMatrix(6, 2000, mxREAL);
-	randomMex = mxGetPr(plhs[2]);
-	*/
-
 	// Call the computational routine
 	MultipleYieldSim::simMultipleFull(E, rho, mu, omega, alpha, beta, hist,
 			marginal, copula, varRedType, d, N, fRes, gamma, kappa,
@@ -161,11 +155,5 @@ void mexFunction(int nlhs, mxArray* plhs[],
 			}
 		}
 	}
-	/*
-	for (size_t i = 0; i < k(0); i++) {
-		for (size_t j = 0; j < N; j++) {
-			randomMex[i + j * k(0)] = test(i, j);
-		}
-	}
-	*/
+
 }

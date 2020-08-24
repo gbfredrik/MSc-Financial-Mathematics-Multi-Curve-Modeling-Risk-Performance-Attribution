@@ -54,7 +54,7 @@ bool write_txt_vector(ublas::vector<double> const& v, std::string const& file_na
 
 ublas::matrix<double> read_csv_matrix(std::string const& file_name) {
 	std::ifstream inf;
-	inf.open(/*"X:/Examensarbete/Data/" +*/ file_name);
+	inf.open(file_name);
 
     if (!inf) {
         std::cout << "Failed to open file." << std::endl;
@@ -85,7 +85,7 @@ ublas::matrix<double> read_csv_matrix(std::string const& file_name) {
 
 ublas::vector<double> read_csv_vector(std::string const& file_name) {
 	std::ifstream inf;
-	inf.open(/*"X:/Examensarbete/Data/" +*/ file_name);
+	inf.open(file_name);
 
     if (!inf) {
         std::cout << "Failed to open file." << std::endl;
@@ -124,7 +124,7 @@ bool write_csv_matrix(ublas::matrix<double> const& m, std::string const& file_na
 
 bool write_csv_vector(ublas::vector<double> const& v, std::string const& file_name) {
 	std::ofstream outf;
-	outf.open("X:/Examensarbete/Data/v_" + file_name); // Appending "v_" to prevent accidental overwriting of important files
+	outf.open(/*"X:/Examensarbete/Data/v_" +*/ file_name); // Appending "v_" to prevent accidental overwriting of important files
 
     if (!outf) {
         std::cout << "Failed\n\n";

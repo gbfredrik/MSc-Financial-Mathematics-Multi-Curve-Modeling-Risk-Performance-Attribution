@@ -98,13 +98,23 @@ bool FactorCalculation::eigen_bdcsvd(
 		Eigen::BDCSVD<Eigen::MatrixXd> bdcsvd(RTR, svd_opt);
 
 		// Return eigenpairs
-		m_E = matrixOperations::matrixXdToUblas(thinQ * bdcsvd.matrixV().block(0, 0, bdcsvd.matrixV().rows(), k));
-		v_Lambda = matrixOperations::vectorXdToUblas(bdcsvd.singularValues().head(k).array().square()); // TODO: Control square method
-		// See: https://stackoverflow.com/questions/34373757/piece-wise-square-of-vector-piece-wise-product-of-two-vectors-in-c-eigen
+		if (k == 0) {
+			m_E = matrixOperations::matrixXdToUblas(thinQ * bdcsvd.matrixV());
+			v_Lambda = matrixOperations::vectorXdToUblas(bdcsvd.singularValues().array().square()); // TODO: Control square method
+		} else {
+			m_E = matrixOperations::matrixXdToUblas(thinQ * bdcsvd.matrixV().block(0, 0, bdcsvd.matrixV().rows(), k));
+			v_Lambda = matrixOperations::vectorXdToUblas(bdcsvd.singularValues().head(k).array().square()); // TODO: Control square method
+			// See: https://stackoverflow.com/questions/34373757/piece-wise-square-of-vector-piece-wise-product-of-two-vectors-in-c-eigen
+		}
 	} else {
 		Eigen::BDCSVD<Eigen::MatrixXd> bdcsvd(H.transpose() * H, svd_opt);
-		m_E = matrixOperations::matrixXdToUblas(bdcsvd.matrixV().block(0, 0, bdcsvd.matrixV().rows(), k));
-		v_Lambda = matrixOperations::vectorXdToUblas(bdcsvd.singularValues().head(k).array().square()); // TODO: Control square method
+		if (k == 0) {
+			m_E = matrixOperations::matrixXdToUblas(bdcsvd.matrixV());
+			v_Lambda = matrixOperations::vectorXdToUblas(bdcsvd.singularValues().array().square()); // TODO: Control square method
+		} else {
+			m_E = matrixOperations::matrixXdToUblas(bdcsvd.matrixV().block(0, 0, bdcsvd.matrixV().rows(), k));
+			v_Lambda = matrixOperations::vectorXdToUblas(bdcsvd.singularValues().head(k).array().square()); // TODO: Control square method
+		}
 	}
 		
 	return v_Lambda.size() > 0;

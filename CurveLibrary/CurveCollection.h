@@ -6,7 +6,8 @@
 
 struct CurveCollection {
     // General type data
-    std::string filename;
+    std::string file_path;
+    std::string file_name;
 
     // Raw curve data
     boost::numeric::ublas::matrix<double> m_A;

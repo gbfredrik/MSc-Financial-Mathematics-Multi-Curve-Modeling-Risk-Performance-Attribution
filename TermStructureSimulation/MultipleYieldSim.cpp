@@ -25,6 +25,7 @@ void MultipleYieldSim::simMultipleFull(vector<matrix<double>> const& E, vector<m
 	/*
 		E: vector, eigenvector matrices
 		rho: vector, matrices describing risk factor dependencies
+		mu: vector, vectors with risk factor drift
 		
 		omega: vector, garch parameter							
 		alpha: vector, garch parameter                        
@@ -46,7 +47,6 @@ void MultipleYieldSim::simMultipleFull(vector<matrix<double>> const& E, vector<m
 		kappa: vector, mean reversion speed parameter of each tau
 		xiHat: matrix, long term averages of each tau and risk factor
 
-
 		dfC: matrix, degrees of freedom for student's t-copulas
 		dfM: matrix, degrees of freedom for student's t-marginals
 
@@ -54,7 +54,7 @@ void MultipleYieldSim::simMultipleFull(vector<matrix<double>> const& E, vector<m
 	
 	size_t M = E.size(); // Risk-free curve + number of tenor curves
 	vector<size_t> k(M); // Number of risk factors of each tenor
-	for (size_t i = 0; i < M; i++) {
+	for (size_t i = 0; i < M; i++) { 
 		k(i) = E(i).size2();
 	}
 	size_t n = fRes(0).size1(); // Number of discretization points
@@ -85,6 +85,7 @@ void MultipleYieldSim::simMultipleFull(vector<matrix<double>> const& E, vector<m
 	*/
 	vector<matrix<double>> histPrevSim(M, matrix<double>(n, N)); 
 	vector<matrix<double>> histPrevPrevSim(M, matrix<double>(n, N));
+	// Instantiate by setting second to most current curves
 	fZero = row(hist(0), m - 1);
 	for (size_t k = 0; k < N; k++) {
 		column(histPrevPrevSim(0), k) = fZero;
@@ -95,13 +96,16 @@ void MultipleYieldSim::simMultipleFull(vector<matrix<double>> const& E, vector<m
 			column(histPrevPrevSim(k), l) = column(pi, k - 1);
 		}
 	}
-
+	/*
+		The main loop that loop d days ahead. Different methodology is used for the first day compared to the others since
+		for this day 2000 "fresh" curves are simulated. For other days the curves are based on the previous curves and
+		keeps track of this for a correct garch volatility-scaling.
+	*/
 	for (size_t i = 0; i < d; i++) {
 		if (i == 0) { // Simulate N curves the first day
 			for (size_t j = 0; j < M; j++) {
 				U(j) = unfGen::genU(rho(j), N, copula(j), boost::get(dfC)(j)); // Generate uniformly correlated random variables with desired copula
 				V(j) = varRed::redVariance(U(j), varRedType(j)); // Apply desired variance reduction technique		
-				//test = U(0);
 				sigma(j) = statisticsOperations::GARCH(omega(j), alpha(j),
 					beta(j), boost::get(gamma)(j), E(j), hist(j)); // Calculate scaling factor
 				eps(j) = rvSim::genEps(V(j), mu(j), sigma(j), marginal(j), boost::get(dfM)(j));
@@ -150,9 +154,15 @@ void MultipleYieldSim::simMultipleDaily(vector<matrix<double>> const& E, vector<
 /*
 	Function to simulate d days ahead 1 time each.
 */
-void MultipleYieldSim::simSingleMultipleDaily(vector<matrix<double>> const& E, vector<matrix<double>> const& eps, int M, int N,
-	
-	vector<matrix<double>>& fRes, vector<matrix<double>>& histPrevSim, vector<matrix<double>>& histPrevPrevSim) {
+void MultipleYieldSim::simSingleMultipleDaily(
+    vector<matrix<double>> const& E, 
+    vector<matrix<double>> const& eps, 
+    int M, 
+    int N,
+	vector<matrix<double>>& fRes, 
+    vector<matrix<double>>& histPrevSim, 
+    vector<matrix<double>>& histPrevPrevSim
+) {
 	size_t n = E(0).size1();
 	matrix<double> pi(n, M - 1);
 
@@ -166,8 +176,7 @@ void MultipleYieldSim::simSingleMultipleDaily(vector<matrix<double>> const& E, v
 				column(histPrevPrevSim(k), i) = column(fRes(k), i);
 				column(fRes(k), i) = column(fRes(k), i) + prod(E(k), column(eps(k), i)); // +prod(E(k)(), (kappa(k) * (xiHat(k) - ) + eps(k)(i, j)); // Simulate risk-free curve
 				column(histPrevSim(k), i) = column(fRes(k), i);
-			}
-			else {
+			} else {
 				column(histPrevPrevSim(k), i) = column(fRes(k), i) - column(fRes(0), k);
 				column(fRes(k), i) = column(fRes(k - 1), i) + column(pi, k - 1) + prod(E(k), column(eps(k), i)); //+ kappa(k) * (xiHat(k) - ) + eps(k)(i, j); // Simulate tenor curves
 				column(histPrevSim(k), i) = column(fRes(k), i) - column(fRes(0), k);
@@ -175,7 +184,3 @@ void MultipleYieldSim::simSingleMultipleDaily(vector<matrix<double>> const& E, v
 		}
 	}
 }
-
-
-
-
