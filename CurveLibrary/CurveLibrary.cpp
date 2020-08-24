@@ -38,14 +38,18 @@ BOOL __stdcall generate_multi_risk_factorsXL(
 	int const eigen_algorithm,
 	bool const eval_eigen,
 	double* return_norm_errors,
-	int const curve_length
+	int const curve_length,
+	char const* _k_risk_factors
 ) {
 #pragma EXPORT
 
 	bool status{ 1 };
     std::string file_names{ _file_names };
+    //std::string k_risk_factors{ _k_risk_factors };
     std::stringstream ss_file_names{ file_names };
+	std::stringstream ss_k_risk_factors{ std::string{ _k_risk_factors } };
     std::string substr{};
+	std::string substr_k{};
 
 	int count_tenor{ std::count(file_names.begin(), file_names.end(), ';') };
 	CurveCollection rf;
@@ -55,12 +59,17 @@ BOOL __stdcall generate_multi_risk_factorsXL(
 	rf.file_path = _file_path;
     getline(ss_file_names, substr, ';');
     rf.file_name = substr;
-    rf.k = 6;
+
+	getline(ss_k_risk_factors, substr_k, ';');
+	rf.k = std::stoi(substr_k);
+
 	for (CurveCollection& cc : tenors) {
         cc.file_path = _file_path;
         getline(ss_file_names, substr, ';');
 		cc.file_name = substr;
-        cc.k = 6;
+
+		getline(ss_k_risk_factors, substr_k, ';');
+        cc.k = std::stoi(substr_k);
 	}
 
 	try {
@@ -212,14 +221,14 @@ void placeholder_eigen(
 	//ublas::vector<double> v_Lambda(k);
 
 	enum class PCA_Algo { IRAM, BDCSVD };
-	if (PCA_Algo(eigen_algorithm) == PCA_Algo::IRAM) {
+	if (PCA_Algo(eigen_algorithm) == PCA_Algo::IRAM && curve_collection.k != 0) {
 		FactorCalculation::iram(
 			m_centered / sqrt(m_centered.size1() - 1),
             curve_collection.k,
 			curve_collection.m_E, 
 			curve_collection.v_Lambda
 		);
-	} else if (PCA_Algo(eigen_algorithm) == PCA_Algo::BDCSVD) {
+	} else if (PCA_Algo(eigen_algorithm) == PCA_Algo::BDCSVD || curve_collection.k == 0) {
 		FactorCalculation::eigen_bdcsvd(
 			m_centered / sqrt(m_centered.size1() - 1), 
 			curve_collection.k, 
