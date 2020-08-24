@@ -18,7 +18,6 @@
 # Compiled Dynamic libraries
 *.so
 *.dylib
-*.dll
 
 # Fortran module files
 *.mod
@@ -423,3 +422,4 @@ MigrationBackup/
 TermStructureSimulation/MatlabTestSim/JBfiler/
 Dependencies/*
 !Dependencies/README.md
+Data/Curves/*
