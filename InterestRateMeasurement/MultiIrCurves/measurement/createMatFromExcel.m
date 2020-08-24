@@ -5,13 +5,13 @@
 % fileName = 'JPY.xlsx';
 % fileName = 'KRW.xlsx';
 % fileName = 'SEK.xlsx';
-fileName = 'USD_OS.xlsx';
+fileName = 'EUR_OOS.xlsx';
 
 [type, sheetNames]=xlsfinfo(fileName);
 
 i = 1; % Counter to deal with AFOSHEET
 
-for k = 1:length(sheetNames)
+for k = 1:3%length(sheetNames)
   if (strcmp(sheetNames(k), 'settings'))
     continue;
   end
