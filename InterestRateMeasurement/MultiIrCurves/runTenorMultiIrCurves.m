@@ -107,7 +107,7 @@ irStartDate = datenum(2006,01,01); % Todo - kontrollera, original: datenum(2005,
 cashID = mexPortfolio('createCash', currency, accountName, cashDCC, cashFrq, cashEom, cashBDC, cal, irStartDate);
 
 %%
-for k=316:318%1:length(times)
+for k=length(times)%1:length(times)
     tradeDate = floor(times(k));
     %   datestr(tradeDate)
     
