@@ -14,6 +14,8 @@
 #include <Windows.h>
 #include <WinUser.h>
 
+#include "sample_handler.h"
+
 using namespace boost::numeric;
 
 bool FactorCalculation::iram(
@@ -29,19 +31,22 @@ bool FactorCalculation::iram(
 	Eigen::MatrixXd D{ matrixOperations::ublasToMatrixXd(input) };
 	
 	if (D.rows() < D.cols()) {
-		Eigen::HouseholderQR<Eigen::MatrixXd> qr(D.transpose());
+		Eigen::HouseholderQR<Eigen::MatrixXd> qr{ D.transpose() };
+		// Can use FullPivHouseholderQR for greater precision
+		//Eigen::FullPivHouseholderQR<Eigen::MatrixXd> qr(D.transpose());
 
 		// Define the positive definite RTR matrix
-		Eigen::MatrixXd RTR{ qr.matrixQR().transpose() * qr.matrixQR() };
-		Eigen::MatrixXd thinQ(Eigen::MatrixXd::Identity(D.cols(), D.rows()));
-		thinQ = qr.householderQ() * thinQ;
+		Eigen::MatrixXd thinQ{ qr.householderQ() * Eigen::MatrixXd::Identity(D.cols(), D.rows()) }; // qr.householderQ()
+		Eigen::MatrixXd R_temp{ qr.matrixQR().triangularView<Eigen::Upper>() };
+		Eigen::MatrixXd thinR{ R_temp.topRows(R_temp.cols()) };
+		Eigen::MatrixXd RRT{ thinR * thinR.transpose() };
 
 		// Construct matrix operation objects
-		DenseSymMatProd<double> op(RTR);
+		DenseSymMatProd<double> op{ RRT }; // RRT
 
 		// Construct eigen solver object, requesting the largest k eigenvalues in magnitude
 		SymEigsSolver<double, LARGEST_ALGE, DenseSymMatProd<double>> eigs(&op, k, 2 * k + 1);
-		
+
 		// Initialize and compute
 		eigs.init();
 		int nconv{ eigs.compute() };
@@ -50,10 +55,10 @@ bool FactorCalculation::iram(
 		if (eigs.info() == SUCCESSFUL) {
 			// Return eigenpairs
 			m_E = matrixOperations::matrixXdToUblas(thinQ * eigs.eigenvectors());
-			v_Lambda = matrixOperations::vectorXdToUblas(eigs.eigenvalues()); // TODO: Scale by n-1
+			v_Lambda = matrixOperations::vectorXdToUblas(eigs.eigenvalues()); // OK
 		}
 	} else {
-		// Define the positive definite C matrix
+		// Define the positive definite C matrix (covariance)
 		Eigen::MatrixXd C{ D.transpose() * D };
 
 		// Construct matrix operation objects
@@ -69,7 +74,7 @@ bool FactorCalculation::iram(
 		if (eigs.info() == SUCCESSFUL) {
 			// Return eigenpairs
 			m_E = matrixOperations::matrixXdToUblas(eigs.eigenvectors());
-			v_Lambda = matrixOperations::vectorXdToUblas(eigs.eigenvalues()); // TODO: Scale by n-1
+			v_Lambda = matrixOperations::vectorXdToUblas(eigs.eigenvalues()); // OK
 		}
 	}
 	
@@ -89,31 +94,31 @@ bool FactorCalculation::eigen_bdcsvd(
 
 	if (H.rows() < H.cols()) {
 		Eigen::HouseholderQR<Eigen::MatrixXd> qr(H.transpose()); // FullPivHouseholderQR<Matrix<double, Dynamic, Size>> fpqr(A.rows(), A.cols());
-		Eigen::MatrixXd thinQ(qr.householderQ() * Eigen::MatrixXd::Identity(H.cols(), H.rows()));
+		Eigen::MatrixXd thinQ{ qr.householderQ() * Eigen::MatrixXd::Identity(H.cols(), H.rows()) };
+		Eigen::MatrixXd R_temp{ qr.matrixQR().triangularView<Eigen::Upper>() };
+		Eigen::MatrixXd thinR{ R_temp.topRows(R_temp.cols()) };
+		Eigen::MatrixXd RRT{ thinR * thinR.transpose() };
 
-		//Eigen::MatrixXd thinQ(Eigen::MatrixXd::Identity(H.cols(), H.rows()));
-		//thinQ = qr.householderQ() * thinQ;
-		Eigen::MatrixXd RTR{ qr.matrixQR().transpose() * qr.matrixQR() };
-
-		Eigen::BDCSVD<Eigen::MatrixXd> bdcsvd(RTR, svd_opt);
+		Eigen::BDCSVD<Eigen::MatrixXd> bdcsvd(RRT, svd_opt);
 
 		// Return eigenpairs
 		if (k == 0) {
 			m_E = matrixOperations::matrixXdToUblas(thinQ * bdcsvd.matrixV());
-			v_Lambda = matrixOperations::vectorXdToUblas(bdcsvd.singularValues().array().square()); // TODO: Control square method
+			v_Lambda = matrixOperations::vectorXdToUblas(bdcsvd.singularValues()); // OK
 		} else {
 			m_E = matrixOperations::matrixXdToUblas(thinQ * bdcsvd.matrixV().block(0, 0, bdcsvd.matrixV().rows(), k));
-			v_Lambda = matrixOperations::vectorXdToUblas(bdcsvd.singularValues().head(k).array().square()); // TODO: Control square method
+			v_Lambda = matrixOperations::vectorXdToUblas(bdcsvd.singularValues().head(k)); // OK
 			// See: https://stackoverflow.com/questions/34373757/piece-wise-square-of-vector-piece-wise-product-of-two-vectors-in-c-eigen
 		}
 	} else {
 		Eigen::BDCSVD<Eigen::MatrixXd> bdcsvd(H.transpose() * H, svd_opt);
+		
 		if (k == 0) {
 			m_E = matrixOperations::matrixXdToUblas(bdcsvd.matrixV());
-			v_Lambda = matrixOperations::vectorXdToUblas(bdcsvd.singularValues().array().square()); // TODO: Control square method
+			v_Lambda = matrixOperations::vectorXdToUblas(bdcsvd.singularValues().array().square()); // OK
 		} else {
 			m_E = matrixOperations::matrixXdToUblas(bdcsvd.matrixV().block(0, 0, bdcsvd.matrixV().rows(), k));
-			v_Lambda = matrixOperations::vectorXdToUblas(bdcsvd.singularValues().head(k).array().square()); // TODO: Control square method
+			v_Lambda = matrixOperations::vectorXdToUblas(bdcsvd.singularValues().head(k).array().square()); // OK
 		}
 	}
 		

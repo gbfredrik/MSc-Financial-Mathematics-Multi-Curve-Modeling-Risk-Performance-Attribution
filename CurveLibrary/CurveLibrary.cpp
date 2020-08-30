@@ -62,7 +62,7 @@ BOOL __stdcall generate_multi_risk_factorsXL(
 
 	getline(ss_k_risk_factors, substr_k, ';');
 	rf.k = std::stoi(substr_k);
-
+	
 	for (CurveCollection& cc : tenors) {
         cc.file_path = _file_path;
         getline(ss_file_names, substr, ';');
@@ -88,6 +88,7 @@ BOOL __stdcall generate_multi_risk_factorsXL(
 		cc.m_A_trunc = cc.m_A;
 		cc.m_A_trunc.resize(cc.m_A_trunc.size1(), curve_length);
 	}
+
 
 	// Risk factor calculation
 	placeholder_eigen(rf, eigen_algorithm, eval_eigen);
@@ -207,17 +208,17 @@ void placeholder_eigen(
 	bool const eval_eigen,
     bool const save
 ) {
-	curve_collection.m_diff = matrixOperations::diff_matrix(curve_collection.m_A);
+	curve_collection.m_diff = matrixOperations::diff_matrix(curve_collection.m_A_trunc);
 
 	// Todo: Clean data here and process:
-	ublas::matrix_range<ublas::matrix<double>> m_diff_clean(
-		curve_collection.m_diff,
-		ublas::range(0, min(1500, curve_collection.m_diff.size1())),
-		ublas::range(0, curve_collection.m_diff.size2())
-	);
-	ublas::matrix<double> m_centered{ matrixOperations::center_matrix(m_diff_clean) };
+	//ublas::matrix_range<ublas::matrix<double>> m_diff_clean(
+	//	curve_collection.m_diff,
+	//	ublas::range(0, min(1500, curve_collection.m_diff.size1())),
+	//	ublas::range(0, curve_collection.m_diff.size2())
+	//);
+	ublas::matrix<double> m_centered{ matrixOperations::center_matrix(curve_collection.m_diff) }; // Previously m_diff_clean
 
-	//curve_collection.m_E =  m_rf_E(m_centered.size2(), k);
+	//curve_collection.m_E = m_rf_E(m_centered.size2(), k);
 	//ublas::vector<double> v_Lambda(k);
 
 	enum class PCA_Algo { IRAM, BDCSVD };
@@ -236,15 +237,16 @@ void placeholder_eigen(
 			curve_collection.v_Lambda
 		);
 	}
-    
+
 	curve_collection.m_delta_xi = FactorCalculation::compute_risk_factors(
 		curve_collection.m_E, 
 		curve_collection.m_diff
 	);
 
+
 	if (eval_eigen) { // Evaluate eigendecomposition
 		curve_collection.v_norm_errors = FactorCalculation::eig_all_norm_errors(
-			statisticsOperations::covm(m_diff_clean),
+			statisticsOperations::covm(curve_collection.m_diff), // Previously m_diff_clean
 			curve_collection.m_E,
 			curve_collection.v_Lambda
 		);

@@ -12,7 +12,7 @@ targetFileNames = 'EUR_IS_10Yr';
 sourceFileName = 'EUR_IS_10YrCurves.mat';
 % Options:
     % 'EUR_IS_10YrCurves.mat'
-    % TODO 'EUR_OOS_10YrCurves.mat'
+    % 'EUR_OOS_10YrCurves_Clean.mat'
     % 'USD_OOS_10YrCurves_Clean.mat'
     % TODO 'SEK_OOS_10YrCurves.mat'
 
