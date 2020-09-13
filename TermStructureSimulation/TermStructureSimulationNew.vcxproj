@@ -136,7 +136,7 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>X:\Dependencies\boost_1_72_0;X:\Documents\MSc Git\MScCurveModeling\TermStructureSimulation;X:\Dependencies\eigen-3.3.7;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -169,15 +169,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="framework.h" />
-    <ClInclude Include="FXMultipleYieldSim.h" />
     <ClInclude Include="MultipleYieldSim.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="unfGen.h" />
     <ClInclude Include="varRed.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="FXMultipleYieldSim.cpp" />
-    <ClCompile Include="FXsimMultipleYield.cpp" />
     <ClCompile Include="MultipleYieldSim.cpp" />
     <ClCompile Include="simMultipleYield.cpp" />
     <ClCompile Include="unfGen.cpp" />

@@ -52,8 +52,8 @@ void MultipleYieldSim::simMultipleFull(vector<matrix<double>> const& E, vector<m
 
 	*/
 	
-	size_t M = E.size(); // Risk-free curve + number of tenor curves
-	vector<size_t> k(M); // Number of risk factors of each tenor
+	size_t M = 2; // Risk-free curve + tenor curve
+	vector<size_t> k(M); // Number of risk factors of curve
 	for (size_t i = 0; i < M; i++) { 
 		k(i) = E(i).size2();
 	}
@@ -97,35 +97,16 @@ void MultipleYieldSim::simMultipleFull(vector<matrix<double>> const& E, vector<m
 		}
 	}
 	/*
-		The main loop that loop d days ahead. Different methodology is used for the first day compared to the others since
-		for this day 2000 "fresh" curves are simulated. For other days the curves are based on the previous curves and
-		keeps track of this for a correct garch volatility-scaling.
-	*/
-	for (size_t i = 0; i < d; i++) {
-		if (i == 0) { // Simulate N curves the first day
-			for (size_t j = 0; j < M; j++) {
-				U(j) = unfGen::genU(rho(j), N, copula(j), boost::get(dfC)(j)); // Generate uniformly correlated random variables with desired copula
-				V(j) = varRed::redVariance(U(j), varRedType(j)); // Apply desired variance reduction technique		
-				sigma(j) = statisticsOperations::GARCH(omega(j), alpha(j),
-					beta(j), boost::get(gamma)(j), E(j), hist(j)); // Calculate scaling factor
-				eps(j) = rvSim::genEps(V(j), mu(j), sigma(j), marginal(j), boost::get(dfM)(j));
-			}
-			simMultipleDaily(E, fZero, pi, eps, M, N, fRes, histPrevSim);
-		}
-		if (i != 0) { // Simulate 1 curve for each following day
-			for (size_t j = 0; j < M; j++) {
-				U(j) = unfGen::genU(rho(j), N, copula(j), boost::get(dfC)(j)); // Generate uniformly correlated random variables with desired copula
-				V(j) = varRed::redVariance(U(j), varRedType(j)); // Apply desired variance reduction			
-
-				for (size_t l = 0; l < N; l++) {
-					sigma(j) = statisticsOperations::GARCH(omega(j), alpha(j),
-						beta(j), boost::get(gamma)(j), E(j), column(histPrevSim(j), l), column(histPrevPrevSim(j), l), sigma(j)); // Calculate scaling factor
-					column(eps(j), l) = rvSim::genEps(column(V(j), l), mu(j), sigma(j), marginal(j), boost::get(dfM)(j));
-				}
-			}
-			simSingleMultipleDaily(E, eps, M, N, fRes, histPrevSim, histPrevPrevSim);
-		}
+		The first day 2000 "fresh" curves are simulated.
+*/
+	for (size_t j = 0; j < M; j++) {
+		U(j) = unfGen::genU(rho(j), N, copula(j), boost::get(dfC)(j)); // Generate uniformly correlated random variables with desired copula
+		V(j) = varRed::redVariance(U(j), varRedType(j)); // Apply desired variance reduction technique		
+		sigma(j) = statisticsOperations::GARCH(omega(j), alpha(j),
+			beta(j), boost::get(gamma)(j), E(j), hist(j)); // Calculate scaling factor
+		eps(j) = rvSim::genEps(V(j), mu(j), sigma(j), marginal(j), boost::get(dfM)(j));
 	}
+	simMultipleDaily(E, fZero, pi, eps, M, N, fRes, histPrevSim);
 	
 }
 
@@ -146,40 +127,6 @@ void MultipleYieldSim::simMultipleDaily(vector<matrix<double>> const& E, vector<
 			else {
 				column(fRes(k), i) = column(fRes(k - 1), i) + column(pi, k -  1) + prod(E(k), column(eps(k), i)); //+ kappa(k) * (xiHat(k) - ) + eps(k)(i, j); // Simulate tenor curves
 				column(histPrevSim(k), i) = column(fRes(k), i) - column(fRes(0), i);
-			}
-		}
-	}
-}
-
-/*
-	Function to simulate d days ahead 1 time each.
-*/
-void MultipleYieldSim::simSingleMultipleDaily(
-    vector<matrix<double>> const& E, 
-    vector<matrix<double>> const& eps, 
-    int M, 
-    int N,
-	vector<matrix<double>>& fRes, 
-    vector<matrix<double>>& histPrevSim, 
-    vector<matrix<double>>& histPrevPrevSim
-) {
-	size_t n = E(0).size1();
-	matrix<double> pi(n, M - 1);
-
-	for (int i = 0; i < N; i++) { // Simulate N times
-		for (int k = 0; k < M; k++) { // Iterate over each tenor curve
-			if (k != M - 1) {
-				column(pi, k) = column(fRes(k + 1), i) - column(fRes(0), i);
-			}
-			
-			if (k == 0) {
-				column(histPrevPrevSim(k), i) = column(fRes(k), i);
-				column(fRes(k), i) = column(fRes(k), i) + prod(E(k), column(eps(k), i)); // +prod(E(k)(), (kappa(k) * (xiHat(k) - ) + eps(k)(i, j)); // Simulate risk-free curve
-				column(histPrevSim(k), i) = column(fRes(k), i);
-			} else {
-				column(histPrevPrevSim(k), i) = column(fRes(k), i) - column(fRes(0), k);
-				column(fRes(k), i) = column(fRes(k - 1), i) + column(pi, k - 1) + prod(E(k), column(eps(k), i)); //+ kappa(k) * (xiHat(k) - ) + eps(k)(i, j); // Simulate tenor curves
-				column(histPrevSim(k), i) = column(fRes(k), i) - column(fRes(0), k);
 			}
 		}
 	}

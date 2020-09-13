@@ -26,7 +26,7 @@ E.Zero = V(:,ind);
 E.Tau = V(:,ind);
 
 
-d = 10;
+d = 1;
 N = 2000;
 
 marginalGauss = {};
@@ -173,6 +173,5 @@ pause(0.01);
 clear simMultipleYield.mexw64
 pause(0.01);
 end
-%mex ../simMultipleYield.cpp ../MultipleYieldSim.cpp ../varRed.cpp ../unfGen.cpp ../../Mathlibrary/statisticsOperations.cpp ../../Mathlibrary/matrixOperations.cpp ../../Mathlibrary/rvSim.cpp -IX:/boost_1_72_0 -IX:\exjobb\eigen-eigen-323c052e1731
 
-
+%mex ../simMultipleYield.cpp ../MultipleYieldSim.cpp ../varRed.cpp ../unfGen.cpp ../../Mathlibrary/statisticsOperations.cpp ../../Mathlibrary/matrixOperations.cpp ../../Mathlibrary/rvSim.cpp -I..\..\Dependencies\boost_1_72_0 -I..\..\Dependencies\eigen-3.3.7 -L..\..\Dependencies\boost_1_72_0\stage\lib
