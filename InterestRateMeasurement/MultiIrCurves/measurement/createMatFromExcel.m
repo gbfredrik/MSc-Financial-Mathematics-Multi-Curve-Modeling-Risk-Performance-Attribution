@@ -5,7 +5,7 @@
 % fileName = 'JPY.xlsx';
 % fileName = 'KRW.xlsx';
 % fileName = 'SEK.xlsx';
-fileName = 'EUR_OOS.xlsx';
+fileName = 'SEK_OOS.xlsx';
 
 [type, sheetNames]=xlsfinfo(fileName);
 

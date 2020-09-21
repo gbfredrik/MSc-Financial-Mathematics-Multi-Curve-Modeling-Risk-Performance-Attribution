@@ -4,7 +4,7 @@ figwaitbar = waitbar(0, 'Progress');
 
 % Set file name
 dataPath = '../../Data/';
-fileName = 'EUR_OOS';
+fileName = 'SEK_OOS';
 
 % Variables to save
 tradeDatesAll = [];
@@ -17,7 +17,7 @@ zAll = [];
 measurementPath = '.\measurement';
 addpath(measurementPath)
 
-c = 2;
+c = 6;
 if (c==1) % CHF
     currency = 'CHF'; cal = 'SWI'; currencyTimeZone = 'Europe/Paris';
     iborName = 'LIBORCHF3M'; iborCal = 'SWI,UKG'; iborCalFixing = 'UKG'; tenorIRS = '6M'; iborTimeZone = 'Europe/London'; settlementLagIRS = 2; irsBDC = 'M'; iborDCC = 'MMA0';
@@ -103,11 +103,11 @@ cashDCC = 'MMA0';
 cashFrq = '1D';
 cashEom = 'S';
 cashBDC = 'F';
-irStartDate = datenum(2006,01,01); % Todo - kontrollera, original: datenum(2005,01,1)
+irStartDate = datenum(2005,01,01); % Todo - kontrollera, original: datenum(2005,01,1)
 cashID = mexPortfolio('createCash', currency, accountName, cashDCC, cashFrq, cashEom, cashBDC, cal, irStartDate);
 
 %%
-for k=length(times)%1:length(times)
+for k=1%1:length(times)
     tradeDate = floor(times(k));
     %   datestr(tradeDate)
     
@@ -275,7 +275,7 @@ for k=length(times)%1:length(times)
         %text(instrT(eInd(j))+0.1, instrf(eInd(j)) + z(eInd(j)), instr.assetRIC(eInd(j)));
       end
       %title(datestr(times(k)));
-      legend(tenorON, tenorIRS, 'Quoted prices', 'Location', 'SouthEast')
+      %legend(tenorON, tenorIRS, 'Quoted prices', 'Location', 'SouthEast')
       xlabel('Time [years]')
       ylabel('Forward rate [%]')
       exportgraphics(curve_fig, sprintf('Figures/%s_%i.png', fileName, k));
@@ -326,11 +326,11 @@ end
 
 %%
 % exportgraphics(curve_fig, sprintf('Figures/%s_%i.png', fileName, k));
-% for k=1:1537
-%     plot(fDatesAll(k, 1:3654), fAll(k,1:3654)', fDatesAll(k, 1:3654), fAll(k,1:3654)' + piAll(k,1:3654)')
-%     title(k)
-%     %disp(k)
-%     pause(0.03)
-% end
+for k=1:100
+    plot(fDatesAll(k, 1:3650), fAll(k,1:3650)', fDatesAll(k, 1:3650), fAll(k,1:3650)' + piAll(k,1:3650)')
+    title(k)
+    %disp(k)
+    pause(0.01)
+end
 % % plot(fAll(410:425,:)')
 %%
