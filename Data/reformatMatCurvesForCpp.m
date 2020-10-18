@@ -9,7 +9,7 @@ targetFileNames = 'EUR_IS_10Yr';
     % 'USD_OOS_10Yr'
     % 'SEK_OOS_10Yr'
     
-sourceFileName = 'EUR_IS_10YrCurves_Clean_Final.mat';
+sourceFileName = 'EUR_IS_10YrCurves_Clean_Final2.mat';
 % Options:
     % 'EUR_IS_10YrCurves.mat'
     % 'EUR_OOS_10YrCurves_Clean.mat'
