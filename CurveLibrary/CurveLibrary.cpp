@@ -208,7 +208,8 @@ void placeholder_eigen(
 	bool const eval_eigen,
     bool const save
 ) {
-	curve_collection.m_diff = matrixOperations::diff_matrix(curve_collection.m_A_trunc);
+	curve_collection.m_diff = matrixOperations::abs(matrixOperations::diff_matrix(curve_collection.m_A_trunc));
+	//curve_collection.m_diff = matrixOperations::diff_matrix(curve_collection.m_A_trunc);
 
 	// Todo: Clean data here and process:
 	//ublas::matrix_range<ublas::matrix<double>> m_diff_clean(

@@ -206,10 +206,15 @@ ublas::vector<double> matrixOperations::kron_prod_vec(ublas::vector<double> cons
     return vKron;
 }
 
-//Crop matrix
-/*void matrixOperations::crop_matrix(
-	ublas::vector<double> const& m,
-	double const curve_length)
-{
+ublas::matrix<double> matrixOperations::abs(ublas::matrix<double> const& m) {
+	ublas::matrix<double> out(m.size1(), m.size2());
 
-}*/
+	for (size_t r{ 0 }, rows{ m.size1() }; r < rows; ++r) {
+		for (size_t c{ 0 }, cols{ m.size2() }; c < cols; ++c) {
+			out(r, c) = std::abs(m(r, c));
+		}
+	}
+
+	return out;
+}
+

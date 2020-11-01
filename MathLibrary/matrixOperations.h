@@ -30,4 +30,6 @@ public:
         boost::numeric::ublas::vector<double> const& v1, 
         boost::numeric::ublas::vector<double> const& v2
     );
+
+    static boost::numeric::ublas::matrix<double> abs(boost::numeric::ublas::matrix<double> const& m);
 };
