@@ -1,0 +1,17 @@
+function accrual = accrual(dtFloat, dtFix, fixing, N, y, numKnown)
+
+    % Calculate fraction of period progressed
+    if numKnown == 1
+        fracFloat = dtFloat(1)
+        fracFix =
+    elseif numKnown == 2
+        fracFloat(1) =
+        fracFloat(2) = 
+        fracFix(1) = 
+        fracFix(2) = 
+    end
+        
+
+
+end
+
