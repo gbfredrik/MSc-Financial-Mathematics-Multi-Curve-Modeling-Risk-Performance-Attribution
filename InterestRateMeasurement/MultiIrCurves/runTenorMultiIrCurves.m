@@ -1,10 +1,10 @@
-%close all;
+close all;
 clear;
 figwaitbar = waitbar(0, 'Progress');
 
 % Set file name
-dataPath = '../../Data/';
-fileName = 'SEK_OOS';
+dataPath = 'Data/';
+fileName = 'USD_OOS';
 
 % Variables to save
 tradeDatesAll = [];
@@ -17,7 +17,7 @@ zAll = [];
 measurementPath = '.\measurement';
 addpath(measurementPath)
 
-c = 6;
+c = 7;
 if (c==1) % CHF
     currency = 'CHF'; cal = 'SWI'; currencyTimeZone = 'Europe/Paris';
     iborName = 'LIBORCHF3M'; iborCal = 'SWI,UKG'; iborCalFixing = 'UKG'; tenorIRS = '6M'; iborTimeZone = 'Europe/London'; settlementLagIRS = 2; irsBDC = 'M'; iborDCC = 'MMA0';
@@ -107,7 +107,7 @@ irStartDate = datenum(2005,01,01); % Todo - kontrollera, original: datenum(2005,
 cashID = mexPortfolio('createCash', currency, accountName, cashDCC, cashFrq, cashEom, cashBDC, cal, irStartDate);
 
 %%
-for k=1%1:length(times)
+for k=252%length(times)
     tradeDate = floor(times(k));
     %   datestr(tradeDate)
     
@@ -275,7 +275,7 @@ for k=1%1:length(times)
         %text(instrT(eInd(j))+0.1, instrf(eInd(j)) + z(eInd(j)), instr.assetRIC(eInd(j)));
       end
       %title(datestr(times(k)));
-      %legend(tenorON, tenorIRS, 'Quoted prices', 'Location', 'SouthEast')
+      legend(tenorON, tenorIRS, 'Quoted prices', 'Location', 'SouthEast')
       xlabel('Time [years]')
       ylabel('Forward rate [%]')
       exportgraphics(curve_fig, sprintf('Figures/%s_%i.png', fileName, k));
@@ -285,7 +285,7 @@ for k=1%1:length(times)
     
       for j=1:length(instrID)
     %     [timeData, data] = mexPortfolio('getValues', instrID(j), times(k), currencyTermTimeZone, {'BID', 'ASK'});
-        fprintf('%3d %18s %12s %9f %9f\n',j,instr.assetRIC{j}, datestr(instr.maturityDate(j)), instr.data{j}.price(3), z(j));
+        %fprintf('%3d %18s %12s %9f %9f\n',j,instr.assetRIC{j}, datestr(instr.maturityDate(j)), instr.data{j}.price(3), z(j));
       end
       pause(0.01);
     %% ---
@@ -326,11 +326,11 @@ end
 
 %%
 % exportgraphics(curve_fig, sprintf('Figures/%s_%i.png', fileName, k));
-for k=1:100
-    plot(fDatesAll(k, 1:3650), fAll(k,1:3650)', fDatesAll(k, 1:3650), fAll(k,1:3650)' + piAll(k,1:3650)')
-    title(k)
-    %disp(k)
-    pause(0.01)
-end
+% for k=1:100
+%     plot(fDatesAll(k, 1:3650), fAll(k,1:3650)', fDatesAll(k, 1:3650), fAll(k,1:3650)' + piAll(k,1:3650)')
+%     title(k)
+%     %disp(k)
+%     pause(0.01)
+% end
 % % plot(fAll(410:425,:)')
 %%
