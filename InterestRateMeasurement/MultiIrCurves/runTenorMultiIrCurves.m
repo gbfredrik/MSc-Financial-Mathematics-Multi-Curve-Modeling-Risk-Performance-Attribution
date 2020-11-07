@@ -4,7 +4,7 @@ figwaitbar = waitbar(0, 'Progress');
 
 % Set file name
 dataPath = 'Data/';
-fileName = 'USD_OOS';
+fileName = 'EUR_OOS';
 
 % Variables to save
 tradeDatesAll = [];
@@ -17,7 +17,7 @@ zAll = [];
 measurementPath = '.\measurement';
 addpath(measurementPath)
 
-c = 7;
+c = 2;
 if (c==1) % CHF
     currency = 'CHF'; cal = 'SWI'; currencyTimeZone = 'Europe/Paris';
     iborName = 'LIBORCHF3M'; iborCal = 'SWI,UKG'; iborCalFixing = 'UKG'; tenorIRS = '6M'; iborTimeZone = 'Europe/London'; settlementLagIRS = 2; irsBDC = 'M'; iborDCC = 'MMA0';
@@ -107,7 +107,7 @@ irStartDate = datenum(2005,01,01); % Todo - kontrollera, original: datenum(2005,
 cashID = mexPortfolio('createCash', currency, accountName, cashDCC, cashFrq, cashEom, cashBDC, cal, irStartDate);
 
 %%
-for k=252%length(times)
+for k=255%length(times)
     tradeDate = floor(times(k));
     %   datestr(tradeDate)
     
