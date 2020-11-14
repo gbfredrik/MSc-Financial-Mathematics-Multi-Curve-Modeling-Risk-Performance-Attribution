@@ -1,4 +1,4 @@
-function [valueParams, portfolioValues, cash, realizedPnL] = initValueParams(tradeDatesAll_OOS, fixingDates, floatDates, fixDates, ccy, Ibor, IborDates, RoP, Nom, yield, f, pi)
+function [valueParams, cash] = initValueParams(tradeDatesAll_OOS, fixingDates, floatDates, fixDates, ccy, Ibor, IborDates, RoP, Nom, yield, f, pi)
 
     % Set number of active contracts and split parameter 
     numContracts = length(floatDates);
@@ -11,10 +11,6 @@ function [valueParams, portfolioValues, cash, realizedPnL] = initValueParams(tra
         end
     end
 
-    % Define data set to store results
-    portfolioValues = cell(length(tradeDatesAll_OOS), 1);
-    realizedPnL = cell(length(tradeDatesAll_OOS), 1);
-    
     % Set day count conventions
     if ccy == "EUR"
         floatLegDCC = "act/360";
@@ -75,11 +71,7 @@ function [valueParams, portfolioValues, cash, realizedPnL] = initValueParams(tra
         valueParams{17}{i} = timeFracFloat{i};  
         valueParams{18}{i} = fixLegDCC;
         valueParams{19}{i} = cash;
-        
     end
     
     valueParams = getParameters(valueParams, f, pi);
-    
-
 end
-

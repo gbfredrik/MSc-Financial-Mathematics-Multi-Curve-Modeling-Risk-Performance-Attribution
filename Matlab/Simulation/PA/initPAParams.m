@@ -16,7 +16,7 @@ function [paParams, paResult, plotPAParams] = initPAParams(numContracts, A, E, E
     paResult{7} = cell(numContracts, 1);
     % Twist_1_f
     paResult{8} = cell(numContracts, 1);
-    % Butterfly_1_f
+    % Butterfly_1_f      
     paResult{9} = cell(numContracts, 1);    
     % 4th - 6th_1_f
     paResult{10} = cell(numContracts, 1);  

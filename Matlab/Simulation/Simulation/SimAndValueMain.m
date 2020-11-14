@@ -1,3 +1,4 @@
+clear all
 %% Import Forward rates
 path_IS = 'Data/Curves/EUR_IS_10YrCurves_Clean_Final2.mat';
 path_OOS = 'Data/Curves/EUR_OOS_10YrCurves_Clean_Final.mat';
@@ -11,8 +12,8 @@ instruments = 'A':'P';
 kZero = 6;
 kPi = 6;
 % type 1: Matlab eigenvectors
-% type 2: BDSCV
-% type 3: BDSCV and IRAM
+% type 2: BDCSVD
+% type 3: BDCSVD and IRAM
 type = 1;
 [E, E_k, DZero, DPi] = getRiskFactors(kZero, kPi, fAll_IS, piAll_IS, type);
 A = intMatrix(size(E.Zero,1));
@@ -21,41 +22,35 @@ A = intMatrix(size(E.Zero,1));
 N = 2000; % Number of curves to be simulated
 simParams = initSimParams(N, E_k, DZero, DPi, fAll_IS, piAll_IS, fAll_OOS, piAll_OOS, tradeDatesAll_OOS);
 
-%% Init value parameters
-[valueParams, portfolioValues, cash, realizedPnL] = initValueParams(tradeDatesAll_OOS, fixingDates, floatDates, fixDates, ccy, Ibor, IborDates, RoP, Nom, yield, fAll_OOS(1,:)', piAll_OOS(1,:)');
-valuePortfolio(A*fAll_OOS(1,:)', A*piAll_OOS(1,:)', valueParams) % Test the first day valuation
-
 %% Init PA parameters
+[valueParams, ~] = initValueParams(tradeDatesAll_OOS, fixingDates, floatDates, fixDates, ccy, Ibor, IborDates, RoP, Nom, yield, fAll_OOS(1,:)', piAll_OOS(1,:)');
 numContracts = length(valueParams{2});
 [paParams, paResult, plotPAParams] = initPAParams(numContracts, A, E, E_k, fAll_OOS(1,:)', piAll_OOS(1,:)', fAll_IS(end,:)', piAll_IS(end,:)');
 
-%% Preallocate arrays and cell arrays
-portfolioValuesNext = cell(length(tradeDatesAll_OOS), 1);
-portfolioValuesNext(1, :) = {0};
-portfolioValuesSimMC = cell(1, length(tradeDatesAll_OOS));
-portfolioValuesSimMC(:, :) = {zeros(N, 1)};
+%% Initialize valuation and risk parameters, as well as run main loop
+% Init valuation parameters (redo just incase we only run the simulation
+% multiple times without full clearing of data)
+[valueParams, cash] = initValueParams(tradeDatesAll_OOS, fixingDates, floatDates, fixDates, ccy, Ibor, IborDates, RoP, Nom, yield, fAll_OOS(1,:)', piAll_OOS(1,:)');
+fprintf('First day valuation is %.3f.\n', valuePortfolio(A*fAll_OOS(1,:)', A*piAll_OOS(1,:)', valueParams)); % Test the first day valuation
 
-Risk.VaR_95s = zeros(1, length(tradeDatesAll_OOS));
-Risk.VaR_99s = zeros(1, length(tradeDatesAll_OOS));
+% Init risk parameters
+[portfolioValues, portfolioValuesNext, portfolioValuesSimMC, Risk] = initRiskParams(length(tradeDatesAll_OOS));
 
-Risk.ES_95s = zeros(1, length(tradeDatesAll_OOS));
-Risk.ES_99s = zeros(1, length(tradeDatesAll_OOS));
+% Loop over all days
+useMR = false; % Use mean-reversion for simulation of curves
 
-Risk.theo_pnl = zeros(1, length(tradeDatesAll_OOS));
-
-%% Loop over all days
-useMR = true; % Use mean-reversion for simulation of curves
-
-for i = 1:25%length(tradeDatesAll_OOS)
+for i = 1:1%length(tradeDatesAll_OOS)
+    fprintf('Currently on iteration %i.\n', i)
     currDate = datestr(tradeDatesAll_OOS(i));
     
     % Calculate realized portfolio values today and for next wd (backtesting)
     portfolioValues{i} = valuePortfolio(A*fAll_OOS(i,:)', A*piAll_OOS(i,:)', valueParams);
     portfolioValuesNext{i} = valuePortfolio(A*fAll_OOS(i+1,:)', A*piAll_OOS(i+1,:)', valueParams);
+    fprintf('portfolioValues{%i} = %.3f, portfolioValuesNext{%i} = %.3f.\n', i, portfolioValues{i}, i, portfolioValuesNext{i})
     
     %Simulate 1d ahead
     [fSimulated, piSimulated, simParams] = TermStructureSim(i+1, simParams, fAll_IS, piAll_IS, fAll_OOS, piAll_OOS, tradeDatesAll_OOS, useMR);
-      
+    
     % Value Portfolio with MC simulation
     if sum(valueParams{12}) > 0
         portfolioValuesSimMC{i} = valuePortfolio(A*fSimulated', A*piSimulated', valueParams);
@@ -64,10 +59,9 @@ for i = 1:25%length(tradeDatesAll_OOS)
     % Risk Measurement
     Risk.VaR_95s(i) = var_risk(portfolioValuesSimMC{i} - portfolioValues{i}, 0.95);
     Risk.VaR_99s(i) = var_risk(portfolioValuesSimMC{i} - portfolioValues{i}, 0.99);
-    Risk.ES_95s(i) = es_risk(portfolioValuesSimMC{i} - portfolioValues{i}, 0.95);
-    Risk.ES_99s(i) = es_risk(portfolioValuesSimMC{i} - portfolioValues{i}, 0.99);
+    Risk.ES_975s(i) = es_risk(portfolioValuesSimMC{i} - portfolioValues{i}, 0.975);
+    Risk.PnL(i) = portfolioValuesNext{i} - portfolioValues{i};
     
-    Risk.theo_pnl(i) = portfolioValuesNext{i} - portfolioValues{i};
     % Call Performance attribution
 %     if sum(valueParams{12}) > 0
 %         paParams = getPAParameters(paParams, A, fAll_OOS(i,:)', piAll_OOS(i,:)');
@@ -80,19 +74,26 @@ for i = 1:25%length(tradeDatesAll_OOS)
         break
     end
     
-    nextWD = datestr(tradeDatesAll_OOS(i+1)); 
+    nextWD = datestr(tradeDatesAll_OOS(i+1));
     valueParams{1} = nextWD;
 
-    % Uppdatera kassaflöden
+    % Update cashflows
     valueParams = setActiveStatus(valueParams, nextWD);
     valueParams = getParameters(valueParams, fAll_OOS(i,:)', piAll_OOS(i,:)');
-     
 end
-%%
-ttt = 1:25;
-plot(ttt, Risk.theo_pnl(ttt), ttt, -Risk.VaR_95s(ttt), ttt, -Risk.ES_95s(ttt))
-legend("TheoPnL", "VaR95", "ES95")
 
+save("Data/Risk/Risk_" + instruments, "Risk")
+%%
+ttt = 1:252;
+figure(101)
+hold on
+%plot(ttt, Risk.PnL(ttt), ttt, -Risk.VaR_95s(ttt), ttt, -Risk.VaR_99s(ttt), ttt, -Risk.ES_975s(ttt))
+scatter(ttt, Risk.PnL(ttt), '*')
+plot(ttt, -Risk.VaR_95s(ttt))
+plot(ttt, -Risk.VaR_99s(ttt))
+plot(ttt, -Risk.ES_975s(ttt))
+legend("TheoPnL", "VaR95", "VaR99", "ES97.5")
+hold off
 
 clearvars ttt
 %%
