@@ -51,7 +51,7 @@ function [oneY_IRS_table, allY_first_IRS_table, abs_cont, abs_cont_mature] = sum
     cash = 0;
     
     % READ RESULTS
-    for i = 1:7
+    for i = 1:9
         % READ RESULTS
         % NPV
         npv = sum(paResult{1}{i});
@@ -153,6 +153,8 @@ function [oneY_IRS_table, allY_first_IRS_table, abs_cont, abs_cont_mature] = sum
           abs_cont = [shift_1_f, twist_1_f, butterfly_1_f, fourth_sixth_1_f, shift_1_pi, twist_1_pi, butterfly_1_pi, fourth_eight_1_pi, sum_second ...
             eps_P, eps_I, eps_A, carry, D_t, npv];  
     
+        abs_cont = abs_cont';
+        
         npv = 0;
         carry = 0; 
         eps_I = 0;
@@ -207,6 +209,6 @@ function [oneY_IRS_table, allY_first_IRS_table, abs_cont, abs_cont_mature] = sum
           abs_cont_mature = [shift_1_f, twist_1_f, butterfly_1_f, fourth_sixth_1_f, shift_1_pi, twist_1_pi, butterfly_1_pi, fourth_eight_1_pi, sum_second ...
             eps_P, eps_I, eps_A, carry, D_t, npv];         
         
-        
+         abs_cont_mature = abs_cont_mature';
 end
 

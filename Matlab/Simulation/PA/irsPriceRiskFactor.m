@@ -13,7 +13,7 @@ function  [P, nextEstFloat] = irsPriceRiskFactor(fixDatesIndexes, floatDatesInde
     %Calc fix leg
     fix = 0;   
     for i = 1:numFix-1
-        fix = fix + N * y * dtFix(i) * exp(-timeFracFix(i+1) * aZero(fixDatesIndexes(i+1),:) * XiZero);
+        fix = fix + N * y * dtFix(i) * exp(-timeFracFix(i+1) * aZero(fixDatesIndexes(i+1)+1,:) * XiZero);
     end
     
     
@@ -27,14 +27,14 @@ function  [P, nextEstFloat] = irsPriceRiskFactor(fixDatesIndexes, floatDatesInde
     i = numKnown+1;
     
     if numKnown+1 <= numFloat-1
-        nextEstFloat = N * (exp(timeFracFloat(i+1) * (aPi(floatDatesIndexes(i + 1),:) * XiPi) - timeFracFloat(i) * (aZero(floatDatesIndexes(i)+1,:) * XiZero + aPi(floatDatesIndexes(i)+1,:) * XiPi))...
+        nextEstFloat = N * (exp(timeFracFloat(i+1) * (aPi(floatDatesIndexes(i + 1),:) * XiPi) - timeFracFloat(i) * (aZero(floatDatesIndexes(i),:) * XiZero + aPi(floatDatesIndexes(i),:) * XiPi))...
                 - exp(-timeFracFloat(i + 1) * aZero(floatDatesIndexes(i + 1),:) * XiZero)');
     else
         nextEstFloat = 0;
     end
         
     for i = numKnown+1:numFloat-1
-        float = float + N * (exp(timeFracFloat(i+1) * (aPi(floatDatesIndexes(i + 1),:) * XiPi) - timeFracFloat(i) * (aZero(floatDatesIndexes(i)+1,:) * XiZero + aPi(floatDatesIndexes(i)+1,:) * XiPi))...
+        float = float + N * (exp(timeFracFloat(i+1) * (aPi(floatDatesIndexes(i + 1),:) * XiPi) - timeFracFloat(i) * (aZero(floatDatesIndexes(i),:) * XiZero + aPi(floatDatesIndexes(i),:) * XiPi))...
             - exp(-timeFracFloat(i + 1) * aZero(floatDatesIndexes(i + 1),:) * XiZero)');
     end
     

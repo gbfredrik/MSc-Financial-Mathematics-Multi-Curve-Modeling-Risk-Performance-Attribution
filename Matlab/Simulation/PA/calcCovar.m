@@ -1,4 +1,4 @@
-function [Exp, Cov, Tot_exp] = calcCovar(plotPAParams)
+function [Exp, Cov, Tot_exp, type] = calcCovar(plotPAParams)
     
 resultMatrix(:,1) = plotPAParams{9};  % eps_A
     resultMatrix(:,2) = plotPAParams{10}; % eps_I 
@@ -56,5 +56,27 @@ resultMatrix(:,1) = plotPAParams{9};  % eps_A
         Tot_exp(i) = Tot_exp(i-1) + Cov(i)*100;  
     end
     Tot_exp = Tot_exp'
+    
+    count = 1;
+    for i = 1:length(sortedVariances)
+        temp1 = type(i,1);
+        temp2 = type(i,2);
+        for j = i+1:length(sortedVariances)
+            if type(j,2) == temp1 && type(j,1) == temp2
+                rmIndexes(count) = i
+                count = count + 1;
+            end
+        end
+    end
+    
+    for i = length(sortedVariances):-1:1
+        if ismember(i, rmIndexes)
+            Exp(i) = []
+            Cov(i) = []
+            Tot_exp(i) = []
+            type(i,:) = []
+        end 
+    end
+    
 end
 
