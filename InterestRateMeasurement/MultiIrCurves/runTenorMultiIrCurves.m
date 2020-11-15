@@ -1,10 +1,10 @@
-close all;
+%close all;
 clear;
 figwaitbar = waitbar(0, 'Progress');
 
 % Set file name
 dataPath = 'Data/';
-fileName = 'EUR_OOS';
+fileName = 'USD_OOS';
 
 % Variables to save
 tradeDatesAll = [];
@@ -17,7 +17,7 @@ zAll = [];
 measurementPath = '.\measurement';
 addpath(measurementPath)
 
-c = 2;
+c = 7;
 if (c==1) % CHF
     currency = 'CHF'; cal = 'SWI'; currencyTimeZone = 'Europe/Paris';
     iborName = 'LIBORCHF3M'; iborCal = 'SWI,UKG'; iborCalFixing = 'UKG'; tenorIRS = '6M'; iborTimeZone = 'Europe/London'; settlementLagIRS = 2; irsBDC = 'M'; iborDCC = 'MMA0';
@@ -91,7 +91,7 @@ elseif (c==6)
     %indIRS = indIRS(1:2); % TODO
 elseif (c==7) % OK
     %indOIS = indOIS(1:24);
-    %indIRS = indIRS(1:10);
+    %indIRS = indIRS(1:9);
 end
 % % Small test example
 % indOIS = indOIS(3);
@@ -103,11 +103,11 @@ cashDCC = 'MMA0';
 cashFrq = '1D';
 cashEom = 'S';
 cashBDC = 'F';
-irStartDate = datenum(2005,01,01); % Todo - kontrollera, original: datenum(2005,01,1)
+irStartDate = datenum(2005,01,1); % Todo - kontrollera, original: datenum(2005,01,1)
 cashID = mexPortfolio('createCash', currency, accountName, cashDCC, cashFrq, cashEom, cashBDC, cal, irStartDate);
 
 %%
-for k=255%length(times)
+for k=252%length(times)
     tradeDate = floor(times(k));
     %   datestr(tradeDate)
     
@@ -209,11 +209,16 @@ for k=255%length(times)
         mexPortfolio('clearMarketState');
     end
     
-    mexPortfolio('initMarketState', times(k), currencyTimeZone);
-    fCurveID = mexPortfolio('setMarketStateTermStructureDiscreteForward', times(k), currencyTimeZone, currency, 'Interbank', 'ON', 'Forward', fDates, f);
-    piCurveID = mexPortfolio('setMarketStateTermStructureDiscreteForward', times(k), currencyTimeZone, currency, 'Interbank', tenorIRS, 'SpreadRelative', fDates, piSpread);
-    iborCurveID = mexPortfolio('setMarketStateTermStructureRelative', times(k), currencyTimeZone, fCurveID, piCurveID, currency, 'Interbank', tenorIRS, 'Forward');
-    
+    %mexPortfolio('initMarketState', times(k), currencyTimeZone);
+    %fCurveID = mexPortfolio('setMarketStateTermStructureDiscreteForward', times(k), currencyTimeZone, currency, 'Interbank', 'ON', 'Forward', fDates, f);
+    %piCurveID = mexPortfolio('setMarketStateTermStructureDiscreteForward', times(k), currencyTimeZone, currency, 'Interbank', tenorIRS, 'SpreadRelative', fDates, piSpread);
+    %iborCurveID = mexPortfolio('setMarketStateTermStructureRelative', times(k), currencyTimeZone, fCurveID, piCurveID, currency, 'Interbank', tenorIRS, 'Forward');
+
+    mexPortfolio('initMarketState', tradeDate, currencyTimeZone);
+    fCurveID = mexPortfolio('setMarketStateTermStructureDiscreteForward', tradeDate, currencyTimeZone, currency, 'Interbank', 'ON', 'Forward', fDates, f);
+    piCurveID = mexPortfolio('setMarketStateTermStructureDiscreteForward', tradeDate, currencyTimeZone, currency, 'Interbank', tenorIRS, 'SpreadRelative', fDates, piSpread);
+    iborCurveID = mexPortfolio('setMarketStateTermStructureRelative', tradeDate, currencyTimeZone, fCurveID, piCurveID, currency, 'Interbank', tenorIRS, 'Forward');
+
     mu = 1.0;
     nIterations = 200;
     iterationPrint = 0; %true; % Default från Jörgen är 1
@@ -278,7 +283,7 @@ for k=255%length(times)
       legend(tenorON, tenorIRS, 'Quoted prices', 'Location', 'SouthEast')
       xlabel('Time [years]')
       ylabel('Forward rate [%]')
-      exportgraphics(curve_fig, sprintf('Figures/%s_%i.png', fileName, k));
+      %exportgraphics(curve_fig, sprintf('Figures/%s_%i.png', fileName, k));
     
       fprintf('\nGraphed trade date: \n')
       disp(datestr(tradeDate))
