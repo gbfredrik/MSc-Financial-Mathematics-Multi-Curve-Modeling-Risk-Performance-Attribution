@@ -64,14 +64,14 @@ end
 fZero = fAll_OOS(i-1,:);
 pi = piAll_OOS(i-1,:);
 
-if i == 1
+if i == 2
    % Calculate sigma the first day based on the IS data
     sigmaZero = GJR_GARCH(omegaZero', alphaZero', betaZero', EZero, fAll_IS);
     sigmaPi = GJR_GARCH(omegaPi', alphaPi', betaPi', EPi, piAll_IS); 
 else
     % Calc sigma based on last day's vol
-    sigmaZero = GJR_GARCH_d(omegaZero', alphaZero', betaZero', EZero, fZero, fAll_OOS(i-1,:), sigmaZero);
-    sigmaPi = GJR_GARCH_d(omegaPi', alphaPi', betaPi', EPi, pi, piAll_OOS(i-1,:), sigmaPi);
+    sigmaZero = GJR_GARCH_d(omegaZero', alphaZero', betaZero', EZero, fZero, fAll_OOS(i-2,:), sigmaZero);
+    sigmaPi = GJR_GARCH_d(omegaPi', alphaPi', betaPi', EPi, pi, piAll_OOS(i-2,:), sigmaPi);
 end
 % Calc random numbers
 UZero = lhsstud(zeros(1,length(omegaZero)), rhoZero, dfCZero, N);
@@ -102,9 +102,11 @@ piSimulated = (repmat(pi',1,N) + deltaPi)';
 
 % Plot results
 % Zero
-%plotResults(fZero, T, fSimulated, tradeDatesAll_OOS, i, ['Simulated 1d Risk-free IR Curves, Date: ', num2str(datestr(tradeDatesAll_OOS(i)))], 1);
-% Zero + Pi
-%plotResults(fZero + pi, T, fSimulated + piSimulated, tradeDatesAll_OOS, i, ['Simulated 1d Tenor IR Curves, Date: ', num2str(datestr(tradeDatesAll_OOS(i)))], 2);
+%plotResults(fZero, T, fSimulated, tradeDatesAll_OOS, i, ['Simulated 1d risk-free IR curves, Date: ', num2str(datestr(tradeDatesAll_OOS(i)))], 1);
+%  Pi
+%plotResults(pi, T, piSimulated, tradeDatesAll_OOS, i, ['Simulated 1d Tenor spreads, Date: ', num2str(datestr(tradeDatesAll_OOS(i)))], 2);
+ % Zero + Pi   
+%plotResults(fZero + pi, T, fSimulated + piSimulated, tradeDatesAll_OOS, i, ['Simulated 1d 3M IR curves, Date: ', num2str(datestr(tradeDatesAll_OOS(i)))], 3);
 
 % Set sigma to be used in next day simulation
 simParams{8}{1} = sigmaZero; 
