@@ -1,4 +1,4 @@
-function [reject] = var_hypothesistest(VaRs, PnLs, c, alpha)
+function [reject, Z, tilde_m] = var_hypothesistest(VaRs, PnLs, c, alpha)
 %VAR_HYPOTHESISTEST Summary of this function goes here
 %   Detailed explanation goes here
 

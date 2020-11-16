@@ -60,18 +60,18 @@ if i == 1 || mod(i,504) == 0
    simParams{13}{2} = kappaPi;
 end
 
-% Set active curve at day i
+% Set active curve at day i-1 (the trade date)
 fZero = fAll_OOS(i-1,:);
 pi = piAll_OOS(i-1,:);
 
-if i == 1
-   % Calculate sigma the first day based on the IS data
+if i == 2
+   % Calculate sigma the first day based on the IS data (i.e. trade date 1)
     sigmaZero = GJR_GARCH(omegaZero', alphaZero', betaZero', EZero, fAll_IS);
     sigmaPi = GJR_GARCH(omegaPi', alphaPi', betaPi', EPi, piAll_IS); 
 else
     % Calc sigma based on last day's vol
-    sigmaZero = GJR_GARCH_d(omegaZero', alphaZero', betaZero', EZero, fZero, fAll_OOS(i-1,:), sigmaZero);
-    sigmaPi = GJR_GARCH_d(omegaPi', alphaPi', betaPi', EPi, pi, piAll_OOS(i-1,:), sigmaPi);
+    sigmaZero = GJR_GARCH_d(omegaZero', alphaZero', betaZero', EZero, fZero, fAll_OOS(i-2,:), sigmaZero);
+    sigmaPi = GJR_GARCH_d(omegaPi', alphaPi', betaPi', EPi, pi, piAll_OOS(i-2,:), sigmaPi);
 end
 % Calc random numbers
 UZero = lhsstud(zeros(1,length(omegaZero)), rhoZero, dfCZero, N);

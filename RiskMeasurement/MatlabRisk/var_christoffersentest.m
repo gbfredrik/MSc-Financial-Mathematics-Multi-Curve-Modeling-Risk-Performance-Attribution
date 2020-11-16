@@ -1,4 +1,4 @@
-function [reject] = var_christoffersentest(VaRs, PnLs, alpha)
+function [reject, c_stat, chi_val] = var_christoffersentest(VaRs, PnLs, alpha)
 %VAR_CHRISTOFFERSENTEST Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -9,8 +9,9 @@ pi01 = (u01) / (u00 + u01);
 pi11 = (u11) / (u10 + u11);
 
 c_stat = teststat_christoffersen(pi, pi01, pi11, u00, u01, u10, u11);
+chi_val = chi2inv(1 - alpha, 1);
 
-reject = (c_stat > chi2inv(1 - alpha, 1));
+reject = (c_stat > chi_val);
 end
 
 function [u00, u01, u10, u11] = numberofperiods(VaRs, PnLs)
@@ -39,8 +40,10 @@ end
 end
 
 function [c_stat] = teststat_christoffersen(pi, pi01, pi11, u00, u01, u10, u11)
-c_stat = -2.0 * ((u00 + u10) * log(1.0 - pi) + (u01 + u11) * log(pi)) ...
-    + 2.0 * (u00 * log(1.0 - pi01) + u01 * log(pi01) + u10 * log(1.0 - pi11) + u11 * log(pi11));
+c_stat = -2.0 * log((1 - pi)^(u00 + u10) * pi^(u01 + u11)) ...
+    + 2.0 * log((1.0 - pi01)^u00 * pi01^u01 * (1 - pi11)^u10 * pi11^u11);
+%c_stat = -2.0 * ((u00 + u10) * log(1.0 - pi) + (u01 + u11) * log(pi)) ...
+    %+ 2.0 * (u00 * log(1.0 - pi01) + u01 * log(pi01) + u10 * log(1.0 - pi11) + u11 * log(pi11));
 end
 
 % Helper

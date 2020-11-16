@@ -10,11 +10,11 @@ instruments = 'A':'P';
 
 %% Get/set risk factors
 kZero = 6;
-kPi = 6;
+kPi = 8;
 % type 1: Matlab eigenvectors
 % type 2: BDCSVD
 % type 3: BDCSVD and IRAM
-type = 1;
+type = 2;
 [E, E_k, DZero, DPi] = getRiskFactors(kZero, kPi, fAll_IS, piAll_IS, type);
 A = intMatrix(size(E.Zero,1));
 
@@ -39,7 +39,8 @@ fprintf('First day valuation is %.3f.\n', valuePortfolio(A*fAll_OOS(1,:)', A*piA
 % Loop over all days
 useMR = false; % Use mean-reversion for simulation of curves
 
-for i = 1:1%length(tradeDatesAll_OOS)
+fprintf('\n\nStarting main loop:\n');
+for i = 1:258%length(tradeDatesAll_OOS) - 1
     fprintf('Currently on iteration %i.\n', i)
     currDate = datestr(tradeDatesAll_OOS(i));
     
@@ -61,7 +62,8 @@ for i = 1:1%length(tradeDatesAll_OOS)
     Risk.VaR_99s(i) = var_risk(portfolioValuesSimMC{i} - portfolioValues{i}, 0.99);
     Risk.ES_975s(i) = es_risk(portfolioValuesSimMC{i} - portfolioValues{i}, 0.975);
     Risk.PnL(i) = portfolioValuesNext{i} - portfolioValues{i};
-    
+    Risk.Tail{i} = sort(portfolioValuesSimMC{i}(portfolioValuesSimMC{i} <= -Risk.VaR_95s(i)));
+    fprintf('Measured 95-VaR: %.3f. 99-VaR: %.3f. 97.5-ES: %.3f.\n', Risk.VaR_95s(i), Risk.VaR_99s(i), Risk.ES_975s(i));
     % Call Performance attribution
 %     if sum(valueParams{12}) > 0
 %         paParams = getPAParameters(paParams, A, fAll_OOS(i,:)', piAll_OOS(i,:)');
@@ -74,6 +76,10 @@ for i = 1:1%length(tradeDatesAll_OOS)
         break
     end
     
+    if (Risk.VaR_95s(i) == 0)
+        fprintf("\n\nFEL.\n\n");
+    end
+    
     nextWD = datestr(tradeDatesAll_OOS(i+1));
     valueParams{1} = nextWD;
 
@@ -82,9 +88,9 @@ for i = 1:1%length(tradeDatesAll_OOS)
     valueParams = getParameters(valueParams, fAll_OOS(i,:)', piAll_OOS(i,:)');
 end
 
-save("Data/Risk/Risk_" + instruments, "Risk")
+%save("Data/Risk/Risk_" + ccy + "_" + instruments + "_useMR" + useMR, "Risk")
 %%
-ttt = 1:252;
+ttt = 1:length(Risk.PnL(Risk.PnL ~= 0));
 figure(101)
 hold on
 %plot(ttt, Risk.PnL(ttt), ttt, -Risk.VaR_95s(ttt), ttt, -Risk.VaR_99s(ttt), ttt, -Risk.ES_975s(ttt))
@@ -95,7 +101,6 @@ plot(ttt, -Risk.ES_975s(ttt))
 legend("TheoPnL", "VaR95", "VaR99", "ES97.5")
 hold off
 
-clearvars ttt
 %%
 %load('paResult')
 %load('plotPAParams')
