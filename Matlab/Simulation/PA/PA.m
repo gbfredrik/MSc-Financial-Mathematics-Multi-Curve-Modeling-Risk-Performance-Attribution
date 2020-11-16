@@ -1,4 +1,4 @@
-function [paParams, paResult] = PA(paParams, paResult, valueParams)
+function [paParams, paResult, priceErrorBP] = PA(paParams, paResult, valueParams, priceErrorBP)
 
 % READ PARAMETERS ---------------------------------------------------------
     currDate = valueParams{1};        
@@ -126,7 +126,9 @@ function [paParams, paResult] = PA(paParams, paResult, valueParams)
                 twist_1_pi{i}(end+1) = 0;
                 butterfly_1_pi{i}(end+1) = 0;    
                 fourth_eight_1_pi{i}(end+1) = 0;  
-
+                
+                priceErrorBP{i} = pricingErr(fixDatesIndexes, floatDatesIndexes, timeFracFix, timeFracFloat, dtFix, dtFloat, fixing, RoP, y, N, numKnown, aZero, aPi, XiBarZero, XiBarPi)
+                
                 sumRiskFactors{i}(end+1) = 0;
                 cash{i}(end+1) = cashCurr; %calcAccrual(RoP, dtFloat, dtFix, fixing, N, y, numKnown, currDate, floatLegDCC, fixLegDCC, floatDatesIndexes, fixDatesIndexes); 
                 npv{i}(end+1) = currPrice + cash{i}(end);
@@ -161,7 +163,7 @@ function [paParams, paResult] = PA(paParams, paResult, valueParams)
             else
                 
                    
-                if fixingDay == 1 && length(valueParams{11}{i}) > 1
+                if fixingDay(i) == 1 && length(valueParams{11}{i}) > 1
                         diffBlomvallLibor = nextEstFloatPrev - valueParams{11}{i}(2) * 1000 * valueParams{10}{i}(2);
                 else
                         diffBlomvallLibor = 0;
@@ -266,7 +268,7 @@ function [paParams, paResult] = PA(paParams, paResult, valueParams)
         paResult{13} = twist_1_pi;
         % Butterfly_1_pi
         paResult{14} = butterfly_1_pi;    
-        % 4th - 6th_1_pi
+        % 4th - 8th_1_pi
         paResult{15} = fourth_eight_1_pi;  
  
         

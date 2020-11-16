@@ -141,12 +141,12 @@ function plotPAParams = plotPA(paResult, plotPAParams, currDate, activeStatus)
     %resultDates(end+1) = currDate;
     
     % PLOT RESULTS
-    resultLength  = length(cNPV);
+    %resultLength  = length(cNPV);
     
-    plot(1:resultLength, cNPV, 1:resultLength, cSumRiskFactors, 1:resultLength, cEps_A, 1:resultLength, cEps_I, 1:resultLength, cEps_P, 1:resultLength, cCarry)
+    %plot(1:resultLength, cNPV, 1:resultLength, cSumRiskFactors, 1:resultLength, cEps_A, 1:resultLength, cEps_I, 1:resultLength, cEps_P, 1:resultLength, cCarry)
     
     %legend('NPV', 'SumRiskFactors', 'epsA', 'epsI', 'epsP', 'Carry');
-    pause(0.01)
+    %pause(0.01)
    
     % WRITE TO RESULT DATASET
     plotPAParams{1} = cNPV;

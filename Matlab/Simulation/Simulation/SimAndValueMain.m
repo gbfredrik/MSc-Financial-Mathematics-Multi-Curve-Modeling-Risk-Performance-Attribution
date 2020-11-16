@@ -19,7 +19,7 @@ type = 2;
 A = intMatrix(size(E.Zero,1));
 
 %% Initialize sim params
-N = 2000; % Number of curves to be simulated
+N = 200; % Number of curves to be simulated
 simParams = initSimParams(N, E_k, DZero, DPi, fAll_IS, piAll_IS, fAll_OOS, piAll_OOS, tradeDatesAll_OOS);
 
 %% Init PA parameters
@@ -51,6 +51,7 @@ for i = 1:258%length(tradeDatesAll_OOS) - 1
     
     %Simulate 1d ahead
     [fSimulated, piSimulated, simParams] = TermStructureSim(i+1, simParams, fAll_IS, piAll_IS, fAll_OOS, piAll_OOS, tradeDatesAll_OOS, useMR);
+    %[fSimulated, piSimulated, simParams] = TermStructureSim_10d(i+1, simParams, fAll_IS, piAll_IS, fAll_OOS, piAll_OOS, tradeDatesAll_OOS, useMR, 10);    
     
     % Value Portfolio with MC simulation
     if sum(valueParams{12}) > 0
@@ -102,22 +103,19 @@ legend("TheoPnL", "VaR95", "VaR99", "ES97.5")
 hold off
 
 %%
-%load('paResult')
-%load('plotPAParams')
+%plotRiskFactors(E_k.Zero, "Forward rate risk factors, risk-free")
+%plotTenorSpreads(fAll_OOS(1:252,:), " ")
+%%
+%load('paResult_SEK')
+%load('plotPAParams_SEK')
+
+
 %% Plot PA
 %plotPAFinal(plotPAParams, tradeDatesAll_OOS)
 %diff = paResult{1}{1}' - paResult{2}{1}' - paResult{3}{1}' - paResult{4}{1}' - paResult{5}{1}' - paResult{16}{1}' 
 
 %% Calculate covariance matrix
-%[Exp, Cov, Tot_exp] = calcCovar(plotPAParams);
+%[Exp, Cov, Tot_exp, type] = calcCovar(plotPAParams);
 
 %% 1Y IRS table
 %[oneY_IRS_table, allY_first_IRS_table, abs_cont_all, abs_cont_mature] = sum_1Y_results(paResult, tradeDatesAll_OOS);
-
-
-%%
-
-
-
-
-

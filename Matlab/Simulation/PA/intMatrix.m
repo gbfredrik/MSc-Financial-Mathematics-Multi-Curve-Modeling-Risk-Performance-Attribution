@@ -1,8 +1,15 @@
 function [A] = intMatrix(n)
-A = zeros(n, n);
+
 
 for i = 1:n
-    A(i, 1:n <= i) = 1 / i;
+    for j = 1:n
+        if j <= i 
+            A(i, j) = 1 / i;
+        else
+            A(i, j) = 0;
+        end
+    end
 end
+
 
 end

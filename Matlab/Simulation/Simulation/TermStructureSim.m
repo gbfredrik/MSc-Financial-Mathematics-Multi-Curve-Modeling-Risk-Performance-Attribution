@@ -102,9 +102,11 @@ piSimulated = (repmat(pi',1,N) + deltaPi)';
 
 % Plot results
 % Zero
-%plotResults(fZero, T, fSimulated, tradeDatesAll_OOS, i, ['Simulated 1d Risk-free IR Curves, Date: ', num2str(datestr(tradeDatesAll_OOS(i)))], 1);
-% Zero + Pi
-%plotResults(fZero + pi, T, fSimulated + piSimulated, tradeDatesAll_OOS, i, ['Simulated 1d Tenor IR Curves, Date: ', num2str(datestr(tradeDatesAll_OOS(i)))], 2);
+%plotResults(fZero, T, fSimulated, tradeDatesAll_OOS, i, ['Simulated 1d risk-free IR curves, Date: ', num2str(datestr(tradeDatesAll_OOS(i)))], 1);
+%  Pi
+%plotResults(pi, T, piSimulated, tradeDatesAll_OOS, i, ['Simulated 1d Tenor spreads, Date: ', num2str(datestr(tradeDatesAll_OOS(i)))], 2);
+ % Zero + Pi   
+%plotResults(fZero + pi, T, fSimulated + piSimulated, tradeDatesAll_OOS, i, ['Simulated 1d 3M IR curves, Date: ', num2str(datestr(tradeDatesAll_OOS(i)))], 3);
 
 % Set sigma to be used in next day simulation
 simParams{8}{1} = sigmaZero; 
