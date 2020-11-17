@@ -4,26 +4,25 @@ numSim = size(rSimulated, 2);
 numContracts = length(valueParams{5});
 
 
-for i = 1:numContracts
-    simDate = valueParams{1};
-    floatDates = valueParams{5};
-    fixDates = valueParams{6};
-    numKnown = valueParams{8};
-    dtFix = valueParams{9};
-    dtFloat = valueParams{10};
-    floatFixing = valueParams{11};
-    activeStatus = valueParams{12};
-    RoP = valueParams{13};
-    N = valueParams{14};
-    y = valueParams{15};
-    timeFracFix = valueParams{16};
-    timeFracFloat = valueParams{17};   
-end
+simDate = valueParams{1};
+floatDates = valueParams{5};
+fixDates = valueParams{6};
+numKnown = valueParams{8};
+dtFix = valueParams{9};
+dtFloat = valueParams{10};
+floatFixing = valueParams{11};
+activeStatus = valueParams{12};
+RoP = valueParams{13};
+N = valueParams{14};
+y = valueParams{15};
+timeFracFix = valueParams{16};
+timeFracFloat = valueParams{17};   
+
 
 % Get indexes to interest rate dates
 floatDatesIndexes = cell(numContracts, 1);
 fixDatesIndexes = cell(numContracts, 1);
-lastday = [];
+lastday = zeros(numContracts, 1);
 for i = 1:numContracts
     if activeStatus(i) == 1
         [floatDatesIndexes{i}, fixDatesIndexes{i}] = getIndexes(simDate, fixDates{i}, floatDates{i});
@@ -53,7 +52,7 @@ for j = 1:numSim
     for k = 1:numContracts
         % Calculate the portfolio value
         if activeStatus(k) == 1
-            if lastday == 0
+            if lastday(k) == 0
                 contractValues(j,k) = irsPrice(r, piSpot, fixDatesIndexes{k}, floatDatesIndexes{k}, timeFracFix{k}, timeFracFloat{k}, dtFix{k}, dtFloat{k}, floatFixing{k}, RoP(k), y(k), N(k), numKnown(k));
             else
                 contractValues(j,k) = 0;

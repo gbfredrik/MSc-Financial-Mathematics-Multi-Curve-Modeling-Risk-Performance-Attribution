@@ -1,4 +1,4 @@
-function [xOpt, ll, grad] = mlGARCH(r, dt, likelihoodFunction, x1)
+function [xOpt, ll] = mlGARCH(r, dt, likelihoodFunction, x1)
 
 
 optionvec=optimset('MaxFunEvals',2000,'Display','iter','TolX',1e-16,'TolFun',1e-10,'Algorithm','interior-point');

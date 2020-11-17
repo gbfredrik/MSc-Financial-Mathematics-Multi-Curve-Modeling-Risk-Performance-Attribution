@@ -1,4 +1,4 @@
-function [fSimulated, piSimulated, simParams] = TermStructureSim(i, simParams, fAll_IS, piAll_IS, fAll_OOS, piAll_OOS, tradeDatesAll_OOS, useMR, simDays)
+function [fSimulated, piSimulated, simParams] = TermStructureSim_10d(i, simParams, fAll_IS, piAll_IS, fAll_OOS, piAll_OOS, tradeDatesAll_OOS, useMR, simHorizon)
 
 % Read parameters from simParams
 muZero = simParams{1}{1};
@@ -64,25 +64,26 @@ end
 fZero = fAll_OOS(i-1,:);
 pi = piAll_OOS(i-1,:);
 
-for d = 1:10
-    if d == 1
-        if i == 2
+for d = 1:simHorizon % Loop over the number of days ahead to simulate
+    % Calc random numbers
+    UZero = lhsstud(zeros(1,length(omegaZero)), rhoZero, dfCZero, N);
+    for j=1:length(omegaZero)
+        ZZero(:,j) = tinv(UZero(:,j), dfMZero(j));
+    end
+    UPi = lhsstud(zeros(1,length(omegaPi)), rhoPi, dfCPi, N);
+    for j=1:length(omegaPi)
+        ZPi(:,j) = tinv(UPi(:,j), dfMPi(j));
+    end
+        
+    if d == 1 % Simulate N curves the first day 
+        if i == 2 % Special case for the first OOS day
            % Calculate sigma the first day based on the IS data
             sigmaZero = GJR_GARCH(omegaZero', alphaZero', betaZero', EZero, fAll_IS);
             sigmaPi = GJR_GARCH(omegaPi', alphaPi', betaPi', EPi, piAll_IS); 
-        else
+        else 
             % Calc sigma based on last day's vol
             sigmaZero = GJR_GARCH_d(omegaZero', alphaZero', betaZero', EZero, fZero, fAll_OOS(i-2,:), sigmaZero);
             sigmaPi = GJR_GARCH_d(omegaPi', alphaPi', betaPi', EPi, pi, piAll_OOS(i-2,:), sigmaPi);
-        end
-        % Calc random numbers
-        UZero = lhsstud(zeros(1,length(omegaZero)), rhoZero, dfCZero, N);
-        for j=1:length(omegaZero)
-            ZZero(:,j) = tinv(UZero(:,j), dfMZero(j));
-        end
-        UPi = lhsstud(zeros(1,length(omegaPi)), rhoPi, dfCPi, N);
-        for j=1:length(omegaPi)
-            ZPi(:,j) = tinv(UPi(:,j), dfMPi(j));
         end
         % Calc the 1d ahead simulated curves
         if (useMR)
@@ -100,67 +101,46 @@ for d = 1:10
         % Compute simulated curves
         fSimulated = (repmat(fZero',1,N) + deltaF)';
         piSimulated = (repmat(pi',1,N) + deltaPi)';
-        sigmaZeroOrig = sigmaZero;
+        sigmaZeroOrig = sigmaZero; % Set the realized volatility diff
         sigmaPiOrig = sigmaPi;
-    else
-        % Calc random numbers
-        UZero = lhsstud(zeros(1,length(omegaZero)), rhoZero, dfCZero, N);
-        for j=1:length(omegaZero)
-            ZZero(:,j) = tinv(UZero(:,j), dfMZero(j));
-        end
-        UPi = lhsstud(zeros(1,length(omegaPi)), rhoPi, dfCPi, N);
-        for j=1:length(omegaPi)
-            ZPi(:,j) = tinv(UPi(:,j), dfMPi(j));
-        end
-        
-
-        for k = 1:N
-            if d == 2
+                
+    else % For all other days, simulate curves based on the previous scenarios
+        for k = 1:N % Simulate N curves every time point
+            if d == 2 % Special volatility case for the second day
                 % Calc sigma based on last day's vol
                 sigmaZero(:,k) = GJR_GARCH_d(omegaZero', alphaZero', betaZero', EZero, fSimulated(k,:), fZero, sigmaZeroOrig);
                 sigmaPi(:,k) = GJR_GARCH_d(omegaPi', alphaPi', betaPi', EPi, piSimulated(k,:), pi, sigmaPiOrig);
-                % Calc the 1d ahead simulated curves
-                if (useMR)
-                    xiHatZero = mean(EZero' * DZero', 2);
-                    xiHatPi = mean(EPi' * DPi', 2);
-                    mrZero = kappaZero .* (xiHatZero - EZero' * DZero(i-1,:)'); % i-1?
-                    mrPi = kappaPi .* (xiHatPi - EPi' * DPi(i-1,:)'); % i-1?
-
-                    deltaF = EZero * (mrZero + ZZero'.* repmat(sigmaZero,1,N));
-                    deltaPi = EPi * (mrPi + muPi' + ZPi'.* repmat(sigmaPi,1,N));
-                else
-                    deltaF(:,k) = EZero * (muZero' + ZZero(k,:)'.* sigmaZero(:,k));
-                    deltaPi(:,k) = EPi * (muPi' + ZPi(k,:)'.* sigmaPi(:,k));
-                end
-                % Compute simulated curves
-                fSimulated(k,:) = fSimulated(k,:) + deltaF(:,k)';
-                piSimulated(k,:) = piSimulated(k,:) + deltaPi(:,k)';
-                
+                fSimulatedPrev = fSimulated;
+                piSimulatedPrev = piSimulated;
             else
                 % Calc sigma based on last day's vol
-                sigmaZero(:,k) = GJR_GARCH_d(omegaZero', alphaZero', betaZero', EZero, fSimulated(k,:), fSimulatedPrev(k,:), sigmaZero(:,k));
-                sigmaPi(:,k) = GJR_GARCH_d(omegaPi', alphaPi', betaPi', EPi, piSimulated(k,:), piSimulatedPrev(k,:), sigmaPi(:,k));
-                % Calc the 1d ahead simulated curves
-                if (useMR)
-                    xiHatZero = mean(EZero' * DZero', 2);
-                    xiHatPi = mean(EPi' * DPi', 2);
-                    mrZero = kappaZero .* (xiHatZero - EZero' * DZero(i-1,:)'); % i-1?
-                    mrPi = kappaPi .* (xiHatPi - EPi' * DPi(i-1,:)'); % i-1?
-
-                    deltaF = EZero * (mrZero + ZZero'.* repmat(sigmaZero,1,N));
-                    deltaPi = EPi * (mrPi + muPi' + ZPi'.* repmat(sigmaPi,1,N));
-                else
-                    deltaF(:,k) = EZero * (muZero' + ZZero(k,:)'.* sigmaZero(:,k));
-                    deltaPi(:,k) = EPi * (muPi' + ZPi(k,:)'.* sigmaPi(:,k));
-                end
-                % Compute simulated curves
-                fSimulated(k,:) = fSimulated(k,:) + deltaF(:,k)';
-                piSimulated(k,:) = piSimulated(k,:) + deltaPi(:,k)';
+                sigmaZero(:,k) = GJR_GARCH_d(omegaZero', alphaZero', betaZero', EZero, fSimulatedPrev(k,:), fSimulatedPrevPrev(k,:), sigmaZero(:,k));
+                sigmaPi(:,k) = GJR_GARCH_d(omegaPi', alphaPi', betaPi', EPi, piSimulatedPrev(k,:), piSimulatedPrevPrev(k,:), sigmaPi(:,k));
             end
-            
+            % Calc the 1d ahead simulated curves
+            if (useMR)
+                xiHatZero = mean(EZero' * DZero', 2);
+                xiHatPi = mean(EPi' * DPi', 2);
+                mrZero = kappaZero .* (xiHatZero - EZero' * DZero(i-1,:)'); % i-1?
+                mrPi = kappaPi .* (xiHatPi - EPi' * DPi(i-1,:)'); % i-1?
+
+                deltaF = EZero * (mrZero + ZZero'.* repmat(sigmaZero,1,N));
+                deltaPi = EPi * (mrPi + muPi' + ZPi'.* repmat(sigmaPi,1,N));
+            else
+                deltaF(:,k) = EZero * (muZero' + ZZero(k,:)'.* sigmaZero(:,k));
+                deltaPi(:,k) = EPi * (muPi' + ZPi(k,:)'.* sigmaPi(:,k));
+            end
+            % Compute simulated curves
+            fSimulated(k,:) = fSimulated(k,:) + deltaF(:,k)';
+            piSimulated(k,:) = piSimulated(k,:) + deltaPi(:,k)';
+                            
         end
+        
+        fSimulatedPrevPrev = fSimulatedPrev;
+        piSimulatedPrevPrev = piSimulatedPrev;
         fSimulatedPrev = fSimulated;
         piSimulatedPrev = piSimulated;
+        
     end
 end
 
@@ -168,11 +148,11 @@ end
 
 % Plot results
 % Zero
-plotResults(fZero, T, fSimulated, tradeDatesAll_OOS, i, ['Simulated 1d risk-free IR curves, Date: ', num2str(datestr(tradeDatesAll_OOS(i+simDays)))], 1);
+plotResults(fZero, T, fSimulated, tradeDatesAll_OOS, i, ['Simulated 1d risk-free IR curves, Date: ', num2str(datestr(tradeDatesAll_OOS(i+simHorizon)))], 1);
 % Pi
-plotResults(pi, T, piSimulated, tradeDatesAll_OOS, i, ['Simulated 1d Tenor spreads, Date: ', num2str(datestr(tradeDatesAll_OOS(i+simDays)))], 2);
- % Zero + Pi   
-plotResults(fZero + pi, T, fSimulated + piSimulated, tradeDatesAll_OOS, i, ['Simulated 1d 3M IR curves, Date: ', num2str(datestr(tradeDatesAll_OOS(i+simDays)))], 3);
+plotResults(pi, T, piSimulated, tradeDatesAll_OOS, i, ['Simulated 1d Tenor spreads, Date: ', num2str(datestr(tradeDatesAll_OOS(i+simHorizon)))], 2);
+% Zero + Pi   
+plotResults(fZero + pi, T, fSimulated + piSimulated, tradeDatesAll_OOS, i, ['Simulated 1d 3M IR curves, Date: ', num2str(datestr(tradeDatesAll_OOS(i+simHorizon)))], 3);
 
 % Set sigma to be used in next day simulation
 simParams{8}{1} = sigmaZeroOrig; 

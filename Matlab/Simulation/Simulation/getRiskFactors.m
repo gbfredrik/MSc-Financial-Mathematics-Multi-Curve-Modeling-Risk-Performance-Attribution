@@ -33,8 +33,8 @@ function [E, E_k, DZero, DPi] = getRiskFactors(kZero, kPi, fAll_IS, piAll_IS, ty
         if type == 2
         
             % BDCSV is used for E_k
-            E_k.Zero = E.Zero(:,1:6);
-            E_k.Pi = E.Pi(:,1:8);
+            E_k.Zero = E.Zero(:,1:kZero);
+            E_k.Pi = E.Pi(:,1:kPi);
 
         elseif type == 3
             

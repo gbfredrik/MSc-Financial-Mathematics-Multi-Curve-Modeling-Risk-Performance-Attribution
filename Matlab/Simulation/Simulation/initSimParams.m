@@ -9,8 +9,8 @@ for i = 1:8
     end
 end
 
-[muZero, omegaZero, betaZero, alphaZero, dfMZero, rhoZero, dfCZero, kappaZero] = calibrateParams(DZero, E.Zero);
-[muPi, omegaPi, betaPi, alphaPi, dfMPi, rhoPi, dfCPi, kappaPi] = calibrateParams(DPi, E.Pi);
+[muZero, omegaZero, betaZero, alphaZero, dfMZero, rhoZero, dfCZero, kappaZero, like_t_zero, like_garch_zero] = calibrateParams(DZero, E.Zero);
+[muPi, omegaPi, betaPi, alphaPi, dfMPi, rhoPi, dfCPi, kappaPi, like_t_pi, like_garch_pi] = calibrateParams(DPi, E.Pi);
 
 % Calculate sigma the first day based on the IS data
 sigmaZero = GJR_GARCH(omegaZero', alphaZero', betaZero', E.Zero, fAll_IS);
