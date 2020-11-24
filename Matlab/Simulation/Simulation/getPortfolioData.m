@@ -10,17 +10,17 @@ function [floatCashFlows, fixCashFlows, yield, fixingDatesCashFlows, RoP, IborDa
         currColumn = strcat(loop(i), ':', loop(i));
         if verLessThan('matlab', '9.8')
             floatCashFlows{i} = rmmissing(table2array(readtable('PortfolioData.xlsx', 'Sheet', strcat("Float Cashflows ", ccy), 'Range', currColumn)));
-            %floatCashFlows{i} = floatCashFlows{i}(2:end);
+            floatCashFlows{i} = floatCashFlows{i}(2:end);
             fixCashFlows{i} = rmmissing(table2array(readtable('PortfolioData.xlsx', 'Sheet', strcat("Fix Cashflows ", ccy), 'Range', currColumn)));
-            %fixCashFlows{i} = fixCashFlows{i}(2:end);
+            fixCashFlows{i} = fixCashFlows{i}(2:end);
             yield(i) = rmmissing(table2array(readtable('PortfolioData.xlsx', 'Sheet', strcat("Yield ", ccy), 'Range', currColumn))) / 100;
             fixingDatesCashFlows{i} = rmmissing(table2array(readtable('PortfolioData.xlsx', 'Sheet', strcat("Fixing dates ", ccy), 'Range', currColumn)));
             RoP(i) = rmmissing(table2array(readtable('PortfolioData.xlsx', 'Sheet', strcat("RoP ", ccy), 'Range', currColumn)));
         else
             floatCashFlows{i} = rmmissing(table2array(readtable('PortfolioData.xlsx', 'Sheet', strcat("Float Cashflows ", ccy), 'Range', currColumn)));
-            floatCashFlows{i} = floatCashFlows{i}(2:end);
+            floatCashFlows{i} = floatCashFlows{i}(3:end);
             fixCashFlows{i} = rmmissing(table2array(readtable('PortfolioData.xlsx', 'Sheet', strcat("Fix Cashflows ", ccy), 'Range', currColumn)));
-            fixCashFlows{i} = fixCashFlows{i}(2:end);
+            fixCashFlows{i} = fixCashFlows{i}(3:end);
             yield(i) = rmmissing(table2array(readtable('PortfolioData.xlsx', 'Sheet', strcat("Yield ", ccy), 'Range', currColumn, 'NumHeaderLines', 1))) / 100;
             fixingDatesCashFlows{i} = rmmissing(table2array(readtable('PortfolioData.xlsx', 'Sheet', strcat("Fixing dates ", ccy), 'Range', currColumn)));
             fixingDatesCashFlows{i} = fixingDatesCashFlows{i}(2:end);
