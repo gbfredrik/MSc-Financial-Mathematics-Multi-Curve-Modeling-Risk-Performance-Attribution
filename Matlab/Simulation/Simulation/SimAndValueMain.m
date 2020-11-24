@@ -19,7 +19,7 @@ type = 2;
 A = intMatrix(size(E.Zero,1));
 
 %% Initialize sim params
-N = 200; % Number of curves to be simulated
+N = 2000; % Number of curves to be simulated
 simParams = initSimParams(N, E_k, DZero, DPi, fAll_IS, piAll_IS, fAll_OOS, piAll_OOS, tradeDatesAll_OOS);
 
 %% Init PA parameters
@@ -39,8 +39,8 @@ fprintf('First day valuation is %.3f.\n', valuePortfolio(A*fAll_OOS(1,:)', A*piA
 % Loop over all days
 useMR = false; % Use mean-reversion for simulation of curves
 
-fprintf('\n\nStarting main loop:\n');
-for i = 1:258%length(tradeDatesAll_OOS) - 1
+fprintf('\nStarting main loop:\n');
+for i = 1:5%length(tradeDatesAll_OOS) - 1
     fprintf('Currently on iteration %i.\n', i)
     currDate = datestr(tradeDatesAll_OOS(i));
     
@@ -59,11 +59,12 @@ for i = 1:258%length(tradeDatesAll_OOS) - 1
     end
     
     % Risk Measurement
-    Risk.VaR_95s(i) = var_risk(portfolioValuesSimMC{i} - portfolioValues{i}, 0.95);
-    Risk.VaR_99s(i) = var_risk(portfolioValuesSimMC{i} - portfolioValues{i}, 0.99);
-    Risk.ES_975s(i) = es_risk(portfolioValuesSimMC{i} - portfolioValues{i}, 0.975);
+    simulatedPnLs = portfolioValuesSimMC{i} - portfolioValues{i};
+    Risk.VaR_95s(i) = var_risk(simulatedPnLs, 0.95);
+    Risk.VaR_99s(i) = var_risk(simulatedPnLs, 0.99);
+    Risk.ES_975s(i) = es_risk(simulatedPnLs, 0.975);
     Risk.PnL(i) = portfolioValuesNext{i} - portfolioValues{i};
-    Risk.Tail{i} = sort(portfolioValuesSimMC{i}(portfolioValuesSimMC{i} <= -Risk.VaR_95s(i)));
+    Risk.Tail{i} = sort(simulatedPnLs(simulatedPnLs <= -Risk.VaR_95s(i)));
     fprintf('Measured 95-VaR: %.3f. 99-VaR: %.3f. 97.5-ES: %.3f.\n', Risk.VaR_95s(i), Risk.VaR_99s(i), Risk.ES_975s(i));
     % Call Performance attribution
 %     if sum(valueParams{12}) > 0
@@ -71,12 +72,7 @@ for i = 1:258%length(tradeDatesAll_OOS) - 1
 %         [paParams, paResult] = PA(paParams, paResult, valueParams);
 %         plotPAParams = plotPA(paResult, plotPAParams, currDate, valueParams{12});
 %     end
-    
-    % Break on last day (lite onajs, men nu blev det så)
-    if i == length(tradeDatesAll_OOS)
-        break
-    end
-    
+
     if (Risk.VaR_95s(i) == 0)
         fprintf("\n\nFEL.\n\n");
     end

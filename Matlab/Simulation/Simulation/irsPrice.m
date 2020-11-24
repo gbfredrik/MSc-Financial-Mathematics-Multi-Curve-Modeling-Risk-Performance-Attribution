@@ -34,11 +34,9 @@ function [P] = irsPrice(r, pi, fixDatesIndexes, floatDatesIndexes, timeFracFix, 
     
 %timeFracFloat(1) * r(floatDatesIndexes(1))
     % Set value based on receive or pay
-    if RoP == 'r'
+    if char(RoP) == 'r'
         P = fix - float;
-    elseif RoP == 'p'
+    elseif char(RoP) == 'p'
         P = float - fix;
     end
-
 end
-

@@ -10,7 +10,6 @@ portfolioValuesSimMC(:, :) = {zeros(N, 1)};
 Risk.VaR_95s = zeros(1, N);
 Risk.VaR_99s = zeros(1, N);
 Risk.ES_975s = zeros(1, N);
-Risk.PnL= zeros(1, N);
-Risk.Tail = cell(1, N)
-
+Risk.PnL = zeros(1, N);
+Risk.Tail = cell(1, N);
 end
