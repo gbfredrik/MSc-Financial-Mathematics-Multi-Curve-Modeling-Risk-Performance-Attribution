@@ -1,12 +1,13 @@
 clear all
 %% Import Forward rates
 path_IS = 'Data/Curves/EUR_IS_10YrCurves_Clean_Final2.mat';
-path_OOS = 'Data/Curves/EUR_OOS_10YrCurves_Clean_Final.mat';
+path_OOS = 'Data/Curves/USD_OOS_10YrCurves_Clean_Final.mat';
 [fAll_IS, piAll_IS, tradeDatesAll_IS, fAll_OOS, piAll_OOS, tradeDatesAll_OOS, ccy, fDatesAll] = getData(path_IS, path_OOS);
 clearvars path_IS path_OOS
 %% Get portfolio data
 instruments = 'A':'P';
-[floatDates, fixDates, yield, fixingDates, RoP, IborDates, Ibor, Nom] = getPortfolioData(instruments, ccy);
+portType = 'sim'; %'sim' or 'PA'
+[floatDates, fixDates, yield, fixingDates, RoP, IborDates, Ibor, Nom] = getPortfolioData(instruments, ccy, portType);
 
 %% Get/set risk factors
 kZero = 6;
@@ -34,24 +35,26 @@ numContracts = length(valueParams{2});
 fprintf('First day valuation is %.3f.\n', valuePortfolio(A*fAll_OOS(1,:)', A*piAll_OOS(1,:)', valueParams)); % Test the first day valuation
 
 % Init risk parameters
-[portfolioValues, portfolioValuesNext, portfolioValuesSimMC, Risk] = initRiskParams(length(tradeDatesAll_OOS));
+[portfolioValues, portfolioValuesNext, portfolioValuesSimMC, Risk] = initRiskParams(length(tradeDatesAll_OOS), N);
 
 % Loop over all days
 useMR = false; % Use mean-reversion for simulation of curves
+simHorizon = 1; % Number of trade days ahead to simulate
+
 
 fprintf('\nStarting main loop:\n');
-for i = 1:5%length(tradeDatesAll_OOS) - 1
+for i = 1:length(tradeDatesAll_OOS) - 1
     fprintf('Currently on iteration %i.\n', i)
     currDate = datestr(tradeDatesAll_OOS(i));
     
     % Calculate realized portfolio values today and for next wd (backtesting)
     portfolioValues{i} = valuePortfolio(A*fAll_OOS(i,:)', A*piAll_OOS(i,:)', valueParams);
-    portfolioValuesNext{i} = valuePortfolio(A*fAll_OOS(i+1,:)', A*piAll_OOS(i+1,:)', valueParams);
+    portfolioValuesNext{i} = valuePortfolio(A*fAll_OOS(i + simHorizon,:)', A*piAll_OOS(i + simHorizon,:)', valueParams);
     fprintf('portfolioValues{%i} = %.3f, portfolioValuesNext{%i} = %.3f.\n', i, portfolioValues{i}, i, portfolioValuesNext{i})
     
     %Simulate 1d ahead
     [fSimulated, piSimulated, simParams] = TermStructureSim(i+1, simParams, fAll_IS, piAll_IS, fAll_OOS, piAll_OOS, tradeDatesAll_OOS, useMR);
-    %[fSimulated, piSimulated, simParams] = TermStructureSim_10d(i+1, simParams, fAll_IS, piAll_IS, fAll_OOS, piAll_OOS, tradeDatesAll_OOS, useMR, 10);    
+    %[fSimulated, piSimulated, simParams] = TermStructureSim_10d(i+1, simParams, fAll_IS, piAll_IS, fAll_OOS, piAll_OOS, tradeDatesAll_OOS, useMR, simHorizon);    
     
     % Value Portfolio with MC simulation
     if sum(valueParams{12}) > 0
@@ -73,10 +76,6 @@ for i = 1:5%length(tradeDatesAll_OOS) - 1
 %         plotPAParams = plotPA(paResult, plotPAParams, currDate, valueParams{12});
 %     end
 
-    if (Risk.VaR_95s(i) == 0)
-        fprintf("\n\nFEL.\n\n");
-    end
-    
     nextWD = datestr(tradeDatesAll_OOS(i+1));
     valueParams{1} = nextWD;
 
@@ -84,8 +83,8 @@ for i = 1:5%length(tradeDatesAll_OOS) - 1
     valueParams = setActiveStatus(valueParams, nextWD);
     valueParams = getParameters(valueParams, fAll_OOS(i,:)', piAll_OOS(i,:)');
 end
-
-%save("Data/Risk/Risk_" + ccy + "_" + instruments + "_useMR" + useMR, "Risk")
+%%
+save("Data/Risk/Risk_" + ccy + "_" + instruments + "_useMR" + useMR, "Risk")
 %%
 ttt = 1:length(Risk.PnL(Risk.PnL ~= 0));
 figure(101)

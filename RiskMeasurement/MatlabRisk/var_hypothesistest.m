@@ -6,9 +6,9 @@ X_T = teststatistic_XT(VaRs, PnLs);
 T = length(VaRs);
 p = 1 - c;
 Z = teststatistic_Z(X_T, T, p);
-tilde_m = norminv(1 - alpha); % Defaults mu = 0, sigma = 1
+tilde_m = norminv(1 - alpha/2); % Defaults mu = 0, sigma = 1
 
-reject = Z > tilde_m;
+reject = abs(Z) >= tilde_m;
 end
 
 function [X_T] = teststatistic_XT(VaRs, PnLs)

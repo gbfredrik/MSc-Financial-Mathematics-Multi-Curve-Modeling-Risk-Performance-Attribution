@@ -5,7 +5,7 @@ clear all
 %% Data loading
 %risk_path = 'Data/Risk/Risk_ABCD_750_noMR.mat';
 %risk_path = 'Data/Risk/Risk_A_750_MR.mat';
-risk_path = 'Data/Risk/Risk_EUR_ABCDEFGHIJKLMNOP_useMRfalse.mat';
+risk_path = 'Data/Risk/Risk_USD_ABCDEFGHIJKLMNOP_useMRfalse.mat';
 load(risk_path);
 
 %% Risk measurement plots
@@ -28,18 +28,18 @@ fprintf('\n\nValue-at-Risk backtesting for %i trade dates:\n', length(tt));
 fprintf('Number of breaches for 95-VaR: %i.\n', sum(-Risk.VaR_95s(tt) > Risk.PnL(tt)));
 fprintf('Number of breaches for 99-VaR: %i.\n', sum(-Risk.VaR_99s(tt) > Risk.PnL(tt)));
 % Test 1: Hypothesis test
-[Risk.Test.Hyp95, Risk.Test.HypZ95, tilde_m] = var_hypothesistest(Risk.VaR_95s(tt), Risk.PnL(tt), 0.95, 0.01);
-fprintf('Hypothesis test for 95-VaR is rejected: %i, for Z statistic vs tilde_m "%.3f > %.3f".\n', Risk.Test.Hyp95, Risk.Test.HypZ95, tilde_m);
+[Risk.Test.Hyp95, Risk.Test.HypZ95, tilde_m] = var_hypothesistest(Risk.VaR_95s(tt), Risk.PnL(tt), 0.95, 0.05);
+fprintf('Hypothesis test for 95-VaR is rejected: %i, for Z statistic vs tilde_m "%.3f <---> %.3f".\n', Risk.Test.Hyp95, abs(Risk.Test.HypZ95), tilde_m);
 
-[Risk.Test.Hyp99, Risk.Test.HypZ99, tilde_m] = var_hypothesistest(Risk.VaR_99s(tt), Risk.PnL(tt), 0.99, 0.01);
-fprintf('Hypothesis test for 99-VaR is rejected: %i, for Z statistic vs tilde_m "%.3f > %.3f".\n', Risk.Test.Hyp99, Risk.Test.HypZ99, tilde_m);
+[Risk.Test.Hyp99, Risk.Test.HypZ99, tilde_m] = var_hypothesistest(Risk.VaR_99s(tt), Risk.PnL(tt), 0.99, 0.05);
+fprintf('Hypothesis test for 99-VaR is rejected: %i, for Z statistic vs tilde_m "%.3f <---> %.3f".\n', Risk.Test.Hyp99, abs(Risk.Test.HypZ99), tilde_m);
 
 % Test 2: Christoffersen's test
-[Risk.Test.Christ95, Risk.Test.ChristC95, chi_val] = var_christoffersentest(Risk.VaR_95s(tt), Risk.PnL(tt), 0.01);
-fprintf('Christoffersen큦 test for 95-VaR is rejected: %i, for C vs chiInv "%.3f > %.3f".\n', Risk.Test.Christ95, Risk.Test.ChristC95, chi_val);
+[Risk.Test.Christ95, Risk.Test.ChristC95, chi_val] = var_christoffersentest(Risk.VaR_95s(tt), Risk.PnL(tt), 0.05);
+fprintf('Christoffersen큦 test for 95-VaR is rejected: %i, for C vs chiInv "%.3f <---> %.3f".\n', Risk.Test.Christ95, Risk.Test.ChristC95, chi_val);
 
-[Risk.Test.Christ99, Risk.Test.ChristC99, chi_val] = var_christoffersentest(Risk.VaR_99s(tt), Risk.PnL(tt), 0.01);
-fprintf('Christoffersen큦 test for 99-VaR is rejected: %i, for C vs chiInv "%.3f > %.3f".\n', Risk.Test.Christ99, Risk.Test.ChristC99, chi_val);
+[Risk.Test.Christ99, Risk.Test.ChristC99, chi_val] = var_christoffersentest(Risk.VaR_99s(tt), Risk.PnL(tt), 0.05);
+fprintf('Christoffersen큦 test for 99-VaR is rejected: %i, for C vs chiInv "%.3f <---> %.3f".\n', Risk.Test.Christ99, Risk.Test.ChristC99, chi_val);
 
 
 %% ES Backtest
