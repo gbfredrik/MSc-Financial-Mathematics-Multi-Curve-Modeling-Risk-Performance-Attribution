@@ -54,7 +54,6 @@ function [valueParams, cash] = initValueParams(tradeDatesAll_OOS, fixingDates, f
     valueParams{19} = cash;
     
     for i = 1:numContracts
-        
         valueParams{2}(i) = floatLegDCC;
         valueParams{5}{i} = [currDate; floatDates{i}];
         valueParams{6}{i} = [currDate; fixDates{i}];

@@ -1,7 +1,6 @@
 clear all
 %% Import Forward rates
 path_IS = 'Data/Curves/EUR_IS_10YrCurves_Clean_Final2.mat';
-path_OOS = 'Data/Curves/EUR_OOS_10YrCurves_E_50.mat';
 [fAll_IS, piAll_IS, tradeDatesAll_IS, fAll_OOS, piAll_OOS, tradeDatesAll_OOS, ccy, fDatesAll] = getData(path_IS, path_OOS);
 if ccy == "SEK"
     fAll_IS = [fAll_IS(1:1005,:)];
@@ -52,7 +51,7 @@ useMR = false; % Use mean-reversion for simulation of curves
 simHorizon = 1; % Number of trade days ahead to simulate
 
 
-fprintf('\n\nStarting main loop:\n');
+
 for i = 1:length(tradeDatesAll_OOS) - simHorizon
     fprintf('Currently on iteration %i.\n', i)
     currDate = datestr(tradeDatesAll_OOS(i));
@@ -62,6 +61,7 @@ for i = 1:length(tradeDatesAll_OOS) - simHorizon
     portfolioValuesNext{i} = valuePortfolio(A*fAll_OOS(i + simHorizon,:)', A*piAll_OOS(i + simHorizon,:)', valueParams);
     fprintf('portfolioValues{%i} = %.3f, portfolioValuesNext{%i} = %.3f.\n', i, portfolioValues{i}, i, portfolioValuesNext{i})
     %Simulate 1d ahead
+
     %[fSimulated, piSimulated, simParams] = TermStructureSim(i+1, simParams, fAll_IS, piAll_IS, fAll_OOS, piAll_OOS, tradeDatesAll_OOS, useMR);
     [fSimulated, piSimulated, simParams] = TermStructureSim_10d(i+1, simParams, fAll_IS, piAll_IS, fAll_OOS, piAll_OOS, tradeDatesAll_OOS, useMR, simHorizon);    
     
@@ -71,11 +71,14 @@ for i = 1:length(tradeDatesAll_OOS) - simHorizon
     end
     
     % Risk Measurement
-    Risk.VaR_95s(i) = var_risk(portfolioValuesSimMC{i} - portfolioValues{i}, 0.95);
-    Risk.VaR_99s(i) = var_risk(portfolioValuesSimMC{i} - portfolioValues{i}, 0.99);
-    Risk.ES_975s(i) = es_risk(portfolioValuesSimMC{i} - portfolioValues{i}, 0.975);
+
+    simulatedPnLs = portfolioValuesSimMC{i} - portfolioValues{i};
+    Risk.VaR_95s(i) = var_risk(simulatedPnLs, 0.95);
+    Risk.VaR_99s(i) = var_risk(simulatedPnLs, 0.99);
+    Risk.ES_975s(i) = es_risk(simulatedPnLs, 0.975);
     Risk.PnL(i) = portfolioValuesNext{i} - portfolioValues{i};
-    Risk.Tail{i} = sort(portfolioValuesSimMC{i}(portfolioValuesSimMC{i} <= -Risk.VaR_95s(i)));
+
+    Risk.Tail{i} = sort(simulatedPnLs(simulatedPnLs <= -Risk.VaR_95s(i)));
     fprintf('Measured 95-VaR: %.3f. 99-VaR: %.3f. 97.5-ES: %.3f.\n', Risk.VaR_95s(i), Risk.VaR_99s(i), Risk.ES_975s(i));
     % Call Performance attribution
 %     if sum(valueParams{12}) > 0
@@ -83,16 +86,7 @@ for i = 1:length(tradeDatesAll_OOS) - simHorizon
 %         [paParams, paResult] = PA(paParams, paResult, valueParams);
 %         plotPAParams = plotPA(paResult, plotPAParams, currDate, valueParams{12});
 %     end
-    
-    % Break on last day (lite onajs, men nu blev det så)
-    if i == length(tradeDatesAll_OOS)
-        break
-    end
-    
-    if (Risk.VaR_95s(i) == 0)
-        fprintf("\n\nFEL.\n\n");
-    end
-    
+
     nextWD = datestr(tradeDatesAll_OOS(i+1));
     valueParams{1} = nextWD;
 
@@ -101,6 +95,7 @@ for i = 1:length(tradeDatesAll_OOS) - simHorizon
     valueParams = getParameters(valueParams, fAll_OOS(i,:)', piAll_OOS(i,:)');
 end
 %%
+
 %save("Data/Risk/Risk_" + ccy + "_" + instruments + "_useMR" + useMR, "Risk")
 ccy = "SEK"
 useMR = "false"

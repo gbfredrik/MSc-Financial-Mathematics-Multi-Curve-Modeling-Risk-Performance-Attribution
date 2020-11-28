@@ -12,5 +12,4 @@ Risk.VaR_99s = zeros(1, numDates);
 Risk.ES_975s = zeros(1, numDates);
 Risk.PnL = zeros(1, numDates);
 Risk.Tail = cell(1, numDates)
-
 end
