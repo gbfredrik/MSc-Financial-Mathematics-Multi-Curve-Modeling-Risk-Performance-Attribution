@@ -4,7 +4,7 @@ figwaitbar = waitbar(0, 'Progress');
 
 % Set file name
 dataPath = 'Data/';
-fileName = 'USD_OOS';
+fileName = 'EUR_OOS';
 
 % Variables to save
 tradeDatesAll = [];
@@ -17,7 +17,7 @@ zAll = [];
 measurementPath = '.\measurement';
 addpath(measurementPath)
 
-c = 7;
+c = 2;
 if (c==1) % CHF
     currency = 'CHF'; cal = 'SWI'; currencyTimeZone = 'Europe/Paris';
     iborName = 'LIBORCHF3M'; iborCal = 'SWI,UKG'; iborCalFixing = 'UKG'; tenorIRS = '6M'; iborTimeZone = 'Europe/London'; settlementLagIRS = 2; irsBDC = 'M'; iborDCC = 'MMA0';
@@ -83,7 +83,7 @@ times(isHoliday==1) = []; % Removes all holidays
 %%
 if (c==2) % OK
     % Jörgen: % times = times(times>= datenum(2005,08,15));
-    times = times(times >= datenum(2006,01,01));
+    times = times(times >= datenum(2006,01,1));
     indOIS = indOIS(1:27);
     indIRS = indIRS(1:11);
 elseif (c==6)
@@ -103,11 +103,11 @@ cashDCC = 'MMA0';
 cashFrq = '1D';
 cashEom = 'S';
 cashBDC = 'F';
-irStartDate = datenum(2005,01,1); % Todo - kontrollera, original: datenum(2005,01,1)
+irStartDate = datenum(2006,01,1); % Todo - kontrollera, original: datenum(2005,01,1)
 cashID = mexPortfolio('createCash', currency, accountName, cashDCC, cashFrq, cashEom, cashBDC, cal, irStartDate);
 
 %%
-for k=252%length(times)
+for k=1:length(times)
     tradeDate = floor(times(k));
     %   datestr(tradeDate)
     
@@ -209,15 +209,15 @@ for k=252%length(times)
         mexPortfolio('clearMarketState');
     end
     
-    %mexPortfolio('initMarketState', times(k), currencyTimeZone);
-    %fCurveID = mexPortfolio('setMarketStateTermStructureDiscreteForward', times(k), currencyTimeZone, currency, 'Interbank', 'ON', 'Forward', fDates, f);
-    %piCurveID = mexPortfolio('setMarketStateTermStructureDiscreteForward', times(k), currencyTimeZone, currency, 'Interbank', tenorIRS, 'SpreadRelative', fDates, piSpread);
-    %iborCurveID = mexPortfolio('setMarketStateTermStructureRelative', times(k), currencyTimeZone, fCurveID, piCurveID, currency, 'Interbank', tenorIRS, 'Forward');
+    mexPortfolio('initMarketState', times(k), currencyTimeZone);
+    fCurveID = mexPortfolio('setMarketStateTermStructureDiscreteForward', times(k), currencyTimeZone, currency, 'Interbank', 'ON', 'Forward', fDates, f);
+    piCurveID = mexPortfolio('setMarketStateTermStructureDiscreteForward', times(k), currencyTimeZone, currency, 'Interbank', tenorIRS, 'SpreadRelative', fDates, piSpread);
+    iborCurveID = mexPortfolio('setMarketStateTermStructureRelative', times(k), currencyTimeZone, fCurveID, piCurveID, currency, 'Interbank', tenorIRS, 'Forward');
 
-    mexPortfolio('initMarketState', tradeDate, currencyTimeZone);
-    fCurveID = mexPortfolio('setMarketStateTermStructureDiscreteForward', tradeDate, currencyTimeZone, currency, 'Interbank', 'ON', 'Forward', fDates, f);
-    piCurveID = mexPortfolio('setMarketStateTermStructureDiscreteForward', tradeDate, currencyTimeZone, currency, 'Interbank', tenorIRS, 'SpreadRelative', fDates, piSpread);
-    iborCurveID = mexPortfolio('setMarketStateTermStructureRelative', tradeDate, currencyTimeZone, fCurveID, piCurveID, currency, 'Interbank', tenorIRS, 'Forward');
+    %mexPortfolio('initMarketState', tradeDate, currencyTimeZone);
+    %fCurveID = mexPortfolio('setMarketStateTermStructureDiscreteForward', tradeDate, currencyTimeZone, currency, 'Interbank', 'ON', 'Forward', fDates, f);
+    %piCurveID = mexPortfolio('setMarketStateTermStructureDiscreteForward', tradeDate, currencyTimeZone, currency, 'Interbank', tenorIRS, 'SpreadRelative', fDates, piSpread);
+    %iborCurveID = mexPortfolio('setMarketStateTermStructureRelative', tradeDate, currencyTimeZone, fCurveID, piCurveID, currency, 'Interbank', tenorIRS, 'Forward');
 
     mu = 1.0;
     nIterations = 200;
@@ -249,7 +249,7 @@ for k=252%length(times)
     end
     
     zType = ones(size(instrID))*2; % Type of z-variable (price error): 0 = None, 1 = Price, 2 = Parallel shift of forward rates or spread from forward rates
-    E = ones(size(instrID))*100;   % Objective function coefficient for z-variables
+    E = ones(size(instrID))*50;   % Objective function coefficient for z-variables
     F = ones(size(instrID));       % Scaling of z-variable in constraint
     
     [u, P, z, ~, ~] = mexPortfolio('solveBlomvallNdengo', instrID, zType, E, F);
@@ -272,27 +272,27 @@ for k=252%length(times)
         end
       end
     
-      %plot(T(1:end-1), f, T(1:end-1), pi, instrT, instrf+z, 'o
-      curve_fig = figure();
-      plot(T(1:end-1), f*100, T(1:end-1), (f+pi)*100, instrT, (instrf+z)*100, 'gx');
-      [~, eInd] = sort(abs(z), 1, 'descend');
-      for j = 1:min(3,length(eInd))
+      %plot(T(1:end-1), f, T(1:end-1), f + pi) %, instrT, instrf+z, 'o
+      %curve_fig = figure();
+      %plot(T(1:end-1), f*100, T(1:end-1), (f+pi)*100, instrT, (instrf+z)*100, 'gx');
+      %[~, eInd] = sort(abs(z), 1, 'descend');
+      %for j = 1:min(3,length(eInd))
         %text(instrT(eInd(j))+0.1, instrf(eInd(j)) + z(eInd(j)), instr.assetRIC(eInd(j)));
-      end
+      %end
       %title(datestr(times(k)));
-      legend(tenorON, tenorIRS, 'Quoted prices', 'Location', 'SouthEast')
-      xlabel('Time [years]')
-      ylabel('Forward rate [%]')
+      %legend(tenorON, tenorIRS, 'Quoted prices', 'Location', 'SouthEast')
+      %xlabel('Time [years]')
+      %ylabel('Forward rate [%]')
       %exportgraphics(curve_fig, sprintf('Figures/%s_%i.png', fileName, k));
     
-      fprintf('\nGraphed trade date: \n')
-      disp(datestr(tradeDate))
+      %fprintf('\nGraphed trade date: \n')
+      %disp(datestr(tradeDate))
     
-      for j=1:length(instrID)
+      %for j=1:length(instrID)
     %     [timeData, data] = mexPortfolio('getValues', instrID(j), times(k), currencyTermTimeZone, {'BID', 'ASK'});
         %fprintf('%3d %18s %12s %9f %9f\n',j,instr.assetRIC{j}, datestr(instr.maturityDate(j)), instr.data{j}.price(3), z(j));
-      end
-      pause(0.01);
+      %end
+      %pause(0.01);
     %% ---
     tradeDatesAll = [tradeDatesAll tradeDate];
     fDatesAll = [fDatesAll; [fDates zeros(1,3665-nF-1)]];
@@ -303,11 +303,12 @@ for k=252%length(times)
     
     waitbar(k/length(times), figwaitbar, sprintf('Progress: k = %i / %i', k, length(times)))
 end
+%%
 
-%clearvars -except measurementPath currency fileName tradeDatesAll fDatesAll TAll fAll piAll zAll curve_fig
-%save(strcat(fileName, '_10YrCurves.mat'))
+clearvars -except measurementPath currency fileName tradeDatesAll fDatesAll TAll fAll piAll zAll
+save(strcat(fileName, '_10YrCurves_E_50.mat'))
 
-%rmpath(measurementPath)
+rmpath(measurementPath)
 %%
 % Code for correcting curves where 10Y quotes have been erased due to
 % cleaning

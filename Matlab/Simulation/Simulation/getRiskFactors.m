@@ -1,9 +1,11 @@
 function [E, E_k, DZero, DPi] = getRiskFactors(kZero, kPi, fAll_IS, piAll_IS, type)
     
     % Ändra utifrån hur många år som ska vara med nedan
-    DZero = fAll_IS(end-1511:end,:) - fAll_IS(end-1512:end-1,:);
-    DPi = piAll_IS(end-1511:end,:) - piAll_IS(end-1512:end-1,:);
-
+    %DZero = fAll_IS(end-750:end,:) - fAll_IS(end-751:end-1,:);
+    %DPi = piAll_IS(end-750:end,:) - piAll_IS(end-751:end-1,:);
+    DZero = fAll_IS(2:end,:) - fAll_IS(1:end-1,:);
+    DPi = piAll_IS(2:end,:) - piAll_IS(1:end-1,:);
+    
     if type == 1
         CZero = cov(DZero);
         CPi = cov(DPi);

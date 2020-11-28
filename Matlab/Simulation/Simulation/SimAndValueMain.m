@@ -1,11 +1,21 @@
 clear all
 %% Import Forward rates
 path_IS = 'Data/Curves/EUR_IS_10YrCurves_Clean_Final2.mat';
-path_OOS = 'Data/Curves/USD_OOS_10YrCurves_Clean_Final.mat';
+path_OOS = 'Data/Curves/EUR_OOS_10YrCurves_E_50.mat';
 [fAll_IS, piAll_IS, tradeDatesAll_IS, fAll_OOS, piAll_OOS, tradeDatesAll_OOS, ccy, fDatesAll] = getData(path_IS, path_OOS);
+if ccy == "SEK"
+    fAll_IS = [fAll_IS(1:1005,:)];
+    piAll_IS = [piAll_IS(1:1005,:)];
+    fAll_OOS = [fAll_OOS(1006:end,:)];
+    piAll_OOS = [piAll_OOS(1006:end,:)];
+    tradeDatesAll_OOS = (tradeDatesAll_OOS(1006:end));
+end
 clearvars path_IS path_OOS
 %% Get portfolio data
 instruments = 'A':'P';
+if ccy == "SEK"
+    instruments = 'A':'L';
+end
 portType = 'sim'; %'sim' or 'PA'
 [floatDates, fixDates, yield, fixingDates, RoP, IborDates, Ibor, Nom] = getPortfolioData(instruments, ccy, portType);
 
@@ -43,7 +53,7 @@ simHorizon = 1; % Number of trade days ahead to simulate
 
 
 fprintf('\n\nStarting main loop:\n');
-for i = 1:length(tradeDatesAll_OOS) - 1
+for i = 1:length(tradeDatesAll_OOS) - simHorizon
     fprintf('Currently on iteration %i.\n', i)
     currDate = datestr(tradeDatesAll_OOS(i));
     
@@ -51,10 +61,9 @@ for i = 1:length(tradeDatesAll_OOS) - 1
     portfolioValues{i} = valuePortfolio(A*fAll_OOS(i,:)', A*piAll_OOS(i,:)', valueParams);
     portfolioValuesNext{i} = valuePortfolio(A*fAll_OOS(i + simHorizon,:)', A*piAll_OOS(i + simHorizon,:)', valueParams);
     fprintf('portfolioValues{%i} = %.3f, portfolioValuesNext{%i} = %.3f.\n', i, portfolioValues{i}, i, portfolioValuesNext{i})
-    
     %Simulate 1d ahead
-    [fSimulated, piSimulated, simParams] = TermStructureSim(i+1, simParams, fAll_IS, piAll_IS, fAll_OOS, piAll_OOS, tradeDatesAll_OOS, useMR);
-    %[fSimulated, piSimulated, simParams] = TermStructureSim_10d(i+1, simParams, fAll_IS, piAll_IS, fAll_OOS, piAll_OOS, tradeDatesAll_OOS, useMR, simHorizon);    
+    %[fSimulated, piSimulated, simParams] = TermStructureSim(i+1, simParams, fAll_IS, piAll_IS, fAll_OOS, piAll_OOS, tradeDatesAll_OOS, useMR);
+    [fSimulated, piSimulated, simParams] = TermStructureSim_10d(i+1, simParams, fAll_IS, piAll_IS, fAll_OOS, piAll_OOS, tradeDatesAll_OOS, useMR, simHorizon);    
     
     % Value Portfolio with MC simulation
     if sum(valueParams{12}) > 0
@@ -92,8 +101,13 @@ for i = 1:length(tradeDatesAll_OOS) - 1
     valueParams = getParameters(valueParams, fAll_OOS(i,:)', piAll_OOS(i,:)');
 end
 %%
-save("Data/Risk/Risk_" + ccy + "_" + instruments + "_useMR" + useMR, "Risk")
+%save("Data/Risk/Risk_" + ccy + "_" + instruments + "_useMR" + useMR, "Risk")
+ccy = "SEK"
+useMR = "false"
+type = "E_IS_01_OOS_01";
+save("Data/Risk/Risk_" + ccy + "_" + type + "_useMR" + useMR, "Risk")
 %%
+
 ttt = 1:length(Risk.PnL(Risk.PnL ~= 0));
 figure(101)
 hold on
@@ -104,6 +118,33 @@ plot(ttt, -Risk.VaR_99s(ttt))
 plot(ttt, -Risk.ES_975s(ttt))
 legend("TheoPnL", "VaR95", "VaR99", "ES97.5")
 hold off
+
+%%
+
+for i = 1390:1400
+   figure(1)
+   plot(1:3650, fAll_OOS(i,:)) 
+   figure(2)
+   plot(1:3650, fAll_OOS(i,:) + piAll_OOS(i,:))
+   pause(0.1)
+   i
+end
+
+
+%%
+deleted = 0;
+for i = 1:1884 
+    if (i == 1) || (mod(i,10) == 0)
+        'hej'
+    else
+        Risk.VaR_95s(i-deleted) = [];
+        Risk.VaR_99s(i-deleted) = [];
+        Risk.ES_975s(i-deleted) = [];
+        Risk.PnL(i-deleted) = [];
+        deleted = deleted + 1;
+    end
+end
+
 
 %%
 %plotRiskFactors(E_k.Zero, "Forward rate risk factors, risk-free")

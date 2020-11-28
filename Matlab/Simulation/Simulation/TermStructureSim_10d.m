@@ -30,12 +30,16 @@ kappaPi = simParams{13}{2};
 
 % Recalibrate parameters every two years     
 if i == 1 || mod(i,504) == 0
-   if i <= 1512 && i ~= 1
-       start = size(DZero,1) - (1512 - i);
+   %if i <= 1512 && i ~= 1
+   if i <= size(fAll_IS,1) && i ~= 1     
+       %start = size(DZero,1) - (1512 - i);
+       start = size(DZero,1) - (size(fAll_IS,1) - i);
        DZero = [DZero(start:end,:); fAll_OOS(2:i,:) - fAll_OOS(1:i-1,:)];
        DPi = [DPi(start:end,:); piAll_OOS(2:i,:) - piAll_OOS(1:i-1,:)];
-   elseif i > 1512
-       start = i - 1511;
+   elseif i > size(fAll_IS,1)
+   %elseif i > 1005
+       %start = i - 1511;
+       start = i - size(fAll_IS,1);
        DZero = fAll_OOS(start+1:i,:) - fAll_OOS(start:i-1,:);
        DPi = piAll_OOS(start+1:i,:) - piAll_OOS(start:i-1,:);
    end
@@ -148,11 +152,11 @@ end
 
 % Plot results
 % Zero
-plotResults(fZero, T, fSimulated, tradeDatesAll_OOS, i, ['Simulated 1d risk-free IR curves, Date: ', num2str(datestr(tradeDatesAll_OOS(i+simHorizon)))], 1);
+%plotResults(fZero, T, fSimulated, tradeDatesAll_OOS, i, ['Simulated 1d risk-free IR curves, Date: ', num2str(datestr(tradeDatesAll_OOS(i+simHorizon)))], 1);
 % Pi
-plotResults(pi, T, piSimulated, tradeDatesAll_OOS, i, ['Simulated 1d Tenor spreads, Date: ', num2str(datestr(tradeDatesAll_OOS(i+simHorizon)))], 2);
+%plotResults(pi, T, piSimulated, tradeDatesAll_OOS, i, ['Simulated 1d Tenor spreads, Date: ', num2str(datestr(tradeDatesAll_OOS(i+simHorizon)))], 2);
 % Zero + Pi   
-plotResults(fZero + pi, T, fSimulated + piSimulated, tradeDatesAll_OOS, i, ['Simulated 1d 3M IR curves, Date: ', num2str(datestr(tradeDatesAll_OOS(i+simHorizon)))], 3);
+%plotResults(fZero + pi, T, fSimulated + piSimulated, tradeDatesAll_OOS, i, ['Simulated 1d 3M IR curves, Date: ', num2str(datestr(tradeDatesAll_OOS(i+simHorizon)))], 3);
 
 % Set sigma to be used in next day simulation
 simParams{8}{1} = sigmaZeroOrig; 

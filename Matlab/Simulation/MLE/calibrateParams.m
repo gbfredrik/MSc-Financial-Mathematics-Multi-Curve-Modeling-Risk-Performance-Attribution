@@ -1,4 +1,4 @@
-function [mu, omega, beta, alpha, dfM, rho, dfC, kappa, like_t, like_garch] = calibrateParams(delta_curves, E, type)
+function [mu, omega, beta, alpha, dfM, rho, dfC, kappa, like_t, like_garch] = calibrateParams(delta_curves, E)
 
 % OptParamsAll:
     % Rad 1: mu

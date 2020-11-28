@@ -36,7 +36,7 @@ for i = 1:numContracts
 end
 
 
-
+ 
 
 % Create data result matrix
 contractValues = zeros(numSim, numContracts);

@@ -16,6 +16,8 @@ end
 sigmaZero = GJR_GARCH(omegaZero', alphaZero', betaZero', E.Zero, fAll_IS);
 sigmaPi = GJR_GARCH(omegaPi', alphaPi', betaPi', E.Pi, piAll_IS); 
 
+
+
 simParams{1}{1} = muZero;
 simParams{1}{2} = muPi;
 simParams{2}{1} = omegaZero;

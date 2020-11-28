@@ -21,7 +21,6 @@ for i = 1:k
     like_garch(i) = sum(ll_garch);
     v = varGARCH(xOpt,RiskFactors(:,i),1);
     xi = (RiskFactors(:,i)-xOpt(1))./(sqrt(v(1:end-1)));
-
     u = tcdf(xi,xOpt(5));
     U(:,i) = u;
     OptParamsAll(:,i) = xOpt;

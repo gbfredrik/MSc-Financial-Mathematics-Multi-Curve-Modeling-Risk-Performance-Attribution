@@ -5,7 +5,7 @@ function [floatCashFlows, fixCashFlows, yield, fixingDatesCashFlows, RoP, IborDa
     yield = [];
     fixingDatesCashFlows = {};
     RoP = {};
-
+    
     loop = instruments;
     for i = 1:length(loop)
         currColumn = strcat(loop(i), ':', loop(i));
