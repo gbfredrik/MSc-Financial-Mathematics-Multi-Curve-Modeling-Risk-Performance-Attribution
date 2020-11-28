@@ -1,7 +1,7 @@
 clear all
 %% Import Forward rates
-path_IS = 'Data/Curves/SEK_OOS_10YrCurves_E_01.mat';
-path_OOS = 'Data/Curves/SEK_OOS_10YrCurves_E_01.mat';
+path_IS = 'Data/Curves/EUR_IS_10YrCurves_Clean_Final2.mat';
+path_OOS = 'Data/Curves/USD_OOS_10YrCurves_Clean_Final.mat';
 [fAll_IS, piAll_IS, tradeDatesAll_IS, fAll_OOS, piAll_OOS, tradeDatesAll_OOS, ccy, fDatesAll] = getData(path_IS, path_OOS);
 if ccy == "SEK"
     fAll_IS = [fAll_IS(1:1005,:)];
@@ -20,17 +20,17 @@ portType = 'sim'; %'sim' or 'PA'
 [floatDates, fixDates, yield, fixingDates, RoP, IborDates, Ibor, Nom] = getPortfolioData(instruments, ccy, portType);
 
 %% Get/set risk factors
-kZero = 3;
-kPi = 3;
+kZero = 6;
+kPi = 8;
 % type 1: Matlab eigenvectors
 % type 2: BDCSVD
 % type 3: BDCSVD and IRAM
-type = 1;
+type = 2;
 [E, E_k, DZero, DPi] = getRiskFactors(kZero, kPi, fAll_IS, piAll_IS, type);
 A = intMatrix(size(E.Zero,1));
 
 %% Initialize sim params
-N = 2000; % Number of curves to be simulated
+N = 200; % Number of curves to be simulated
 simParams = initSimParams(N, E_k, DZero, DPi, fAll_IS, piAll_IS, fAll_OOS, piAll_OOS, tradeDatesAll_OOS);
 
 %% Init PA parameters
@@ -48,8 +48,8 @@ fprintf('First day valuation is %.3f.\n', valuePortfolio(A*fAll_OOS(1,:)', A*piA
 [portfolioValues, portfolioValuesNext, portfolioValuesSimMC, Risk] = initRiskParams(length(tradeDatesAll_OOS), N);
 
 % Loop over all days
-useMR = false; % Use mean-reversion for simulation of curves
-simHorizon = 1; % Number of trade days ahead to simulate
+useMR = true; % Use mean-reversion for simulation of curves
+simHorizon = 10; % Number of trade days ahead to simulate
 
 
 
@@ -63,7 +63,6 @@ for i = 1:length(tradeDatesAll_OOS) - simHorizon
     fprintf('portfolioValues{%i} = %.3f, portfolioValuesNext{%i} = %.3f.\n', i, portfolioValues{i}, i, portfolioValuesNext{i})
     %Simulate 1d ahead
 
-    %[fSimulated, piSimulated, simParams] = TermStructureSim(i+1, simParams, fAll_IS, piAll_IS, fAll_OOS, piAll_OOS, tradeDatesAll_OOS, useMR);
     [fSimulated, piSimulated, simParams] = TermStructureSim_10d(i+1, simParams, fAll_IS, piAll_IS, fAll_OOS, piAll_OOS, tradeDatesAll_OOS, useMR, simHorizon);    
     
     % Value Portfolio with MC simulation
@@ -99,9 +98,9 @@ end
 %%
 
 %save("Data/Risk/Risk_" + ccy + "_" + instruments + "_useMR" + useMR, "Risk")
-ccy = "SEK";
+ccy = "USD";
 useMR = "false";
-type = "E_IS_01_OOS_01";
+type = "E_100";
 save("Data/Risk/Risk_" + ccy + "_" + type + "_useMR" + useMR, "Risk")
 %%
 
@@ -135,9 +134,11 @@ for i = 1:1884
         'hej'
     else
         Risk.VaR_95s(i-deleted) = [];
+        Risk.VaR_975s(i-deleted) = [];
         Risk.VaR_99s(i-deleted) = [];
         Risk.ES_975s(i-deleted) = [];
         Risk.PnL(i-deleted) = [];
+        Risk.Tail(i-deleted) = [];
         deleted = deleted + 1;
     end
 end

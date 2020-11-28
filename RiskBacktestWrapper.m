@@ -5,7 +5,7 @@ clear all
 %% Data loading
 %risk_path = 'Data/Risk/Risk_ABCD_750_noMR.mat';
 %risk_path = 'Data/Risk/Risk_A_750_MR.mat';
-risk_path = 'Data/Risk/Risk_SEK_E_IS_01_OOS_01_useMRfalse.mat';
+risk_path = 'Data/Risk/Risk_USD_E_100_useMRfalse.mat';
 load(risk_path);
 
 %% Risk measurement plots
