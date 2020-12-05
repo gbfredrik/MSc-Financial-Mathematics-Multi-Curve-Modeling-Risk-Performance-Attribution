@@ -1,6 +1,7 @@
 clear all
 %% Import Forward rates
 path_IS = 'Data/Curves/EUR_IS_10YrCurves_Clean_Final2.mat';
+path_OOS = 'Data/Curves/USD_OOS_10YrCurves_Clean_Final.mat';
 [fAll_IS, piAll_IS, tradeDatesAll_IS, fAll_OOS, piAll_OOS, tradeDatesAll_OOS, ccy, fDatesAll] = getData(path_IS, path_OOS);
 if ccy == "SEK"
     fAll_IS = [fAll_IS(1:1005,:)];
@@ -29,7 +30,7 @@ type = 2;
 A = intMatrix(size(E.Zero,1));
 
 %% Initialize sim params
-N = 2000; % Number of curves to be simulated
+N = 200; % Number of curves to be simulated
 simParams = initSimParams(N, E_k, DZero, DPi, fAll_IS, piAll_IS, fAll_OOS, piAll_OOS, tradeDatesAll_OOS);
 
 %% Init PA parameters
@@ -47,8 +48,8 @@ fprintf('First day valuation is %.3f.\n', valuePortfolio(A*fAll_OOS(1,:)', A*piA
 [portfolioValues, portfolioValuesNext, portfolioValuesSimMC, Risk] = initRiskParams(length(tradeDatesAll_OOS), N);
 
 % Loop over all days
-useMR = false; % Use mean-reversion for simulation of curves
-simHorizon = 1; % Number of trade days ahead to simulate
+useMR = true; % Use mean-reversion for simulation of curves
+simHorizon = 10; % Number of trade days ahead to simulate
 
 
 
@@ -62,7 +63,6 @@ for i = 1:length(tradeDatesAll_OOS) - simHorizon
     fprintf('portfolioValues{%i} = %.3f, portfolioValuesNext{%i} = %.3f.\n', i, portfolioValues{i}, i, portfolioValuesNext{i})
     %Simulate 1d ahead
 
-    %[fSimulated, piSimulated, simParams] = TermStructureSim(i+1, simParams, fAll_IS, piAll_IS, fAll_OOS, piAll_OOS, tradeDatesAll_OOS, useMR);
     [fSimulated, piSimulated, simParams] = TermStructureSim_10d(i+1, simParams, fAll_IS, piAll_IS, fAll_OOS, piAll_OOS, tradeDatesAll_OOS, useMR, simHorizon);    
     
     % Value Portfolio with MC simulation
@@ -74,11 +74,12 @@ for i = 1:length(tradeDatesAll_OOS) - simHorizon
 
     simulatedPnLs = portfolioValuesSimMC{i} - portfolioValues{i};
     Risk.VaR_95s(i) = var_risk(simulatedPnLs, 0.95);
+    Risk.VaR_975s(i) = var_risk(simulatedPnLs, 0.975);
     Risk.VaR_99s(i) = var_risk(simulatedPnLs, 0.99);
     Risk.ES_975s(i) = es_risk(simulatedPnLs, 0.975);
     Risk.PnL(i) = portfolioValuesNext{i} - portfolioValues{i};
 
-    Risk.Tail{i} = sort(simulatedPnLs(simulatedPnLs <= -Risk.VaR_95s(i)));
+    Risk.Tail{i} = sort(simulatedPnLs(simulatedPnLs <= -Risk.VaR_975s(i)));
     fprintf('Measured 95-VaR: %.3f. 99-VaR: %.3f. 97.5-ES: %.3f.\n', Risk.VaR_95s(i), Risk.VaR_99s(i), Risk.ES_975s(i));
     % Call Performance attribution
 %     if sum(valueParams{12}) > 0
@@ -97,9 +98,9 @@ end
 %%
 
 %save("Data/Risk/Risk_" + ccy + "_" + instruments + "_useMR" + useMR, "Risk")
-ccy = "SEK"
-useMR = "false"
-type = "E_IS_01_OOS_01";
+ccy = "USD";
+useMR = "false";
+type = "E_100";
 save("Data/Risk/Risk_" + ccy + "_" + type + "_useMR" + useMR, "Risk")
 %%
 
@@ -108,10 +109,10 @@ figure(101)
 hold on
 %plot(ttt, Risk.PnL(ttt), ttt, -Risk.VaR_95s(ttt), ttt, -Risk.VaR_99s(ttt), ttt, -Risk.ES_975s(ttt))
 scatter(ttt, Risk.PnL(ttt), '*')
-plot(ttt, -Risk.VaR_95s(ttt))
+plot(ttt, -Risk.VaR_975s(ttt))
 plot(ttt, -Risk.VaR_99s(ttt))
 plot(ttt, -Risk.ES_975s(ttt))
-legend("TheoPnL", "VaR95", "VaR99", "ES97.5")
+legend("TheoPnL", "VaR97.5", "VaR99", "ES97.5")
 hold off
 
 %%
@@ -133,9 +134,11 @@ for i = 1:1884
         'hej'
     else
         Risk.VaR_95s(i-deleted) = [];
+        Risk.VaR_975s(i-deleted) = [];
         Risk.VaR_99s(i-deleted) = [];
         Risk.ES_975s(i-deleted) = [];
         Risk.PnL(i-deleted) = [];
+        Risk.Tail(i-deleted) = [];
         deleted = deleted + 1;
     end
 end
