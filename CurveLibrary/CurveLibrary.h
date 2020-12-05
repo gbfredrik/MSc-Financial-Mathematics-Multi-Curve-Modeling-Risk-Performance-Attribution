@@ -15,7 +15,8 @@ BOOL __stdcall generate_multi_risk_factorsXL(
 	bool const eval_eigen,
 	double* return_norm_errors,
 	int const curve_length,
-    char const* _k_risk_factors
+    char const* _k_risk_factors,
+    double* return_approx_errors
 );
 
 BOOL __stdcall run_all_multi_risk_measuresXL(

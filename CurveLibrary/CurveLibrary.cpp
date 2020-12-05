@@ -39,7 +39,8 @@ BOOL __stdcall generate_multi_risk_factorsXL(
     bool const eval_eigen,
     double* return_norm_errors,
     int const curve_length,
-    char const* _k_risk_factors
+    char const* _k_risk_factors,
+    double* return_approx_errors
 ) {
 #pragma EXPORT
 
@@ -95,6 +96,17 @@ BOOL __stdcall generate_multi_risk_factorsXL(
     for (CurveCollection& cc : tenors) {
         placeholder_eigen(cc, eigen_algorithm, eval_eigen);
     }
+
+    for (size_t i{ 0 }; i < rf.k; ++i) {
+        return_norm_errors[i] = rf.v_norm_errors[i];
+    }
+
+    for (size_t i{ 0 }; i < tenors[0].k; ++i) {
+        return_norm_errors[rf.k + i] = tenors[0].v_norm_errors[i];
+    }
+
+    return_approx_errors[0] = rf.approximation_error;
+    return_approx_errors[1] = tenors.at(0).approximation_error;
 
     return status;
 }
@@ -219,15 +231,21 @@ void placeholder_eigen(
     ublas::matrix<double> m_centered{ matrixOperations::center_matrix(curve_collection.m_diff) }; // Previously m_diff_clean
 
     std::string name_prefix{};
-
     enum class PCA_Algo { IRAM, BDCSVD, RSVD};
+    if (eval_eigen) { // Evaluate eigen decomposition approximation
+        curve_collection.approximation_error = 1.0;
+    } else {
+        curve_collection.approximation_error = -1.0;
+    }
     if (PCA_Algo(eigen_algorithm) == PCA_Algo::IRAM && curve_collection.k != 0) {
         name_prefix = "IRAM";
         FactorCalculation::iram(
             m_centered / sqrt(m_centered.size1() - 1),
             curve_collection.k,
             curve_collection.m_E, 
-            curve_collection.v_Lambda
+            curve_collection.v_Lambda,
+            curve_collection.approximation_error,
+            curve_collection.v_norm_errors
         );
     } else if (PCA_Algo(eigen_algorithm) == PCA_Algo::BDCSVD || curve_collection.k == 0) {
         name_prefix = "BDCSVD";
@@ -235,7 +253,9 @@ void placeholder_eigen(
             m_centered / sqrt(m_centered.size1() - 1), 
             curve_collection.k, 
             curve_collection.m_E, 
-            curve_collection.v_Lambda
+            curve_collection.v_Lambda,
+            curve_collection.approximation_error,
+            curve_collection.v_norm_errors
         );
     } else if (PCA_Algo(eigen_algorithm) == PCA_Algo::RSVD) {
         name_prefix = "RSVD";
@@ -243,7 +263,9 @@ void placeholder_eigen(
             m_centered / sqrt(m_centered.size1() - 1),
             curve_collection.k,
             curve_collection.m_E,
-            curve_collection.v_Lambda
+            curve_collection.v_Lambda,
+            curve_collection.approximation_error,
+            curve_collection.v_norm_errors
         );
     }
 
@@ -251,15 +273,6 @@ void placeholder_eigen(
     //    curve_collection.m_E, 
     //    curve_collection.m_diff
     //);
-
-
-    if (eval_eigen) { // Evaluate eigendecomposition
-        curve_collection.v_norm_errors = FactorCalculation::eig_all_norm_errors(
-            statisticsOperations::covm(curve_collection.m_diff),
-            curve_collection.m_E,
-            curve_collection.v_Lambda
-        );
-    }
     
     if (save) {
         write_csv_matrix(curve_collection.m_E, curve_collection.file_path + name_prefix +

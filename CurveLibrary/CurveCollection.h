@@ -22,6 +22,7 @@ struct CurveCollection {
     boost::numeric::ublas::vector<double> v_Lambda;
     boost::numeric::ublas::matrix<double> m_delta_xi;
     boost::numeric::ublas::vector<double> v_norm_errors;
+    double approximation_error{ 1.0 };
 
     // Parameter fitting data
     boost::numeric::ublas::vector<double> optimal_parameter_set;
