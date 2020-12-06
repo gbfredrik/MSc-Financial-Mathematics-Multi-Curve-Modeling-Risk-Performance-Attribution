@@ -11,6 +11,7 @@
 #include <Spectra/SymEigsSolver.h>
 #include <rsvd/Prelude.hpp>
 
+#include <chrono>
 #include <iostream>
 #include <Windows.h>
 #include <WinUser.h>
@@ -35,8 +36,11 @@ bool FactorCalculation::iram(
     Eigen::MatrixXd U{ };
     Eigen::VectorXd D{ };
     Eigen::MatrixXd V{ };
+    double time{ 0.0 };
 
     if (Data.rows() < Data.cols()) {
+        auto t1 = std::chrono::high_resolution_clock::now();
+
         Eigen::HouseholderQR<Eigen::MatrixXd> qr{ Data.transpose() };
         // Can use FullPivHouseholderQR for greater precision
         //Eigen::FullPivHouseholderQR<Eigen::MatrixXd> qr(Data.transpose());
@@ -63,6 +67,9 @@ bool FactorCalculation::iram(
             V = thinQ * eigs.eigenvectors();
             D = eigs.eigenvalues().array().sqrt();
         }
+
+        auto t2 = std::chrono::high_resolution_clock::now();
+        time = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
     } else {
         // Define the positive definite C matrix (covariance)
         Eigen::MatrixXd C{ Data.transpose() * Data };
@@ -93,8 +100,15 @@ bool FactorCalculation::iram(
         approximation_error = Rsvd::relativeFrobeniusNormError(C, rsvdApprox);
         
         v_norm_errors = eig_all_norm_errors(matrixOperations::matrixXdToUblas(C), m_E, v_Lambda);
+
+        MessageBoxA(
+            NULL,
+            std::to_string(time).c_str(),
+            "Execution Time",
+            MB_OK
+        );
     }
-    
+
     return v_Lambda.size() > 0;
 }
 
@@ -113,8 +127,11 @@ bool FactorCalculation::eigen_bdcsvd(
     Eigen::MatrixXd U{ };
     Eigen::VectorXd D{ };
     Eigen::MatrixXd V{ };
+    double time{ 0.0 };
 
     if (H.rows() < H.cols()) {
+        auto t1 = std::chrono::high_resolution_clock::now();
+
         Eigen::HouseholderQR<Eigen::MatrixXd> qr(H.transpose()); // FullPivHouseholderQR<Matrix<double, Dynamic, Size>> fpqr(A.rows(), A.cols());
         Eigen::MatrixXd thinQ{ qr.householderQ() * Eigen::MatrixXd::Identity(H.cols(), H.rows()) };
         Eigen::MatrixXd R_temp{ qr.matrixQR().triangularView<Eigen::Upper>() };
@@ -134,6 +151,9 @@ bool FactorCalculation::eigen_bdcsvd(
             D = bdcsvd.singularValues().head(k).array().sqrt();
             // See: https://stackoverflow.com/questions/34373757/piece-wise-square-of-vector-piece-wise-product-of-two-vectors-in-c-eigen
         }
+
+        auto t2 = std::chrono::high_resolution_clock::now();
+        time = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
     } else {
         Eigen::BDCSVD<Eigen::MatrixXd> bdcsvd(H.transpose() * H, svd_opt);
         
@@ -157,8 +177,14 @@ bool FactorCalculation::eigen_bdcsvd(
         approximation_error = Rsvd::relativeFrobeniusNormError(C, rsvdApprox);
         
         v_norm_errors = eig_all_norm_errors(matrixOperations::matrixXdToUblas(C), m_E, v_Lambda);
-    }
 
+        MessageBoxA(
+            NULL,
+            std::to_string(time).c_str(),
+            "Execution Time",
+            MB_OK
+        );
+    }
 
     return v_Lambda.size() > 0;
 }
@@ -179,6 +205,7 @@ bool FactorCalculation::eigen_rsvd(
     Eigen::MatrixXd U{ };
     Eigen::VectorXd D{ };
     Eigen::MatrixXd V{ };
+    double time{ 0.0 };
 
     // Initialize PRNG for the Eigen random matrix generation
     std::srand(static_cast<unsigned int>(777));
@@ -186,6 +213,8 @@ bool FactorCalculation::eigen_rsvd(
     randomEngine.seed(777);
 
     if (H.rows() < H.cols()) {
+        auto t1 = std::chrono::high_resolution_clock::now();
+
         Eigen::HouseholderQR<Eigen::MatrixXd> qr(H.transpose()); // FullPivHouseholderQR<Matrix<double, Dynamic, Size>> fpqr(A.rows(), A.cols());
         Eigen::MatrixXd thinQ{ qr.householderQ() * Eigen::MatrixXd::Identity(H.cols(), H.rows()) };
         Eigen::MatrixXd R_temp{ qr.matrixQR().triangularView<Eigen::Upper>() };
@@ -201,6 +230,9 @@ bool FactorCalculation::eigen_rsvd(
         U = thinQ * rsvd.matrixU();
         V = thinQ * rsvd.matrixV();
         D = rsvd.singularValues().array().sqrt();
+
+        auto t2 = std::chrono::high_resolution_clock::now();
+        time = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
     } else {
         Rsvd::RandomizedSvd<Eigen::MatrixXd, std::mt19937_64, Rsvd::SubspaceIterationConditioner::Lu>
             rsvd(randomEngine);
@@ -221,6 +253,13 @@ bool FactorCalculation::eigen_rsvd(
         approximation_error = Rsvd::relativeFrobeniusNormError(C, rsvdApprox);
         
         v_norm_errors = eig_all_norm_errors(matrixOperations::matrixXdToUblas(C), m_E, v_Lambda);
+
+        MessageBoxA(
+            NULL,
+            std::to_string(time).c_str(),
+            "Execution Time",
+            MB_OK
+        );
     }
 
     return v_Lambda.size() > 0;
