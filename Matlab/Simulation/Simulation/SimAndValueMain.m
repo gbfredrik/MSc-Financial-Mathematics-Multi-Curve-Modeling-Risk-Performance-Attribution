@@ -1,7 +1,7 @@
 clear all
 %% Import Forward rates
 path_IS = 'Data/Curves/EUR_IS_10YrCurves_Clean_Final2.mat';
-path_OOS = 'Data/Curves/USD_OOS_10YrCurves_Clean_Final.mat';
+path_OOS = 'Data/Curves/EUR_OOS_10YrCurves_Clean_Final.mat';
 [fAll_IS, piAll_IS, tradeDatesAll_IS, fAll_OOS, piAll_OOS, tradeDatesAll_OOS, ccy, fDatesAll] = getData(path_IS, path_OOS);
 if ccy == "SEK"
     fAll_IS = [fAll_IS(1:1005,:)];
@@ -21,7 +21,7 @@ portType = 'sim'; %'sim' or 'PA'
 
 %% Get/set risk factors
 kZero = 6;
-kPi = 8;
+kPi = 6;
 % type 1: Matlab eigenvectors
 % type 2: BDCSVD
 % type 3: BDCSVD and IRAM
@@ -30,8 +30,9 @@ type = 2;
 A = intMatrix(size(E.Zero,1));
 
 %% Initialize sim params
-N = 200; % Number of curves to be simulated
-simParams = initSimParams(N, E_k, DZero, DPi, fAll_IS, piAll_IS, fAll_OOS, piAll_OOS, tradeDatesAll_OOS);
+N = 2000; % Number of curves to be simulated
+useMR = true;
+simParams = initSimParams(N, E_k, DZero, DPi, fAll_IS, piAll_IS, fAll_OOS, piAll_OOS, tradeDatesAll_OOS, useMR);
 
 %% Init PA parameters
 [valueParams, ~] = initValueParams(tradeDatesAll_OOS, fixingDates, floatDates, fixDates, ccy, Ibor, IborDates, RoP, Nom, yield, fAll_OOS(1,:)', piAll_OOS(1,:)');
@@ -48,12 +49,9 @@ fprintf('First day valuation is %.3f.\n', valuePortfolio(A*fAll_OOS(1,:)', A*piA
 [portfolioValues, portfolioValuesNext, portfolioValuesSimMC, Risk] = initRiskParams(length(tradeDatesAll_OOS), N);
 
 % Loop over all days
-useMR = true; % Use mean-reversion for simulation of curves
-simHorizon = 10; % Number of trade days ahead to simulate
+simHorizon = 1; % Number of trade days ahead to simulate
 
-
-
-for i = 1:length(tradeDatesAll_OOS) - simHorizon
+for i = 1:100%length(tradeDatesAll_OOS) - simHorizon
     fprintf('Currently on iteration %i.\n', i)
     currDate = datestr(tradeDatesAll_OOS(i));
     
@@ -101,7 +99,7 @@ end
 ccy = "USD";
 useMR = "false";
 type = "E_100";
-save("Data/Risk/Risk_" + ccy + "_" + type + "_useMR" + useMR, "Risk")
+%save("Data/Risk/Risk_" + ccy + "_" + type + "_useMR" + useMR, "Risk")
 %%
 
 ttt = 1:length(Risk.PnL(Risk.PnL ~= 0));
@@ -116,32 +114,32 @@ legend("TheoPnL", "VaR97.5", "VaR99", "ES97.5")
 hold off
 
 %%
-
-for i = 1390:1400
-   figure(1)
-   plot(1:3650, fAll_OOS(i,:)) 
-   figure(2)
-   plot(1:3650, fAll_OOS(i,:) + piAll_OOS(i,:))
-   pause(0.1)
-   i
-end
+% 
+% for i = 1390:1400
+%    figure(1)
+%    plot(1:3650, fAll_OOS(i,:)) 
+%    figure(2)
+%    plot(1:3650, fAll_OOS(i,:) + piAll_OOS(i,:))
+%    pause(0.1)
+%    i
+% end
 
 
 %%
-deleted = 0;
-for i = 1:1884 
-    if (i == 1) || (mod(i,10) == 0)
-        'hej'
-    else
-        Risk.VaR_95s(i-deleted) = [];
-        Risk.VaR_975s(i-deleted) = [];
-        Risk.VaR_99s(i-deleted) = [];
-        Risk.ES_975s(i-deleted) = [];
-        Risk.PnL(i-deleted) = [];
-        Risk.Tail(i-deleted) = [];
-        deleted = deleted + 1;
-    end
-end
+% deleted = 0;
+% for i = 1:1884 
+%     if (i == 1) || (mod(i,10) == 0)
+%         'hej'
+%     else
+%         Risk.VaR_95s(i-deleted) = [];
+%         Risk.VaR_975s(i-deleted) = [];
+%         Risk.VaR_99s(i-deleted) = [];
+%         Risk.ES_975s(i-deleted) = [];
+%         Risk.PnL(i-deleted) = [];
+%         Risk.Tail(i-deleted) = [];
+%         deleted = deleted + 1;
+%     end
+% end
 
 
 %%
