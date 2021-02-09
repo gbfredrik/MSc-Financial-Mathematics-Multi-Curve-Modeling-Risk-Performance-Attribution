@@ -1,4 +1,4 @@
-function [simParams] = initSimParams(N, E, DZero, DPi, fAll_IS, piAll_IS, fAll_OOS, piAll_OOS, tradeDatesAll_OOS)
+function [simParams] = initSimParams(N, E, DZero, DPi, fAll_IS, piAll_IS, fAll_OOS, piAll_OOS, tradeDatesAll_OOS, useMR)
 % Initialize sim params
 
 T = 1:3650;
@@ -9,17 +9,16 @@ for i = 1:8
     end
 end
 
-[muZero, omegaZero, betaZero, alphaZero, dfMZero, rhoZero, dfCZero, kappaZero, like_t_zero, like_garch_zero] = calibrateParams(DZero, E.Zero);
-[muPi, omegaPi, betaPi, alphaPi, dfMPi, rhoPi, dfCPi, kappaPi, like_t_pi, like_garch_pi] = calibrateParams(DPi, E.Pi);
+[muZero, omegaZero, betaZero, alphaZero, dfMZero, rhoZero, dfCZero, like_t_zero, like_garch_zero] = calibrateParams(DZero, E.Zero, useMR);
+[muPi, omegaPi, betaPi, alphaPi, dfMPi, rhoPi, dfCPi, like_t_pi, like_garch_pi] = calibrateParams(DPi, E.Pi, useMR);
 
 % Calculate sigma the first day based on the IS data
 sigmaZero = GJR_GARCH(omegaZero', alphaZero', betaZero', E.Zero, fAll_IS);
 sigmaPi = GJR_GARCH(omegaPi', alphaPi', betaPi', E.Pi, piAll_IS); 
 
 
-
-simParams{1}{1} = muZero;
-simParams{1}{2} = muPi;
+simParams{1}{1} = muZero; % Note that this is really kappaZero if userMR == true
+simParams{1}{2} = muPi; % Dito
 simParams{2}{1} = omegaZero;
 simParams{2}{2} = omegaPi;
 simParams{3}{1} = betaZero;
@@ -40,7 +39,5 @@ simParams{10}{1} = E.Zero;
 simParams{10}{2} = E.Pi;
 simParams{11} = N;
 simParams{12} = T;
-simParams{13}{1} = kappaZero;
-simParams{13}{2} = kappaPi;
 end
 

@@ -1,8 +1,13 @@
 function [fSimulated, piSimulated, simParams] = TermStructureSim_10d(i, simParams, fAll_IS, piAll_IS, fAll_OOS, piAll_OOS, tradeDatesAll_OOS, useMR, simHorizon)
 
 % Read parameters from simParams
-muZero = simParams{1}{1};
-muPi = simParams{1}{2};
+if (useMR)
+    kappaZero = simParams{1}{1};
+    kappaPi = simParams{1}{2};
+else
+    muZero = simParams{1}{1};
+    muPi = simParams{1}{2};
+end
 omegaZero = simParams{2}{1};
 omegaPi = simParams{2}{2};
 betaZero = simParams{3}{1};
@@ -23,10 +28,6 @@ EZero = simParams{10}{1};
 EPi = simParams{10}{2};
 N = simParams{11};
 T = simParams{12};
-% Mean-reversion parameters
-kappaZero = simParams{13}{1};
-kappaPi = simParams{13}{2};
-% Simulate 1d ahead
 
 % Recalibrate parameters every two years     
 if i == 1 || mod(i,504) == 0
@@ -44,8 +45,8 @@ if i == 1 || mod(i,504) == 0
        DPi = piAll_OOS(start+1:i,:) - piAll_OOS(start:i-1,:);
    end
    
-   [muZero, omegaZero, betaZero, alphaZero, dfMZero, rhoZero, dfCZero, kappaZero] = calibrateParams(DZero, EZero);
-   [muPi, omegaPi, betaPi, alphaPi, dfMPi, rhoPi, dfCPi, kappaPi] = calibrateParams(DPi, EPi);
+   [muZero, omegaZero, betaZero, alphaZero, dfMZero, rhoZero, dfCZero] = calibrateParams(DZero, EZero, useMR);
+   [muPi, omegaPi, betaPi, alphaPi, dfMPi, rhoPi, dfCPi] = calibrateParams(DPi, EPi, useMR);
    simParams{1}{1} = muZero;
    simParams{1}{2} = muPi;
    simParams{2}{1} = omegaZero;
@@ -60,8 +61,8 @@ if i == 1 || mod(i,504) == 0
    simParams{6}{2} = rhoPi;
    simParams{7}{1} = dfCZero;
    simParams{7}{2} = dfCPi;
-   simParams{13}{1} = kappaZero;
-   simParams{13}{2} = kappaPi;
+   kappaZero = muZero;
+   kappaPi = muPi;
 end
 
 % Set active curve at day i
@@ -94,14 +95,14 @@ for d = 1:simHorizon % Loop over the number of days ahead to simulate
             xiHatZero = mean(EZero' * DZero', 2);
             xiHatPi = mean(EPi' * DPi', 2);
             if i == 2 % fusklösning för första dagen
-                mrZero = zeros(size(xiHatZero, 1),1);
+                mrZero = zeros(size(xiHatZero, 1), 1);
                 mrPi = zeros(size(xiHatPi, 1), 1);
             else
-                mrZero = kappaZero .* (xiHatZero - EZero' * (fZero - fAll_OOS(i-2,:))');
-                mrPi = kappaPi .* (xiHatPi - EPi' * (pi - piAll_OOS(i-2,:))');                
+                mrZero = kappaZero' .* (xiHatZero - EZero' * (fZero - fAll_OOS(i-2,:))');
+                mrPi = kappaPi' .* (xiHatPi - EPi' * (pi - piAll_OOS(i-2,:))');
             end
             deltaF = EZero * (mrZero + ZZero'.* repmat(sigmaZero,1,N));
-            deltaPi = EPi * (mrPi + muPi' + ZPi'.* repmat(sigmaPi,1,N));
+            deltaPi = EPi * (mrPi + ZPi'.* repmat(sigmaPi,1,N));
         else
             deltaF = EZero * (muZero' + ZZero'.* repmat(sigmaZero,1,N));
             deltaPi = EPi * (muPi' + ZPi'.* repmat(sigmaPi,1,N));
@@ -126,13 +127,13 @@ for d = 1:simHorizon % Loop over the number of days ahead to simulate
                 sigmaPi(:,k) = GJR_GARCH_d(omegaPi', alphaPi', betaPi', EPi, piSimulatedPrev(k,:), piSimulatedPrevPrev(k,:), sigmaPi(:,k));
             end
             % Calc the 1d ahead simulated curves
-            if (useMR)        
+            if (useMR)
                 if d == 2
-                    mrZero = kappaZero .* (xiHatZero - EZero' * (fSimulated(k,:) - fZero)');
-                    mrPi = kappaPi .* (xiHatPi - EPi' * (piSimulated(k,:) - pi)');
+                    mrZero = kappaZero' .* (xiHatZero - EZero' * (fSimulated(k,:) - fZero)');
+                    mrPi = kappaPi' .* (xiHatPi - EPi' * (piSimulated(k,:) - pi)');
                 else
-                    mrZero = kappaZero .* (xiHatZero - EZero' * (fSimulatedPrev(k,:) - fSimulatedPrevPrev(k,:))');
-                    mrPi = kappaPi .* (xiHatPi - EPi' * (piSimulatedPrev(k,:) - piSimulatedPrevPrev(k,:))');                    
+                    mrZero = kappaZero' .* (xiHatZero - EZero' * (fSimulatedPrev(k,:) - fSimulatedPrevPrev(k,:))');
+                    mrPi = kappaPi' .* (xiHatPi - EPi' * (piSimulatedPrev(k,:) - piSimulatedPrevPrev(k,:))');                    
                 end
                 deltaF(:,k) = EZero * (mrZero + ZZero(k,:)'.* sigmaZero(:,k));
                 deltaPi(:,k) = EPi * (mrPi + ZPi(k,:)'.* sigmaPi(:,k));
@@ -156,15 +157,15 @@ end
 
 
 
-% Plot results
+%% Plot results
 % Zero
-plotResults(fZero, T, fSimulated, tradeDatesAll_OOS, i, ['Simulated 1d risk-free IR curves, Date: ', num2str(datestr(tradeDatesAll_OOS(i+simHorizon)))], 1);
+%plotResults(fZero, T, fSimulated, tradeDatesAll_OOS, i, ['Simulated 1d risk-free IR curves, Date: ', num2str(datestr(tradeDatesAll_OOS(i+simHorizon)))], 1);
 % Pi
-plotResults(pi, T, piSimulated, tradeDatesAll_OOS, i, ['Simulated 1d Tenor spreads, Date: ', num2str(datestr(tradeDatesAll_OOS(i+simHorizon)))], 2);
+%plotResults(pi, T, piSimulated, tradeDatesAll_OOS, i, ['Simulated 1d Tenor spreads, Date: ', num2str(datestr(tradeDatesAll_OOS(i+simHorizon)))], 2);
 % Zero + Pi   
-plotResults(fZero + pi, T, fSimulated + piSimulated, tradeDatesAll_OOS, i, ['Simulated 1d 3M IR curves, Date: ', num2str(datestr(tradeDatesAll_OOS(i+simHorizon)))], 3);
+%plotResults(fZero + pi, T, fSimulated + piSimulated, tradeDatesAll_OOS, i, ['Simulated 1d 3M IR curves, Date: ', num2str(datestr(tradeDatesAll_OOS(i+simHorizon)))], 3);
 
-% Set sigma to be used in next day simulation
+%% Set sigma to be used in next day simulation
 simParams{8}{1} = sigmaZeroOrig; 
 simParams{8}{2} = sigmaPiOrig;
 end
